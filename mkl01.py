@@ -137,8 +137,8 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
     through the Shogun constructor realFeatures().
     This module also appends kernels to a combinedKernel object. The kernels
     to be append are ''kernels'' and then are append to the linear combination 
-    'combKer', which is returned.
-    Possible values of 'basisFam':
+    'combKer', which is returned. We have analyzed some basis families available
+    in Shogun, so possible values of 'basisFam':
     basisFam = ['gaussian', 
                 'inverseQuadratic', 
                 'polynomial', 
