@@ -238,21 +238,21 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
 # Defining the compound kernel object
 class mklObj:
     """Default automated definition of the mutiple kernel learning object."""
-    def __init__(self, weightNorm = 2, regNorm = 2, epsilon = 1e-5, 
+    def __init__(self, weightRegNorm = 2, regPar = 2, epsilon = 1e-5, 
 	 			 threads = 2, mkl_epsilon = 0.001, binary = False, verbose = False):
 	 	
         if binary:
             self.mkl = MKLClassification()	# MKL object (Multiclass)
-            self.mkl.set_C(regNorm, 1)		# Setting binary regularization  norm	
+            self.mkl.set_C(regPar, 1)		# Setting binary regularization parameter and regularization norm	
         else:		 
             self.mkl = MKLMulticlass()		# MKL object (Binary)
-            self.mkl.set_C(regNorm)			# Setting multiclass regularization  norm
+            self.mkl.set_C(regPar)		# Setting multiclass regularization  parameter
 
-        self.mkl.set_mkl_norm(weightNorm)  		    # Setting the weight vector norm
-        self.mkl.set_epsilon(epsilon) 			    # setting the transducer epsilon
-        self.mkl.set_mkl_epsilon(mkl_epsilon)		# setting the MKL epsilon
+        self.mkl.set_mkl_norm(weightRegNorm)		# Setting the weight vector norm
+        self.mkl.set_epsilon(epsilon) 			# setting the transducer epsilon
+        self.mkl.set_mkl_epsilon(mkl_epsilon)		# setting the MKL stop criterion. The value suggested by Shogun is 0.001
         self.mkl.parallel.set_num_threads(threads) 	# setting number of traing threads
-        self._verbose = verbose				        # inner trainig process verbosing flag
+        self._verbose = verbose				# inner trainig process verbosing flag
         self._binary = binary
 # All obtained objects below become class attributes, so they are available any moment.
 # Self Function for kernel generation
@@ -370,7 +370,7 @@ class mklObj:
 		f.close()
 
 # It is pending defining functions for run time attribute modification, e.g. set_verbose(), 
-# set_regNorm(), etc.
+# set_regPar(), etc.
 
 # Return kernel 'ker' as well as other useful values obtained during the training:		
     def get_combKernel (self): return self.ker
@@ -381,7 +381,7 @@ class mklObj:
 # ------------------------------ MAIN ----------------------------------------------------------------------
 # MKL object Default definition:
 # class mklObj:
-#   def __init__(self, weightNorm = 2, regNorm = 2, epsilon = 1e-5, 
+#   def __init__(self, weightRegNorm = 2, regPar = 2, epsilon = 1e-5, 
 #	 			 threads = 2, mkl_epsilon = 0.001, binary = False, verbose = False):
 #
 # Kernel fitting function
