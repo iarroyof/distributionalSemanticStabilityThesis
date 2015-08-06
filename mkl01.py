@@ -50,7 +50,7 @@ def generate_binToy():
 		 	concatenate((-ones(2*num), ones(2*num))),	    #Train Labels
 		 	concatenate((-ones(10000), ones(10000))) )	    #Test Labels
 	
-
+        
 def sigmaGen(self, hyperDistribution, size, rango, parameters):
     """
      Creating guassian kernels
@@ -74,16 +74,11 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     weight vector distributions are set to common values of each distribution
     by default, but they can be modified.
     """
-#	_l = 10		
-#	sig = linspace(0.01, _l, size)[::-1]
     sig = []        
     if hyperDistribution == 'linear':
-        #for i in xrange(size):
         sig = random.sample(range(rango[0], rango[1]),size)
         return sig
     elif hyperDistribution == 'quadratic':
-        #for i in xrange(size):
-        #pdb.set_trace()
         sig = random.sample(range(rango[0],int(sqrt(rango[1]))), size)
         return numpy.array(sig)**2
     elif hyperDistribution == 'gaussian':
@@ -91,11 +86,10 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         while i < size:
             numero = random.gauss(parameters[0], parameters[1])
             if numero > rango[0] and numero < rango [1]:  # Validate the initial point of
-                sig.append(numero)
-                i += 1                      # 'range'. If not met, loop does
-        #pdb.set_trace()                                    # not end, but resets.
-                                            # If met, the number is appended 
-        return sig                 # to 'sig' width list.
+                sig.append(numero)                        # 'range'. If not met, loop does
+                i += 1                                    # not end, but resets                                   
+                                                          # If met, the number is appended 
+        return sig                                        # to 'sig' width list.
     elif hyperDistribution == 'triangular':
         for i in xrange(size):
             sig.append(random.triangular(rango[0], rango[1]))
@@ -104,12 +98,11 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         i = 0
         while i < size:
             numero = random.betavariate(parameters[0], parameters[1]) * (rango[1] - rango[0]) + rango[0]
-            #if numero > rango[0] and numero < rango [1]:# Validate the initial point of
             sig.append(numero)
-            i += 1         # If met, the number is appended 
-        return sig                 # to 'sig' width list.
+            i += 1        
+        return sig                
     elif hyperDistribution == 'pareto':
-        return numpy.random.pareto(5, size = size) * (rango[1] - rango[0]) + rango[0]                          # to 'sig' width list.	 
+        return numpy.random.pareto(5, size = size) * (rango[1] - rango[0]) + rango[0]                        
     elif hyperDistribution == 'gamma':
         return numpy.random.gamma(shape = 1, size = size) * (rango[1] - rango[0]) + rango[0]
                          		    
@@ -120,15 +113,15 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         i = 0
         while i < size:
             numero = random.lognormvariate(parameters[0], parameters[1])
-            if numero > rango[0] and numero < rango [1]:# Validate the initial point of
+            if numero > rango[0] and numero < rango [1]:
                 sig.append(numero)
-                i += 1                      # 'range'. If not met, loop does
+                i += 1                      
 
         return sig   	    	    
     else:
     	print 'The entered hyperparameter distribution is not allowed.'
 # -------------------------------------------------------------------
-# combine kernels
+# Combining kernels
 def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
     '''This module generates a list of Gaussian Kernels. These kernels are 
     tuned according to the vector ''widths''. Input parameters ''featsL''
@@ -136,8 +129,8 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
     these both objects should be derived from the training SLM vectors, 
     through the Shogun constructor realFeatures().
     This module also appends kernels to a combinedKernel object. The kernels
-    to be append are ''kernels'' and then are append to the linear combination 
-    'combKer', which is returned. We have analyzed some basis families available
+    to be append are in ''kernels'' which are append to the linear combination 
+    'combKer' that is returned. We have analyzed some basis families available
     in Shogun, so possible values of 'basisFam':
     basisFam = ['gaussian', 
                 'inverseQuadratic', 
@@ -151,14 +144,14 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
                 'cauchy', 
                 'exponential']
     '''
-    print 'Widths:'
+    
     kernels = []
     if basisFam == 'gaussian':
         for w in widths:
-            kernels.append(GaussianKernel())#l = featsL, r = featsR))
+            kernels.append(GaussianKernel())
             kernels[len(kernels)-1].set_width(w)
             if self._verbose:    
-                print kernels[len(kernels)-1].get_width()
+                print 'Widths: ', kernels[len(kernels)-1].get_width()
     elif basisFam == 'inverseQuadratic': # For this (and others below) kernel it is necessary fitting the 
         dst = MinkowskiMetric (l = featsL, r = featsR, k = 2) # distance matrix at this moment
         for w in widths:
@@ -235,24 +228,31 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
 
     return combKer
 
-# Defining the compound kernel object
-class mklObj:
-    """Default automated definition of the mutiple kernel learning object."""
+# Defining the compounding kernel object
+class mklObj (object):
+    """Default automated definition of the mutiple kernel learning object. This object uses the previously defined 
+    methods for generating a linear combination of basis kernels that can be constitued from different families.
+    See at fit_kernel() function documentation for details. This function trains the kernel weights. The object has 
+    other member functions offering utilities.  save_sigmas() saves the set of kernel parameters (e.g. gaussian 
+    widths) into a text file, associted to a basis kernel family. It could be used for loading a desired set of 
+    widths previously used. filePrintingResults () is used for printing training results as well as used settings
+    for each learned compounding kernel. """
     def __init__(self, weightRegNorm = 2, regPar = 2, epsilon = 1e-5, 
 	 			 threads = 2, mkl_epsilon = 0.001, binary = False, verbose = False):
-	 	
+    # Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
+    # hyperperameters (kernel fitting).  	
         if binary:
-            self.mkl = MKLClassification()	# MKL object (Multiclass)
-            self.mkl.set_C(regPar, 1)		# Setting binary regularization parameter and regularization norm	
+            self.mkl = MKLClassification()  # MKL object (Multiclass)
+            self.mkl.set_C(regPar, 1)       # Setting binary regularization parameter and regularization norm	
         else:		 
-            self.mkl = MKLMulticlass()		# MKL object (Binary)
-            self.mkl.set_C(regPar)		# Setting multiclass regularization  parameter
+            self.mkl = MKLMulticlass()      # MKL object (Binary)
+            self.mkl.set_C(regPar)          # Setting multiclass regularization  parameter
 
-        self.mkl.set_mkl_norm(weightRegNorm)		# Setting the weight vector norm
-        self.mkl.set_epsilon(epsilon) 			# setting the transducer epsilon
-        self.mkl.set_mkl_epsilon(mkl_epsilon)		# setting the MKL stop criterion. The value suggested by Shogun is 0.001
+        self.mkl.set_mkl_norm(weightRegNorm)        # Setting the weight vector norm
+        self.mkl.set_epsilon(epsilon)               # setting the transducer epsilon
+        self.mkl.set_mkl_epsilon(mkl_epsilon)       # setting the MKL stop criterion. The value suggested by Shogun is 0.001
         self.mkl.parallel.set_num_threads(threads) 	# setting number of traing threads
-        self._verbose = verbose				# inner trainig process verbosing flag
+        self._verbose = verbose             # inner trainig process verbosing flag
         self._binary = binary
 # All obtained objects below become class attributes, so they are available any moment.
 # Self Function for kernel generation
@@ -261,23 +261,24 @@ class mklObj:
                    randomRange = [1, 50], randomParams = [1, 1], 
 	               hyper = 'linear', kernelFamily = 'guassian', pKers = 3):
 	    # Generating the widths:
-        # sigmaGen(self, hyperDistribution, size, rango = [1,50], parameters = [0, 0])
-        #if kernelFamily == 'gaussian' or kernelFamily == 'chi2':
+       
         self.sigmas = sorted(sigmaGen(self, hyperDistribution = hyper, size = pKers, 
 		                       rango = randomRange, parameters = randomParams)) #; pdb.set_trace()
         try: # Verifying if number of kernels is greater or equal to 2
             if pKers <= 1 or len(self.sigmas)<2:
                 raise NameError('Senseless MKLClassification use!!!')
-        except NameError:	    	
+        except ValueError:	    	
             print "-----------------------------------------------------"
             print """The multikernel learning object is meaningless for less than 2 basis 
 				 kernels, i.e. pKers <= 1, so 'mklObj' couldn't be instantiated."""
             print "-----------------------------------------------------"
             raise
-        self._featsTr = featsTr 		# Inner variable copying.
+        # Inner variable copying:
+        self._featsTr = featsTr 	
         self._targetsTr = targetsTr		
         self._hyper = hyper
         self._pkers = pKers
+        self.basisFamily = kernelFamily
         if self._verbose:	# Printing the training progress
             print '\nNacho, multiple <' + kernelFamily + '> Kernels have been initialized...'
             print "\nInput main parameters: "
@@ -288,17 +289,16 @@ class mklObj:
                 print "Classes: Binary" 
 		
 # Generating the list of subkernels. Creating the compound kernel
-# For monomial-nonhomogeneous polynomial kernels the hyperparameters are uniquely the degree of each monomial
-# in the form of a sequence. MKL finds the coefficient for each monomial in order to find a polynomial.
+# For monomial-nonhomogeneous (polynomial) kernels the hyperparameters are uniquely the degree of each monomial
+# in the form of a sequence. MKL finds the coefficient for each monomial in order to find a compound polynomial.
         if kernelFamily == 'polynomial' or kernelFamily == 'power' or kernelFamily == 'tstudent' or kernelFamily ==  'anova':
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = list(range(0,pKers)))
         else:
+        # We have called 'sigmas' to any kernel parameter, regardless if it is Gaussian or not.
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = self.sigmas)
-# Initializing the compound kernel
+        # Initializing the compound kernel
         self.ker.init(self._featsTr, self._featsTr)
         try: # Verifying if number of kernels is greater or equal to 2
-            #if not inn: 
-            #    raise NameError('Multikernel wasn\'t initialized!!!')
             if self.ker.get_num_subkernels() < 2:
                 raise NameError('Multikernel coeffients are less than 2!!!')
         except NameError:	    	
@@ -338,9 +338,10 @@ class mklObj:
 # Save sigmas into a file if required. By default, '../sigmasFile.txt' will be the corresponding directory and  
 # file name. You can change the mode of the file object, e.g. to 'a' for uniquely adding content. If you want  
 # adding some note for identifying each sigma array, it could be used the 'note' input string.
-    def save_sigmas(self, file = '../sigmasFile.txt', mode = 'w', note = 'Some note'):
+    def save_sigmas(self, file = 'sigmasFile.txt', mode = 'w', note = 'Some note'):
         f = open(file, mode)
-        f.write('------------------------ '+ note +' ----------------------')
+        f.write('# ----------------- '+ note +' ------------------')
+        f.write("\n# Basis kernel family: " + self.basisFamily + '\n')
         for s in self.sigmas:		
             f.write("%s, " % s)
         f.close()
@@ -353,7 +354,9 @@ class mklObj:
 		    \n--------------------------------------------------------------------\n')
 		else:
 		    f.write('\n--------------------------------------------------------------------\n')
-		f.write("Linear combination size: " + str(self._pkers)) 
+		
+		f.write("Basis kernel family: " + self.basisFamily) 
+		f.write("\nLinear combination size: " + str(self._pkers)) 
 	  	f.write('\nHyperarameter distribution: ' + str(self._hyper) )		
 	  	f.write("\nWeights: ") 
 	  	ws = self.ker.get_subkernel_weights()
@@ -372,7 +375,7 @@ class mklObj:
 # It is pending defining functions for run time attribute modification, e.g. set_verbose(), 
 # set_regPar(), etc.
 
-# Return kernel 'ker' as well as other useful values obtained during the training:		
+# Return kernel (getters) 'ker' as well as other useful values obtained during the training:		
     def get_combKernel (self): return self.ker
     def get_testErr (self): return self.testerr
     def get_weights (self): return self.ker.get_subkernel_weights()
@@ -425,7 +428,6 @@ basisKernelFamily = ['gaussian',
                     'wavelet', 
                     'cauchy', 
                     'exponential']
-
 #### With different kernel parameter distributions:               
 widthDistribution = ['linear',
                     'quadratic',
@@ -438,6 +440,22 @@ widthDistribution = ['linear',
                     'weibull']
            
 mode = 'w'
+
+#### With n basis kernels
+# Falta hacer funciones para habilitar la opción de cargar sigmas desde archivo.
+kernelO.fit_kernel(featsTr = feats_train, 
+				   targetsTr = labelsTr, 
+				   featsTs = feats_test, 
+				   targetsTs = labelsTs, 
+				   kernelFamily = 'polynomial',
+				   randomRange = [50, 200], # For homogeneous polynomial kernels these two parameter sets 
+				   randomParams = [50, 20], # have not effect. For quadratic there are not parameter distribution
+				   hyper = 'linear',        # This parameter has not effect when kernel family is polynomial and  
+				   pKers = 3)               # some other powering forms.
+
+kernelO.filePrintingResults('mkl_output.txt', mode)
+kernelO.save_sigmas()
+
 """for w in widthDistribution:
     kernelO.fit_kernel(featsTr = feats_train, 
 				   targetsTr = labelsTr, 
@@ -450,14 +468,3 @@ mode = 'w'
     kernelO.filePrintingResults('mkl_output.txt', mode)	# Printing to a file the training file report.
     mode = 'a'
 """
-#### With n basis kernels
-# Falta hacer funciones para habilitar la opción de cargar sigmas desde archivo.
-kernelO.fit_kernel(featsTr = feats_train, 
-				   targetsTr = labelsTr, 
-				   featsTs = feats_test, 
-				   targetsTs = labelsTs, 
-				   kernelFamily = 'polynomial',
-				   randomRange = [50, 200], # For homogeneous polynomial kernels these two parameter sets 
-				   randomParams = [50, 20], # have not effect. For quadratic there are not parameter distribution
-				   hyper = 'linear', 
-				   pKers = 3)
