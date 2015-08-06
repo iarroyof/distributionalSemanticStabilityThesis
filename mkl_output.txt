@@ -4,6 +4,6 @@ Basis kernel family: polynomial
 Linear combination size: 3
 Hyperarameter distribution: linear
 Weights: 0.0145263594685, 0.586629573636, 0.809725094224, 
-Widths: 113, 160, 166, 
+Widths: 0, 1, 2, 
 Classes: 10
 Test error:93.6

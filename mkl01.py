@@ -261,7 +261,7 @@ class mklObj (object):
                    randomRange = [1, 50], randomParams = [1, 1], 
 	               hyper = 'linear', kernelFamily = 'guassian', pKers = 3):
 	    # Generating the widths:
-       
+        '''
         self.sigmas = sorted(sigmaGen(self, hyperDistribution = hyper, size = pKers, 
 		                       rango = randomRange, parameters = randomParams)) #; pdb.set_trace()
         try: # Verifying if number of kernels is greater or equal to 2
@@ -272,7 +272,7 @@ class mklObj (object):
             print """The multikernel learning object is meaningless for less than 2 basis 
 				 kernels, i.e. pKers <= 1, so 'mklObj' couldn't be instantiated."""
             print "-----------------------------------------------------"
-            raise
+            raise'''
         # Inner variable copying:
         self._featsTr = featsTr 	
         self._targetsTr = targetsTr		
@@ -292,9 +292,21 @@ class mklObj (object):
 # For monomial-nonhomogeneous (polynomial) kernels the hyperparameters are uniquely the degree of each monomial
 # in the form of a sequence. MKL finds the coefficient for each monomial in order to find a compound polynomial.
         if kernelFamily == 'polynomial' or kernelFamily == 'power' or kernelFamily == 'tstudent' or kernelFamily ==  'anova':
-            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = list(range(0,pKers)))
+            self.sigmas = list(range(0,pKers))
+            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = self.sigmas)
         else:
         # We have called 'sigmas' to any kernel parameter, regardless if it is Gaussian or not.
+            self.sigmas = sorted(sigmaGen(self, hyperDistribution = hyper, size = pKers, 
+		                       rango = randomRange, parameters = randomParams)) #; pdb.set_trace()
+            try: # Verifying if number of kernels is greater or equal to 2
+                if pKers <= 1 or len(self.sigmas)<2:
+                    raise NameError('Senseless MKLClassification use!!!')
+            except ValueError:	    	
+                print "-----------------------------------------------------"
+                print """The multikernel learning object is meaningless for less than 2 basis 
+				     kernels, i.e. pKers <= 1, so 'mklObj' couldn't be instantiated."""
+                print "-----------------------------------------------------"
+                raise
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = self.sigmas)
         # Initializing the compound kernel
         self.ker.init(self._featsTr, self._featsTr)
