@@ -260,19 +260,6 @@ class mklObj (object):
     def fit_kernel(self, featsTr,  targetsTr, featsTs, targetsTs, 
                    randomRange = [1, 50], randomParams = [1, 1], 
 	               hyper = 'linear', kernelFamily = 'guassian', pKers = 3):
-	    # Generating the widths:
-        '''
-        self.sigmas = sorted(sigmaGen(self, hyperDistribution = hyper, size = pKers, 
-		                       rango = randomRange, parameters = randomParams)) #; pdb.set_trace()
-        try: # Verifying if number of kernels is greater or equal to 2
-            if pKers <= 1 or len(self.sigmas)<2:
-                raise NameError('Senseless MKLClassification use!!!')
-        except ValueError:	    	
-            print "-----------------------------------------------------"
-            print """The multikernel learning object is meaningless for less than 2 basis 
-				 kernels, i.e. pKers <= 1, so 'mklObj' couldn't be instantiated."""
-            print "-----------------------------------------------------"
-            raise'''
         # Inner variable copying:
         self._featsTr = featsTr 	
         self._targetsTr = targetsTr		
@@ -295,7 +282,7 @@ class mklObj (object):
             self.sigmas = list(range(0,pKers))
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = self.sigmas)
         else:
-        # We have called 'sigmas' to any kernel parameter, regardless if it is Gaussian or not.
+        # We have called 'sigmas' to any kernel parameter, regardless if it is Gaussian or not. So generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution = hyper, size = pKers, 
 		                       rango = randomRange, parameters = randomParams)) #; pdb.set_trace()
             try: # Verifying if number of kernels is greater or equal to 2
