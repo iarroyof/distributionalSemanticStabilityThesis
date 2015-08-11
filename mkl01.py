@@ -125,13 +125,14 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
 def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
     '''This module generates a list of Gaussian Kernels. These kernels are 
     tuned according to the vector ''widths''. Input parameters ''featsL''
-    and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS
+    and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS,
     these both objects should be derived from the training SLM vectors, 
-    through the Shogun constructor realFeatures().
-    This module also appends kernels to a combinedKernel object. The kernels
-    to be append are in ''kernels'' which are append to the linear combination 
-    'combKer' that is returned. We have analyzed some basis families available
-    in Shogun, so possible values of 'basisFam':
+    by means of the Shogun constructor realFeatures().
+    This module also appends basis kernels to a combinedKernel object. The 
+    kernels to be append are in ''kernels'' which are append to the linear 
+    combination 'combKer' that is returned. We have analyzed some basis 
+    families available in Shogun, so possible values of 'basisFam':
+    
     basisFam = ['gaussian', 
                 'inverseQuadratic', 
                 'polynomial', 
@@ -230,13 +231,11 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
 
 # Defining the compounding kernel object
 class mklObj (object):
-    """Default automated definition of the mutiple kernel learning object. This object uses the previously defined 
+    """Default self definition of the mutiple kernel learning object. This object uses the previously defined 
     methods for generating a linear combination of basis kernels that can be constitued from different families.
-    See at fit_kernel() function documentation for details. This function trains the kernel weights. The object has 
-    other member functions offering utilities.  save_sigmas() saves the set of kernel parameters (e.g. gaussian 
-    widths) into a text file, associted to a basis kernel family. It could be used for loading a desired set of 
-    widths previously used. filePrintingResults () is used for printing training results as well as used settings
-    for each learned compounding kernel. """
+    See at fit_kernel() function documentation for details. This function trains the kernel weights. The object 
+    has other member functions offering utilities.  
+    """
     def __init__(self, weightRegNorm = 2, regPar = 2, epsilon = 1e-5, 
 	 			 threads = 2, mkl_epsilon = 0.001, binary = False, verbose = False):
     # Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
@@ -334,10 +333,15 @@ class mklObj (object):
                 print 'Kernel evaluation ready. The precision was: ', 100-self.testerr*100, '%'		
             else:
                 print 'Kernel evaluation ready. The precision was: ', self.testerr*100, '%'
-# Save sigmas into a file if required. By default, '../sigmasFile.txt' will be the corresponding directory and  
-# file name. You can change the mode of the file object, e.g. to 'a' for uniquely adding content. If you want  
-# adding some note for identifying each sigma array, it could be used the 'note' input string.
+
     def save_sigmas(self, file = 'sigmasFile.txt', mode = 'w', note = 'Some note'):
+    '''This method saves the set of kernel parameters (e.g. gaussian widths) into a text file, 
+    which are associted to a basis kernel family. It could be used for loading a desired set 
+    of widths used in previous training epochs (i.e. when the F1-measure showed a maximun).
+    By default, '../sigmasFile.txt' will be the corresponding directory and file name. You can 
+    set the mode of the file object, e.g. to 'a' for uniquely adding content. If you want  
+    adding some note to each saved sigma array, it could be used the 'note' input string.
+    '''
         f = open(file, mode)
         f.write('# ----------------- '+ note +' ------------------')
         f.write("\n# Basis kernel family: " + self.basisFamily + '\n')
@@ -347,6 +351,11 @@ class mklObj (object):
 
 # Multikernel object training procedure file reporting.
     def filePrintingResults (self, fileName, mode):
+    '''This method is used for printing training results as well as used settings for each learned 
+    compounding kernel into a file for comparison. 'fileName' is the desired location of the file
+    at your HD and 'mode' could be setted to 'a' for adding different training results to the same 
+    file. The default mode is 'w', which is used for creating or rewritting a file.
+    '''
 		f = open(fileName, mode)
 		if mode == 'w':
 		    f.write('                   Results\
@@ -372,13 +381,45 @@ class mklObj (object):
 		f.close()
 
 # It is pending defining functions for run time attribute modification, e.g. set_verbose(), 
-# set_regPar(), etc.
+# set_regPar(), etc.unwrapped
 
-# Return kernel (getters) 'ker' as well as other useful values obtained during the training:		
-    def get_combKernel (self): return self.ker
-    def get_testErr (self): return self.testerr
-    def get_weights (self): return self.ker.get_subkernel_weights()
-    def get_sigmas (self): return self.sigmas
+# Getters:		
+    def get_combKernel (self): 
+    '''This method is used for getting the kernel object, i.e. the learned MKL object, which posteriorly
+    can be unwrapped into its matrix form.
+    '''
+        return self.ker
+    
+    def get_testErr (self): 
+    '''This method is used for getting the test accuracy after training the MKL object. 
+    '''
+        if self._binary:
+            return 100 - self.testerr*100
+        else:
+            return self.testerr*100
+    
+    def get_weights (self): 
+    '''This method is used for getting the learned weights of the MKL object.
+    '''
+        return self.ker.get_subkernel_weights()
+    
+    def get_sigmas (self): 
+    '''This method is used for getting the current set of basis kernel parameters.
+    '''
+        return self.sigmas
+
+# Setters:
+    def set_sigmas(sigmas):
+    '''This method is used for setting desired basis kernel parameters for the MKL object. 
+    'sigmas' is a list of real values of pKers length. Be careful to avoid missmatching  
+    between the number of basis kernels of the current compound kernel and the one you have 
+    in mind. A missmatch error could be arised.
+    '''    
+        if self._pkers == len(sigmas)
+            self.sigmas = sigmas
+        else:
+            raise Error:
+            
 	
 # ------------------------------ MAIN ----------------------------------------------------------------------
 # MKL object Default definition:
