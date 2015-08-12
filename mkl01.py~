@@ -464,10 +464,6 @@ class mklObj (object):
         change is useful for retrain the model with other regularizer.
         '''
         self.mkl.set_mkl_norm(wrn)
-        
-    def set_epsilon
-    
-        self.mkl.set_epsilon(epsilon) 
 # ------------------------------ MAIN ----------------------------------------------------------------------
 # MKL object Default definition:
 # class mklObj:
