@@ -270,15 +270,15 @@ class mklObj (object):
         else:                               # two classes are imbalanced. Equal for balanced densities
             self.mkl = MKLMulticlass()      # MKL object (Multiclass).
 
-        self.mklC = mklC  # Setting regularization parameter. These are different when the
-        self.weightRegNorm = weightRegNorm        # Setting the basis' weight vector norm
-        self.SVMepsilon = SVMepsilon               # setting the transducer stop (convergence) criterion
-        self.MKLepsilon = MKLepsilon      # setting the MKL stop criterion. The value suggested by
-                                                    # Shogun examples is 0.001. See setter docs for details
-        self.threads =threads 	# setting number of training threads. Verify functionality!!
-        self.verbose = verbose                    # inner training process verbose flag
-        self.Matrx = False       # Kind of returned learned kernel object. See getter documentation of these
-        self.expansion = False   # object configuration parameters for details. Only modifiable by setter.
+        self.mklC = mklC                    # Setting regularization parameter. These are different when the
+        self.weightRegNorm = weightRegNorm  # Setting the basis' weight vector norm
+        self.SVMepsilon = SVMepsilon        # setting the transducer stop (convergence) criterion
+        self.MKLepsilon = MKLepsilon        # setting the MKL stop criterion. The value suggested by
+                                            # Shogun examples is 0.001. See setter docs for details
+        self.threads =threads 	            # setting number of training threads. Verify functionality!!
+        self.verbose = verbose              # inner training process verbose flag
+        self.Matrx = False                  # Kind of returned learned kernel object. See getter documentation of these
+        self.expansion = False              # object configuration parameters for details. Only modifiable by setter.
 # All obtained objects below become class attributes, so they are available any moment.
 # Self Function for kernel generation
 
@@ -332,7 +332,7 @@ class mklObj (object):
             self.sigmas = sorted(sigmaGen(self, hyperDistribution = hyper, size = pKers,
                                rango = randomRange, parameters = randomParams)) #; pdb.set_trace()
             try: # Verifying if number of kernels is greater or equal to 2
-                if pKers <= 1 or len(self.sigmas)<2:
+                if pKers <= 1 or len(self.sigmas) < 2:
                     raise customException('Senseless MKLClassification use!!!')
             except customException, (instance):
                 print 'Caugth: ' + instance.parameter
@@ -416,7 +416,9 @@ class mklObj (object):
 
         f.write("Basis kernel family: " + self.basisFamily)
         f.write("\nLinear combination size: " + str(self._pkers))
-        f.write('\nHyperarameter distribution: ' + str(self._hyper) )
+        f.write('\nHyperparameter distribution: ' + str(self._hyper) )
+        f.write('\nWeight regularization norm: ' + str(self.weightRegNorm))
+        f.write('\nWeight regularization parameter: ' + str(self.mklC))
         f.write("\nWeights: ")
         ws = self.weights
         for item in ws:

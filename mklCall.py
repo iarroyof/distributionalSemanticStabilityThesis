@@ -70,7 +70,7 @@ kernelO.fit_kernel(featsTr=feats_train,
 print kernelO.testerr, kernelO.weights
 # kernelO.filePrintingResults('mkl_output.txt', mode)
 # kernelO.save_sigmas()
-kernelO.mkl.set_mkl_norm(3)
+kernelO.weightRegNorm = 3
 
 kernelO.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,
