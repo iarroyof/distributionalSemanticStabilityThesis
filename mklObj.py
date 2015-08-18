@@ -19,7 +19,7 @@ def load_Toy(dataRoute, fileTrain, fileLabels):
 
 # 2D Toy data generator
 def generate_binToy():
-    num=30;
+    num=30
     num_components=4
     means=zeros((num_components, 2))
     means[0]=[-1,1]
@@ -235,16 +235,16 @@ class mklObj (object):
         import mkl01 as mk
 
         kernel = mk.mklObj(weightRegNorm = 2,
-                        regPar = 2,
-                        svm_epsilon = 1e-5,
+                        mklC = 2,
+                        SVMepsilon = 1e-5,
                         threads = 2,
-                        mkl_epsilon = 0.001,
+                        MKLepsilon = 0.001,
                         binary = False,
                         verbose = False)
     The above values are the defaults, so if they are suitable for you it is possible instantiating
     the object by simply stating: kernel = mk.mklObj(). Even it is possible modifying a subset of
-    input parameters (keeping others as default): kernel = mk.mklObj(weightRegNorm = 1, regPar = 10,
-    svm_epsilon = 1e-2). See the documentation of each setter below for allowed setting parameters
+    input parameters (keeping others as default): kernel = mk.mklObj(weightRegNorm = 1, mklC = 10,
+    SVMepsilon = 1e-2). See the documentation of each setter below for allowed setting parameters
     without new instantiations.
 
     Now, once main parameters has been setted, fit the kernel:
@@ -260,12 +260,12 @@ class mklObj (object):
 
     Once the MKL object has been fitted, you can get what you need from it. See getters documentation listed below.
     """
-    def __init__(self, weightRegNorm = 2, mklC = 2, SVMepsilon = 1e-5,
+    def __init__(self, weightRegNorm = 2.0, mklC = 2.0, SVMepsilon = 1e-5,
                  threads = 2, MKLepsilon = 0.001, binary = False, verbose = False):
         """Object initialization. This procedure is regardless of the input data, basis kernels and
         corresponding hyperparameters (kernel fitting)."""
-        self.binary = binary
-        if self.binary:
+        self.__binary = binary
+        if self.__binary:
             self.mkl = MKLClassification()  # MKL object (Binary)
         else:                               # two classes are imbalanced. Equal for balanced densities
             self.mkl = MKLMulticlass()      # MKL object (Multiclass).
@@ -279,6 +279,7 @@ class mklObj (object):
         self.verbose = verbose              # inner training process verbose flag
         self.Matrx = False                  # Kind of returned learned kernel object. See getter documentation of these
         self.expansion = False              # object configuration parameters for details. Only modifiable by setter.
+        self.__testerr = 0
 # All obtained objects below become class attributes, so they are available any moment.
 # Self Function for kernel generation
 
@@ -315,7 +316,7 @@ class mklObj (object):
             print '\nNacho, multiple <' + kernelFamily + '> Kernels have been initialized...'
             print "\nInput main parameters: "
             print "Hyperarameter distribution: ", self._hyper, "\nLinear combination size: ", pKers
-            if not self.binary:
+            if not self.__binary:
                 print "Classes: ", targetsTr.get_num_classes()
             else:
                 print "Classes: Binary"
@@ -372,18 +373,18 @@ class mklObj (object):
         self.mkl.set_kernel(self.ker)		    # and test examples generates the corresponding Gramm Matrix.
         out = self.mkl.apply()			        # Applying the obtained Gramm Matrix
 
-        if self.binary:			    # If the problem is either binary or multiclass, different
+        if self.__binary:			    # If the problem is either binary or multiclass, different
             evalua = ErrorRateMeasure()	# performance measures are computed.
         else:
             evalua = MulticlassAccuracy()
 
-        if self.binary:
-            self.testerr = 100-evalua.evaluate(out, targetsTs)*100
+        if self.__binary:
+            self.__testerr = 100-evalua.evaluate(out, targetsTs)*100
         else:
-            self.testerr = evalua.evaluate(out, targetsTs)*100
+            self.__testerr = evalua.evaluate(out, targetsTs)*100
 # Verbose for learning surveying
         if self.verbose:
-            print 'Kernel evaluation ready. The precision was: ', self.testerr, '%'
+            print 'Kernel evaluation ready. The precision was: ', self.__testerr, '%'
 
     def save_sigmas(self, file = 'sigmasFile.txt', mode = 'w', note = 'Some note'):
         """This method saves the set of kernel parameters (e.g. gaussian widths) into a text file, which are
@@ -426,19 +427,19 @@ class mklObj (object):
         f.write('\nWidths: ')
         for item in self.sigmas:
             f.write("%s, " % item)
-        if self.binary:
-            f.write('\nTest error: ' + str(100 - self.testerr*100) )
+        if self.__binary:
+            f.write('\nTest error: ' + str(100 - self.__testerr*100) )
         else:
             f.write("\nClasses: " + str(self._targetsTr.get_num_classes()) )
-            f.write('\nTest error:' + str( self.testerr*100 ))
+            f.write('\nTest error:' + str( self.__testerr*100 ))
         f.close()
 # It is pending defining functions for run time attribute modification, e.g. set_verbose(), set_regPar(),
 # etc. unwrapped
 
 # Getters (properties):
     @property
-    def compoundKernel (self):
-        '''This method is used for getting the kernel object, i.e. the learned MKL object, which can be unwrapped
+    def compoundKernel(self):
+        """This method is used for getting the kernel object, i.e. the learned MKL object, which can be unwrapped
         into its matrix form instead of getting a Shogun object. Use the input parameters Matrix = True,
         expansion = False for getting the compound matrix of reals. For instance:
             mklObj.Matrix = True
@@ -453,10 +454,12 @@ class mklObj (object):
             mklObj.Matrix = False
             mklObj.expansion = False
             kernelObj = mklObj.compoundKernel
-        Be careful with this latter variant of the method becuase of the large amount of needed physical memory.
-        '''
 
-        if self.Matrix:
+        .. warning:: Be careful with this latter variant of the method becuase of the large amount of needed physical
+        memory.
+        """
+
+        if self.Matrx:
             kernels = []
             size = self.ker.get_num_subkernels()
             for k in xrange(0, size-1):
@@ -471,113 +474,173 @@ class mklObj (object):
                                             # object is returned.
 
     @property
-    def testerr (self):
-        """This method is used for getting the test accuracy after training the MKL object.
-        """
-        return self.__testerr
-
-    @property
     def sigmas (self):
-        '''This method is used for getting the current set of basis kernel parameters.
-        '''
+        """This method is used for getting the current set of basis kernel parameters, i.e. widths, in the case of
+        the gaussian basis kernel.
+        :rtype : list of float
+        """
         return self.__sigmas
 
     @property
     def verbose(self):
-        """This method sets to True of False the verbose flag, which is used for monitoring the
-        object training procedure.
+        """This is the verbose flag, which is used for monitoring the object training procedure.
+        :rtype : bool
         """
         return self._verbose
 
     @property
     def Matrx (self):
-        '''This is a boolean property of the object. Its aim is getting and, mainly, setting the kind of object
+        """This is a boolean property of the object. Its aim is getting and, mainly, setting the kind of object
         we want to obtain as learned kernel, i.e. a Kernel Shogun object or a Kernel Matrix whose entries are
         reals. The latter could require large amounts of physical memory. See the mklObj.compoundKernel property
-        documentation in this object for using details.'''
+        documentation in this object for using details.
+        :rtype :bool
+        """
         return self.__Matrx
 
     @property
     def expansion(self):
-        '''This is a boolean property. Its aim is getting and, mainly, setting the mklObj object to return the
+        """This is a boolean property. Its aim is getting and, mainly, setting the mklObj object to return the
         complete expansion of the learned kernel, i.e. a list of basis kernel matrices as well as their
         corresponding coefficients. This configuration may require large amounts of physical memory. See the
-        mklObj.compoundKernel property documentation in this object for using details.'''
+        mklObj.compoundKernel property documentation in this object for using details.
+        :rtype :bool
+        .. seealso:: the code and examples and documentation about :@property:`compoundKernel`
+        """
         return self.__expansion
 
     @property
     def weightRegNorm(self):
+        """ The value of this property is the basis' weight vector norm, e.g. :math:`||\\beta||_p`, to be used as
+        regularizer. It controls the smoothing among basis kernel weights of the learned multiple kernel combination. On
+        one hand, If p=1 (the l_1 norm) the weight values B_i will be disproportionally between them, i.e. a few of them
+        will be >> 0,some other simply > 0 and many of them will be zero or very near to zero (the vector B will be
+        sparse). On the other hand, if p = 2 the weights B_i linearly distributed, i.e. their distribution shows an
+        uniform tilt in such a way the differences between pairs of them are not significant, but rather proportional to
+        the tilt of the distribution.
 
+        To our knowledge, such a tilt is certainly not explicitly taken into account as regularization hyperparameter,
+        although the parameter C \in [0, 1] is directly associated to it as scalar factor. Thus specifically for
+        C \in [0, 1], it operates the vector B by forcing to it to certain orientation which describes a tilt
+        m \in (0, 1)U(1, \infty) (with minima in the extremes of these subsets and maxima in their medians). Given that
+        C \n [0, 1], the scaling effect behaves such that linearly depresses low values of B_i, whilst highlights their
+        high values. The effect of C \in (1, \infty) is still not clearly studied, however it will be a bit different
+        than the above, but keeping its scalar effect.
+
+        Overall, as p tends to be >> 1 (or even p --> \\infty) the B_i values tend to be ever more uniformly
+        distributed. More specific and complex regularization operators are explained in .. seealso:: Schölkopf, B., & Smola, A. J.
+        (2002). Learning with kernels: Support vector machines, regularization, optimization, and beyond. MIT press.
+
+        :rtype : vector of float
+        """
         return self.__weightRegNorm
 # function getters
     @property
     def weights(self):
         """This method is used for getting the learned weights of the MKL object.
+
+        :rtype : list of float
         """
         self.__weights = self.ker.get_subkernel_weights()
         return self.__weights
 
     @property
     def SVMepsilon(self):
-        """This method is used for setting the SVM convergence criterion (the minimum allowed error commited by
-        the transducer in training). In other words, the low level of the learning process. The current basis
-        kernel combination is tested as the SVM kernel. Regardless of each basis' weights. See at page 22 of
-        Sonnemburg et.al., (2006) Large Scale Multiple Kernel Learning.
+        """This method is used for getting the SVM convergence criterion (the minimum allowed error commited by
+        the transducer in training).
+
+        :rtype : float
+
+        .. seealso:: See at page 22 of Sonnemburg et.al., (2006) Large Scale Multiple Kernel Learning.
+        .. seealso:: @SVMepsilon.setter
         """
         return self.__SVMepsion
 
     @property
     def MKLepsilon(self):
-        """This method is used for setting the MKL convergence criterion (the minimum allowed error committed by
-        the MKL object in test). In other words, the high level of the learning process. The current basis
-        kernel combination is tested as the SVM kernel. The basis' weights are tuned until 'MKLeps' is reached.
-        See at page 22 of Sonnemburg et.al., (2006) Large Scale Multiple Kernel Learning.
+        """This method is used for getting the MKL convergence criterion (the minimum allowed error committed by
+        the MKL object in test).
+
+        :rtype : float
+
+        .. seealso:: See at page 22 of Sonnemburg et.al., (2006) Large Scale Multiple Kernel Learning.
+        .. seealso:: @MKLepsilon.setter
         """
         return self.__MKLepsilon
 
     @property
     def mklC(self):
-        """This method is used for setting regularization parameters. These are different when the two classes
-        are imbalanced and Equal for balanced densities in binary classification problems. For multiclass
-        problems imbalanced densities are not considered, so uniquely the first argument is caught by the method.
-        If one or both arguments are misplaced the default values are one both them. See at page 4 of Bagchi,
-        (2014) SVM Classifiers Based On Imperfect Training Data.
+        """This method is used for setting regularization parameters. 'mklC' is a real value in multiclass problems,
+        while in binary problems it must be a list of two elements. These must be different when the two classes are
+        imbalanced, but must be equal for balanced densities in binary classification problems. For multiclass
+        problems, imbalanced densities are not considered.
+
+        :rtype : float
+
+        .. seealso:: See at page 4 of Bagchi, (2014) SVM Classifiers Based On Imperfect Training Data.
+        .. seealso:: @weightRegNorm property documentation for more details about C as regularization parameter.
         """
         return self.__mklC
 
     @property
+    def threads(self):
+        """ This property is used for getting and setting the number of threads in which the training procedure will be
+        will be segmented into a single machine processor core.
+
+        :rtype : int
+        .. seealso:: @threads.setter documentation.
+        """
+        return self.__threads
+
+# Readonly properties:
+    @property
     def binary(self):
-        """This method is used for setting regularization parameters. These are different when the two classes
-        are imbalanced and Equal for balanced densities in binary classification problems. For multiclass
-        problems imbalanced densities are not considered, so uniquely the first argument is caught by the method.
-        If one or both arguments are misplaced the default values are one both them. See at page 4 of Bagchi,
-        (2014) SVM Classifiers Based On Imperfect Training Data.
+        """This method is used for getting the kind of problem the mklObj object will be trained for. If binary == True,
+        the you want to train the object for a two-class classification problem. Otherwise if binary == False, you want
+        to train the object for multiclass classification problems. This property can't be modified once the object has
+        been instantiated.
+
+        :rtype : bool
         """
         return self.__binary
 
     @property
-    def threads(self):
-        return self.__threads
+    def testerr(self):
+        """This method is used for getting the test accuracy after training the MKL object. 'testerr' is a readonly
+        object property.
+
+        :rtype : float
+        """
+        return self.__testerr
 
 # mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
 # a new mklObj object.
     @Matrx.setter
     def Matrx(self, value):
-        """ :type value: bool
         """
+        :type value: bool
+        .. seealso:: @Matrx property documentation.
+        """
+        assert isinstance(value, bool)
         self.__Matrx = value
 
     @expansion.setter
     def expansion(self, value):
-        """ :type value: bool
         """
+        .. seealso:: @expansion property documentation
+        :type value: bool
+        """
+        assert isinstance(value, bool)
         self.__expansion = value
 
     @sigmas.setter
     def sigmas(self, value):
-        """ @type value: list This method is used for setting desired basis kernel parameters for the MKL object. 'value'
+        """ This method is used for setting desired basis kernel parameters for the MKL object. 'value'
         is a list of real values of 'pKers' length. Be careful to avoid mismatching between the number of basis kernels
         of the current compound kernel and the one you have in mind. A mismatch error could be arisen.
+
+        @type value: list of float
+        .. seealso:: @sigmas property documentation
         """
         try:
             if len(value) == self._pkers:
@@ -590,33 +653,23 @@ class mklObj (object):
 
     @verbose.setter
     def verbose(self, value):
-        """This method sets to True of False the verbose flag, which is used for monitoring the
-        object training procedure.
+        """This method sets to True of False the verbose flag, which is used in turn for monitoring the object training
+        procedure.
+
         @type value: bool
-        @type self: object
         """
+        assert isinstance(value, bool)
         self._verbose = value
-
-    @binary.setter
-    def binary(self, value):
-        """This method sets to True of False the verbose flag, which is used for monitoring the
-        object training procedure.
-        @type value: bool
-        @type self: object
-        """
-        self.__binary = value
-# mkl object setters
-
-    @testerr.setter
-    def testerr(self, value):
-        assert isinstance(value, float)
-        self.__testerr = value
 
     @weightRegNorm.setter
     def weightRegNorm(self, value):
-        """This method is used for changing the norm of the weight regularizer of the MKL object. Tipically this
-        change is useful for retrain the model with other regularizer.
+        """This method is used for changing the norm of the weight regularizer of the MKL object. Typically this
+        changing is useful for retrain the model with other regularizer.
+
+        @type value: float
+        ..seealso:: @weightRegNorm property documentation.
         """
+        assert (isinstance(value, float) and value >= 0.0)
         self.mkl.set_mkl_norm(value)
         self.__weightRegNorm = value
 
@@ -624,9 +677,12 @@ class mklObj (object):
     def SVMepsilon(self, value):
         """This method is used for setting the SVM convergence criterion (the minimum allowed error commited by
         the transducer in training). In other words, the low level of the learning process. The current basis
-        kernel combination is tested as the SVM kernel. Regardless of each basis' weights. See at page 22 of
-        Sonnemburg et.al., (2006) Large Scale Multiple Kernel Learning.
+        kernel combination is tested as the SVM kernel. Regardless of each basis' weights.
+
+        @type value: float
+        .. seealso:: Page 22 of Sonnemburg et.al., (2006) Large Scale Multiple Kernel Learning.
         """
+        assert (isinstance(value, float) and value >= 0.0)
         self.mkl.set_epsilon(value)
         self.__SVMepsion = value
 
@@ -635,8 +691,11 @@ class mklObj (object):
         """This method is used for setting the MKL convergence criterion (the minimum allowed error committed by
         the MKL object in test). In other words, the high level of the learning process. The current basis
         kernel combination is tested as the SVM kernel. The basis' weights are tuned until 'MKLeps' is reached.
-        See at page 22 of Sonnemburg et.al., (2006) Large Scale Multiple Kernel Learning.
+
+        @type value: float
+        .. seealso:: Page 22 of Sonnemburg et.al., (2006) Large Scale Multiple Kernel Learning.
         """
+        assert (isinstance(value, float) and value >= 0.0)
         self.mkl.set_mkl_epsilon(value)
         self.__MKLepsilon = value
 
@@ -645,12 +704,16 @@ class mklObj (object):
         """This method is used for setting regularization parameters. These are different when the two classes
         are imbalanced and Equal for balanced densities in binary classification problems. For multiclass
         problems imbalanced densities are not considered, so uniquely the first argument is caught by the method.
-        If one or both arguments are misplaced the default values are one both them. See at page 4 of Bagchi,
-        (2014) SVM Classifiers Based On Imperfect Training Data.
+        If one or both arguments are misplaced the default values are one both them.
+
+        @type value: float
+        .. seealso:: Page 4 of Bagchi,(2014) SVM Classifiers Based On Imperfect Training Data.
         """
-        if self.binary:
+        if self.__binary:
+            assert (isinstance(value,(list, float)) and value[0] >= 0.0 and value[1] >= 0.0)
             self.mkl.set_C(value[0], value[1])
         else:
+            assert isinstance(value, float)
             self.mkl.set_C(value)
 
         self.__mklC = value
@@ -660,73 +723,6 @@ class mklObj (object):
         """This method is used for changing the number of threads we want to be running with a single machine core.
         These threads are not different parallel processes running in different machine cores.
         """
+        assert (isinstance(value, int) and value > 0)
         self.mkl.parallel.set_num_threads(value) 	# setting number of training threads
         self.__threads = value
-
-
-'''
-#### Loading train and test data
-# 1) For multiclass problem loaded from file:
-[traindata,
- testdata,
- trainlab,
- testlab] = mk.load_Toy('/home/iarroyof/shogun-data/toy/',         # Data directory
-                     'fm_train_multiclass_digits500.dat',       # Multiclass dataSet examples file name
-                     'label_train_multiclass_digits500.dat')    # Multiclass Labels file name
-# 2) For generated binary problem:
-#[traindata, testdata, trainlab, testlab] = generate_binToy()
-
-#### Casting train and test data for Shogun feature objects (uncomment and comment labels according to your
-#### problem) ******Include following steps in load_Toy() for preventing loading shogun twice.
-feats_train = RealFeatures(traindata) 	# train examples
-#labelsTr = BinaryLabels(trainlab)	    # train binary lables
-labelsTr = MulticlassLabels(trainlab)	# train multiclass labels
-feats_test = RealFeatures(testdata)  	# test examples
-#labelsTs = BinaryLabels(testlab)	    # test binary labels
-labelsTs = MulticlassLabels(testlab)	# test multiclass labels
-
-#### Instantiating the learnable kernel object
-kernelO = mk.mklObj(verbose = True, threads = 4)
-# It is possible resetting the kernel for different principal parameters.
-# *** It is pending programming a method for loading from file a list of
-# principal parameters:***
-#### With m basis kernels:
-basisKernelFamily = ['gaussian',
-                    'inverseQuadratic',
-                    'polynomial',
-                    'power',
-                    'rationalQuadratic',
-                    'spherical',
-                    'tstudent',
-                    'wave',
-                    'wavelet',
-                    'cauchy',
-                    'exponential']
-#### With different kernel parameter distributions:
-widthDistribution = ['linear',
-                    'quadratic',
-                    'log-gauss',
-                    'gaussian',
-                    'triangular',
-                    'pareto',
-                    'beta',
-                    'gamma',
-                    'weibull']
-
-mode = 'w'
-
-#### With n basis kernels
-# Falta hacer funciones para habilitar la opción de cargar sigmas desde archivo.
-kernelO.fit_kernel(featsTr = feats_train,
-                   targetsTr = labelsTr,
-                   featsTs = feats_test,
-                   targetsTs = labelsTs,
-                   kernelFamily = basisKernelFamily[2],
-                   randomRange = [50, 200], # For homogeneous polynomial kernels these two parameter sets
-                   randomParams = [50, 20], # have not effect. For quadratic there are not parameter distribution
-                   hyper = widthDistribution[0], # With not effect when kernel family is polynomial and some
-                   pKers = 3)                    # other powering forms.
-
-#kernelO.filePrintingResults('mkl_output.txt', mode)
-#kernelO.save_sigmas()
-'''
