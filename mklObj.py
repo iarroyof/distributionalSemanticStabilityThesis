@@ -4,10 +4,23 @@ __author__ = 'Ignacio Arroyo-Fernandez'
 
 from modshogun import *
 from tools.load import LoadMatrix
+import random
 import numpy
+#.. todo:: Specify and validate input and returning types for functions.
+# Loading toy multiclass data from files
+def load_multiclassToy(dataRoute, fileTrain, fileLabels):
+    """ :returns: [RealFeatures(training_data), RealFeatures(test_data), MulticlassLabels(train_labels),
+    MulticlassLabels(test_labels)]. It is a set of Shogun training objects for raising a 10-class classification
+    problem. This function is a modified version from http://www.shogun-toolbox.org/static/notebook/current/MKL.html
+    Pay attention to input parameters because their documentations is valid for acquiring data for any multiclass
+    problem with Shogun.
 
-# Loading toy data from files
-def load_Toy(dataRoute, fileTrain, fileLabels):
+    :param dataRoute: The allocation directory of plain text file containing the train and test data.
+    :param fileTrain: The name of the text file containing the train and test data. Each row of the file contains a
+    sample vector and each column is a dimension of such a sample vector.
+    :param fileLabels: The name of the text file containing the train and test labels. Each row must to correspond to
+    each sample in fileTrain. It must be at the same directory specified by dataRoute.
+    """
     lm = LoadMatrix()
     dataSet = lm.load_numbers(dataRoute + fileTrain)
     labels = lm.load_labels(dataRoute + fileLabels)
@@ -19,6 +32,9 @@ def load_Toy(dataRoute, fileTrain, fileLabels):
 
 # 2D Toy data generator
 def generate_binToy():
+    """:return: [RealFeatures(train_data),RealFeatures(train_data),BinaryLabels(train_labels),BinaryLabels(test_labels)]
+    This method generates random 2D training and test data for binary classification. The labels are {-1, 1} vectors.
+    """
     num=30
     num_components=4
     means=zeros((num_components, 2))
@@ -63,8 +79,8 @@ class customException(Exception):
 
 # Basis kernel parameter generation:
 def sigmaGen(self, hyperDistribution, size, rango, parameters):
-    """ This module generates the pseudorandom vector of widths for basis Gaussian kernels according to a distribution,
-    i.e.:
+    """ :return: list of float
+    This module generates the pseudorandom vector of widths for basis Gaussian kernels according to a distribution, i.e.
     hyperDistribution =
                          ['linear'|
                           'quadratic'|
@@ -79,7 +95,21 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     amount of segments the distribution domain will be discretized out. The 'rango' input are the minimum and maximum
     values of the obtained distributed values. The 'parameters' of these weight vector distributions are set to common
     values of each distribution by default, but they can be modified.
+
+    :param hyperDistribution: string
+    :param size: It is the number of basis kernels for the MKL object.
+    :param rango: It is the range to which the basis kernel parameters will pertain. For some basis kernels families
+    this input parameter has not effect.
+    :param parameters: It is a list of parameters of the distribution of the random weights, e.g. for a gaussian
+    distribution with mean zero and variance 1, parameters = [0, 1]. For some basis kernel families this input parameter
+    has not effect.
+
+    .. seealso: fit_kernel() function documentation.
     """
+    #Validating inputs
+    assert isinstance(size, int)
+    assert (rango[0] < rango[1] and len(rango) == 2)
+
     sig = []
     if hyperDistribution == 'linear':
         sig = random.sample(range(rango[0], rango[1]), size)
@@ -130,15 +160,14 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
 
 # Combining kernels
 def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
-    """This module generates a list of basis kernels. These kernels are
-    tuned according to the vector ''widths''. Input parameters ''featsL''
-    and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS,
-    these both objects should be derived from the training SLM vectors,
-    by means of the Shogun constructor realFeatures().
-    This module also appends basis kernels to a Shogun combinedKernel object.
-    The kernels to be append are left in ''combKer'' (see code) which is
-    returned. We have analyzed some basis families available in Shogun,
-    so possible values of 'basisFam' are:
+    """:return: Shogun CombinedKernel object.
+    This module generates a list of basis kernels. These kernels are tuned according to the vector ''widths''. Input
+    parameters ''featsL'' and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS, these both objects
+    should be derived from the training SLM vectors, by means of the Shogun constructor realFeatures(). This module also
+    appends basis kernels to a Shogun combinedKernel object.
+
+    The kernels to be append are left in ''combKer'' object (see code), which is returned. We have analyzed some basis
+    families available in Shogun, so possible string values of 'basisFam' are:
 
     basisFam = ['gaussian',
                 'inverseQuadratic',
@@ -226,11 +255,10 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
 
 # Defining the compounding kernel object
 class mklObj (object):
-    """Default self definition of the Multiple Kernel Learning object. This object uses previously
-     defined methods for generating a linear combination of basis kernels that can be constituted from
-     different families. See at fit_kernel() function documentation for details. This function trains
-     the kernel weights. The object has other member functions offering utilities. See the next
-     instantiation and using example:
+    """Default self definition of the Multiple Kernel Learning object. This object uses previously defined methods for
+    generating a linear combination of basis kernels that can be constituted from different families. See at
+    fit_kernel() function documentation for details. This function trains the kernel weights. The object has other
+    member functions offering utilities. See the next instantiation and using example:
 
         import mkl01 as mk
 
@@ -241,11 +269,11 @@ class mklObj (object):
                         MKLepsilon = 0.001,
                         binary = False,
                         verbose = False)
-    The above values are the defaults, so if they are suitable for you it is possible instantiating
-    the object by simply stating: kernel = mk.mklObj(). Even it is possible modifying a subset of
-    input parameters (keeping others as default): kernel = mk.mklObj(weightRegNorm = 1, mklC = 10,
-    SVMepsilon = 1e-2). See the documentation of each setter below for allowed setting parameters
-    without new instantiations.
+
+    The above values are the defaults, so if they are suitable for you it is possible instantiating the object by simply
+    stating: kernel = mk.mklObj(). Even it is possible modifying a subset of input parameters (keeping others as
+    default): kernel = mk.mklObj(weightRegNorm = 1, mklC = 10, SVMepsilon = 1e-2). See the documentation of each setter
+    below for allowed setting parameters without new instantiations.
 
     Now, once main parameters has been setted, fit the kernel:
         kernel.fit_kernel(featsTr =        feats_train,
@@ -262,8 +290,9 @@ class mklObj (object):
     """
     def __init__(self, weightRegNorm = 2.0, mklC = 2.0, SVMepsilon = 1e-5,
                  threads = 2, MKLepsilon = 0.001, binary = False, verbose = False):
-        """Object initialization. This procedure is regardless of the input data, basis kernels and
-        corresponding hyperparameters (kernel fitting)."""
+        """Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
+        hyperparameters (kernel fitting).
+        """
         self.__binary = binary
         if self.__binary:
             self.mkl = MKLClassification()  # MKL object (Binary)
@@ -280,12 +309,12 @@ class mklObj (object):
         self.Matrx = False                  # Kind of returned learned kernel object. See getter documentation of these
         self.expansion = False              # object configuration parameters for details. Only modifiable by setter.
         self.__testerr = 0
-# All obtained objects below become class attributes, so they are available any moment.
 # Self Function for kernel generation
 
     def fit_kernel(self, featsTr,  targetsTr, featsTs, targetsTs, randomRange = [1, 50], randomParams = [1, 1],
                    hyper = 'linear', kernelFamily = 'guassian', pKers = 3):
-        """ This method is used for training the desired compound kernel. See documentation of the 'mklObj'
+        """ :return: CombinedKernel Shogun object.
+        This method is used for training the desired compound kernel. See documentation of the 'mklObj'
         object for using example. 'featsTr' and 'featsTs' are the training and test data respectively. 'targetsTr'
         and 'targetsTs' are the training and test labels, respectively. All they must be Shogun 'RealFeatures'
         and 'MulticlassLabels' objects respectively.
@@ -302,9 +331,26 @@ class mklObj (object):
         input parameter defines the size of the learned kernel linear combination, i.e. how many basis kernels to
         be weighted in the training and therefore, how many coefficients will have the Fourier series of data (the
         default is 3).
-        Note: In the cases of kernelFamily = {'polynomial' or 'power' or 'tstudent' or 'anova'}, the input
+
+        .. note:: In the cases of kernelFamily = {'polynomial' or 'power' or 'tstudent' or 'anova'}, the input
         parameters {'randomRange', 'randomParams', 'hyper'} have not effect, because these kernel families do not
         require basis kernel parameters.
+
+        :param featsTr: RealFeatures Shogun object conflating the training data.
+        :param targetsTr: MulticlassLabels Shogun object conflating the training labels.
+        :param featsTr: RealFeatures Shogun object conflating the test data.
+        :param targetsTr: MulticlassLabels Shogun object conflating the test labels.
+        :param randomRange: It is the range to which the basis kernel parameters will pertain. For some basis kernels
+        families this input parameter has not effect.
+        :param randomParams: It is a list of parameters of the distribution of the random weights, e.g. for a gaussian
+        distribution with mean zero and variance 1, parameters = [0, 1]. For some basis kernel families this input
+        parameter has not effect.
+        :param hyper: string which specifies the name of the basis kernel parameter distribution. See documentation for
+        sigmaGen() function for viewing allowed strings (names).
+        :param kernelFamily: string which specifies the name of the basis kernel family. See documentation for
+        genKer() function for viewing allowed strings (names).
+        :param pKers: This is the number of basis kernels for the MKL object (linear combination).
+
         """
         # Inner variable copying:
         self._featsTr = featsTr
@@ -315,7 +361,8 @@ class mklObj (object):
         if self.verbose:	# Printing the training progress
             print '\nNacho, multiple <' + kernelFamily + '> Kernels have been initialized...'
             print "\nInput main parameters: "
-            print "Hyperarameter distribution: ", self._hyper, "\nLinear combination size: ", pKers
+            print "\nHyperarameter distribution: ", self._hyper, "\nLinear combination size: ", pKers,\
+                '\nWeight regularization norm: ', self.weightRegNorm
             if not self.__binary:
                 print "Classes: ", targetsTr.get_num_classes()
             else:
@@ -329,9 +376,9 @@ class mklObj (object):
             self.sigmas = list(range(0,pKers))
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = self.sigmas)
         else:
-# We have called 'sigmas' to any kernel parameter, regardless if it is Gaussian or not. So generate the widths:
+# We have called 'sigmas' to any basis kernel parameter, regardless if it is Gaussian or not. So generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution = hyper, size = pKers,
-                               rango = randomRange, parameters = randomParams)) #; pdb.set_trace()
+                               rango = randomRange, parameters = randomParams))
             try: # Verifying if number of kernels is greater or equal to 2
                 if pKers <= 1 or len(self.sigmas) < 2:
                     raise customException('Senseless MKLClassification use!!!')
@@ -344,7 +391,7 @@ class mklObj (object):
 
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = self.sigmas)
             if self.verbose:
-                print self.weights
+                print 'Widths: ',self.sigmas
         # Initializing the compound kernel
         self.ker.init(self._featsTr, self._featsTr)
         try: # Verifying if number of  kernels was greater or equal to 2 after training
@@ -433,8 +480,7 @@ class mklObj (object):
             f.write("\nClasses: " + str(self._targetsTr.get_num_classes()) )
             f.write('\nTest error:' + str( self.__testerr*100 ))
         f.close()
-# It is pending defining functions for run time attribute modification, e.g. set_verbose(), set_regPar(),
-# etc. unwrapped
+# It is pending defining functions for run time attribute modification, e.g. set_verbose(), set_regPar(), etc. unwrapped
 
 # Getters (properties):
     @property
@@ -710,10 +756,11 @@ class mklObj (object):
         .. seealso:: Page 4 of Bagchi,(2014) SVM Classifiers Based On Imperfect Training Data.
         """
         if self.__binary:
+            assert len(value) == 2
             assert (isinstance(value,(list, float)) and value[0] >= 0.0 and value[1] >= 0.0)
             self.mkl.set_C(value[0], value[1])
         else:
-            assert isinstance(value, float)
+            assert (isinstance(value, float) and value >= 0.0)
             self.mkl.set_C(value)
 
         self.__mklC = value

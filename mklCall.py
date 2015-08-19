@@ -20,9 +20,9 @@ from mklObj import *
 [feats_train,
  feats_test,
  labelsTr,
- labelsTs] = load_Toy('/home/iarroyof/shogun-data/toy/',  # Data directory
-                      'fm_train_multiclass_digits500.dat',  # Multi-class dataSet examples file name
-                      'label_train_multiclass_digits500.dat')  # Multi-class Labels file name
+ labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
+                      'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
+                      'label_train_multiclass_digits500.dat')       # Multi-class Labels file name
 
 # It is possible resetting the kernel for different principal parameters.
 # //TODO: It is pending programming a method for loading from file a list of principal parameters:
@@ -49,33 +49,21 @@ widthDistribution = ['linear',
                      'gamma',
                      'weibull']
 
-mode = 'w'
 #### Instantiating the learnable kernel object
 kernelO = mklObj()
-
+kernelO.verbose = True
 #### With n basis kernels
 kernelO.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,
                    featsTs=feats_test,
                    targetsTs=labelsTs,
-                   kernelFamily=basisKernelFamily[2],
+                   kernelFamily=basisKernelFamily[0],
                    randomRange=[50, 200],               # For homogeneous polynomial kernels these two parameter sets
                    randomParams=[50, 20],               # have not effect. For quadratic there isn't parameter distribution
                    hyper=widthDistribution[0],          # With not effect when kernel family is polynomial and some
                    pKers=3)                             # other powering forms.
+
 print kernelO.testerr, kernelO.weights
+# mode = 'w'
 # kernelO.filePrintingResults('mkl_output.txt', mode)
 # kernelO.save_sigmas()
-kernelO.weightRegNorm = 3.0
-
-kernelO.fit_kernel(featsTr=feats_train,
-                   targetsTr=labelsTr,
-                   featsTs=feats_test,
-                   targetsTs=labelsTs,
-                   kernelFamily=basisKernelFamily[2],
-                   randomRange=[50, 200],
-                   randomParams=[50, 20],
-                   hyper=widthDistribution[0],
-                   pKers=3)
-
-print kernelO.testerr, kernelO.weights
