@@ -50,20 +50,22 @@ widthDistribution = ['linear',
                      'weibull']
 
 #### Instantiating the learnable kernel object
-kernelO = mklObj()
-kernelO.verbose = True
+kernelO = mklObj(mklC=10.0)
+
+a = 2*0.5**2 # = 0.5
+b = 2*10**2  # = 200
 #### With n basis kernels
-kernelO.fit_kernel(featsTr=feats_train,
+for p in xrange(2, 15):
+    kernelO.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,
                    featsTs=feats_test,
                    targetsTs=labelsTs,
                    kernelFamily=basisKernelFamily[0],
-                   randomRange=[50, 200],               # For homogeneous polynomial kernels these two parameter sets
-                   randomParams=[50, 20],               # have not effect. For quadratic there isn't parameter distribution
-                   hyper=widthDistribution[0],          # With not effect when kernel family is polynomial and some
-                   pKers=3)                             # other powering forms.
-
-print kernelO.testerr, kernelO.weights
+                   randomRange=[a, b],             # For homogeneous polynomial kernels these two parameter sets
+                   randomParams=[(a + b)/2, 1.0],            # have not effect. For quadratic there isn't parameter distribution
+                   hyper=widthDistribution[3],       # With not effect when kernel family is polynomial and some
+                   pKers=p)                         # other powering forms.
+    print p, kernelO.testerr, kernelO.weights
 # mode = 'w'
 # kernelO.filePrintingResults('mkl_output.txt', mode)
 # kernelO.save_sigmas()

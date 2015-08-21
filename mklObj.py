@@ -5,8 +5,11 @@ __author__ = 'Ignacio Arroyo-Fernandez'
 from modshogun import *
 from tools.load import LoadMatrix
 import random
+from math import sqrt
 import numpy
-#.. todo:: Specify and validate input and returning types for functions.
+
+
+# .. todo:: Specify and validate input and returning types for functions.
 # Loading toy multiclass data from files
 def load_multiclassToy(dataRoute, fileTrain, fileLabels):
     """ :returns: [RealFeatures(training_data), RealFeatures(test_data), MulticlassLabels(train_labels),
@@ -25,57 +28,61 @@ def load_multiclassToy(dataRoute, fileTrain, fileLabels):
     dataSet = lm.load_numbers(dataRoute + fileTrain)
     labels = lm.load_labels(dataRoute + fileLabels)
 
-    return (RealFeatures(dataSet.T[0:3*len(dataSet.T)/4].T),    # Return the training set, 3/4 * dataSet
-            RealFeatures(dataSet.T[(3*len(dataSet.T)/4):].T),   # Return the test set, 1/4 * dataSet
-            MulticlassLabels(labels[0:3*len(labels)/4]),        # Return corresponding train and test labels
-            MulticlassLabels(labels[(3*len(labels)/4):]))
+    return (RealFeatures(dataSet.T[0:3 * len(dataSet.T) / 4].T),  # Return the training set, 3/4 * dataSet
+            RealFeatures(dataSet.T[(3 * len(dataSet.T) / 4):].T),  # Return the test set, 1/4 * dataSet
+            MulticlassLabels(labels[0:3 * len(labels) / 4]),  # Return corresponding train and test labels
+            MulticlassLabels(labels[(3 * len(labels) / 4):]))
+
 
 # 2D Toy data generator
 def generate_binToy():
     """:return: [RealFeatures(train_data),RealFeatures(train_data),BinaryLabels(train_labels),BinaryLabels(test_labels)]
     This method generates random 2D training and test data for binary classification. The labels are {-1, 1} vectors.
     """
-    num=30
-    num_components=4
-    means=zeros((num_components, 2))
-    means[0]=[-1,1]
-    means[1]=[2,-1.5]
-    means[2]=[-1,-3]
-    means[3]=[2,1]
+    num = 30
+    num_components = 4
+    means = zeros((num_components, 2))
+    means[0] = [-1, 1]
+    means[1] = [2, -1.5]
+    means[2] = [-1, -3]
+    means[3] = [2, 1]
 
-    covs=array([[1.0,0.0],[0.0,1.0]])
+    covs = array([[1.0, 0.0], [0.0, 1.0]])
 
-    gmm=GMM(num_components)
+    gmm = GMM(num_components)
     [gmm.set_nth_mean(means[i], i) for i in range(num_components)]
-    [gmm.set_nth_cov(covs,i) for i in range(num_components)]
-    gmm.set_coef(array([1.0,0.0,0.0,0.0]))
-    xntr=array([gmm.sample() for i in xrange(num)]).T
-    xnte=array([gmm.sample() for i in xrange(5000)]).T
-    gmm.set_coef(array([0.0,1.0,0.0,0.0]))
-    xntr1=array([gmm.sample() for i in xrange(num)]).T
-    xnte1=array([gmm.sample() for i in xrange(5000)]).T
-    gmm.set_coef(array([0.0,0.0,1.0,0.0]))
-    xptr=array([gmm.sample() for i in xrange(num)]).T
-    xpte=array([gmm.sample() for i in xrange(5000)]).T
-    gmm.set_coef(array([0.0,0.0,0.0,1.0]))
-    xptr1=array([gmm.sample() for i in xrange(num)]).T
-    xpte1=array([gmm.sample() for i in xrange(5000)]).T
+    [gmm.set_nth_cov(covs, i) for i in range(num_components)]
+    gmm.set_coef(array([1.0, 0.0, 0.0, 0.0]))
+    xntr = array([gmm.sample() for i in xrange(num)]).T
+    xnte = array([gmm.sample() for i in xrange(5000)]).T
+    gmm.set_coef(array([0.0, 1.0, 0.0, 0.0]))
+    xntr1 = array([gmm.sample() for i in xrange(num)]).T
+    xnte1 = array([gmm.sample() for i in xrange(5000)]).T
+    gmm.set_coef(array([0.0, 0.0, 1.0, 0.0]))
+    xptr = array([gmm.sample() for i in xrange(num)]).T
+    xpte = array([gmm.sample() for i in xrange(5000)]).T
+    gmm.set_coef(array([0.0, 0.0, 0.0, 1.0]))
+    xptr1 = array([gmm.sample() for i in xrange(num)]).T
+    xpte1 = array([gmm.sample() for i in xrange(5000)]).T
 
-    return (RealFeatures(concatenate((xntr,xntr1,xptr,xptr1), axis=1)),     #Train Data
-            RealFeatures(concatenate((xnte,xnte1,xpte,xpte1), axis=1)),     #Test Data
-            BinaryLabels(concatenate((-ones(2*num), ones(2*num)))),         #Train Labels
-            BinaryLabels(concatenate((-ones(10000), ones(10000)))) )        #Test Labels
+    return (RealFeatures(concatenate((xntr, xntr1, xptr, xptr1), axis=1)),  # Train Data
+            RealFeatures(concatenate((xnte, xnte1, xpte, xpte1), axis=1)),  # Test Data
+            BinaryLabels(concatenate((-ones(2 * num), ones(2 * num)))),  # Train Labels
+            BinaryLabels(concatenate((-ones(10000), ones(10000)))))  # Test Labels
+
 
 # Exception handling:
 class customException(Exception):
     """ This exception prevents training inconsistencies. It could be edited for accepting a complete
     dictionary of exceptions if desired.
     """
+
     def __init__(self, message):
         self.parameter = message
 
     def __str__(self):
         return repr(self.parameter)
+
 
 # Basis kernel parameter generation:
 def sigmaGen(self, hyperDistribution, size, rango, parameters):
@@ -106,26 +113,27 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
 
     .. seealso: fit_kernel() function documentation.
     """
-    #Validating inputs
+    # Validating inputs
     assert isinstance(size, int)
     assert (rango[0] < rango[1] and len(rango) == 2)
-
+    # .. todo: Revise the other linespaces of the other distributions. They must be equally consistent than the Gaussian
+    # .. todo: the gaussian one. Change 'is' when verifying equality beteen strings (PEP008 recommendation).
     sig = []
-    if hyperDistribution == 'linear':
+    if hyperDistribution is 'linear':
         sig = random.sample(range(rango[0], rango[1]), size)
         return sig
-    elif hyperDistribution == 'quadratic':
-        sig = random.sample(range(rango[0],int(sqrt(rango[1]))), size)
-        return numpy.array(sig)**2
-    elif hyperDistribution == 'gaussian':
+    elif hyperDistribution is 'quadratic':
+        sig = numpy.square(random.sample(numpy.linspace(sqrt(rango[0]), int(sqrt(rango[1]))), size))
+        return sig
+    elif hyperDistribution is 'gaussian':
         i = 0
         while i < size:
             numero = random.gauss(parameters[0], parameters[1])
-            if numero > rango[0] and numero < rango [1]:  # Validate the initial point of
-                sig.append(numero)                        # 'range'. If not met, loop does
-                i += 1                                    # not end, but resets
-                                                          # If met, the number is appended
-        return sig                                        # to 'sig' width list.
+            if numero > rango[0] and numero < rango[1]:  # Validate the initial point of
+                sig.append(numero)  # 'range'. If not met, loop does
+                i += 1  # not end, but resets
+                # If met, the number is appended
+        return sig  # to 'sig' width list.
     elif hyperDistribution == 'triangular':
         for i in xrange(size):
             sig.append(random.triangular(rango[0], rango[1]))
@@ -138,19 +146,19 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
             i += 1
         return sig
     elif hyperDistribution == 'pareto':
-        return numpy.random.pareto(5, size = size) * (rango[1] - rango[0]) + rango[0]
+        return numpy.random.pareto(5, size=size) * (rango[1] - rango[0]) + rango[0]
 
     elif hyperDistribution == 'gamma':
-        return numpy.random.gamma(shape = 1, size = size) * (rango[1] - rango[0]) + rango[0]
+        return numpy.random.gamma(shape=1, size=size) * (rango[1] - rango[0]) + rango[0]
 
     elif hyperDistribution == 'weibull':
-         return numpy.random.weibull(2, size = size) * (rango[1] - rango[0]) + rango[0]
+        return numpy.random.weibull(2, size=size) * (rango[1] - rango[0]) + rango[0]
 
     elif hyperDistribution == 'log-gauss':
         i = 0
         while i < size:
             numero = random.lognormvariate(parameters[0], parameters[1])
-            if numero > rango[0] and numero < rango [1]:
+            if numero > rango[0] and numero < rango[1]:
                 sig.append(numero)
                 i += 1
 
@@ -158,8 +166,9 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     else:
         print 'The entered hyperparameter distribution is not allowed.'
 
+
 # Combining kernels
-def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
+def genKer(self, featsL, featsR, basisFam, widths=[5, 4, 3, 2, 1]):
     """:return: Shogun CombinedKernel object.
     This module generates a list of basis kernels. These kernels are tuned according to the vector ''widths''. Input
     parameters ''featsL'' and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS, these both objects
@@ -186,10 +195,10 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
     if basisFam == 'gaussian':
         for w in widths:
             kernels.append(GaussianKernel())
-            kernels[len(kernels)-1].set_width(w)
+            kernels[len(kernels) - 1].set_width(w)
 
-    elif basisFam == 'inverseQuadratic': # For this (and others below) kernel it is necessary fitting the
-        dst = MinkowskiMetric (l = featsL, r = featsR, k = 2) # distance matrix at this moment
+    elif basisFam == 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment
         for w in widths:
             kernels.append(InverseMultiQuadricKernel(0, w, dst))
 
@@ -197,46 +206,46 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
         for w in widths:
             kernels.append(PolyKernel(0, w, False))
 
-    elif basisFam == 'power': # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric (l = featsL, r = featsR, k = 2)
+    elif basisFam == 'power':  # At least for images, the used norm does not make differences in performace
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(PowerKernel(0, w, dst))
 
-    elif basisFam == 'rationalQuadratic': # At least for images, using 3-norm  make differences
-        dst = MinkowskiMetric (l = featsL, r = featsR, k = 2) # in performace
+    elif basisFam == 'rationalQuadratic':  # At least for images, using 3-norm  make differences
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performace
         for w in widths:
             kernels.append(RationalQuadraticKernel(0, w, dst))
 
-    elif basisFam == 'spherical': # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric (l = featsL, r = featsR, k = 2)
+    elif basisFam == 'spherical':  # At least for images, the used norm does not make differences in performace
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(SphericalKernel(0, w, dst))
 
-    elif basisFam == 'tstudent': # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric (l = featsL, r = featsR, k = 2)
+    elif basisFam == 'tstudent':  # At least for images, the used norm does not make differences in performace
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(TStudentKernel(0, w, dst))
 
-    elif basisFam == 'wave': # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric (l = featsL, r = featsR, k = 2)
+    elif basisFam == 'wave':  # At least for images, the used norm does not make differences in performace
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(WaveKernel(0, w, dst))
 
-    elif basisFam == 'wavelet': # At least for images it is very low the performance with this kernel.
-        for w in widths:        # It remains pending, for now, analysing its parameters.
+    elif basisFam == 'wavelet':  # At least for images it is very low the performance with this kernel.
+        for w in widths:  # It remains pending, for now, analysing its parameters.
             kernels.append(WaveletKernel(0, w, 0))
 
     elif basisFam == 'cauchy':
-        dst = MinkowskiMetric (l = featsL, r = featsR, k = 2)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(CauchyKernel(0, w, dst))
 
-    elif basisFam == 'exponential': # For this kernel it is necessary specifying features at the constructor
-        dst = MinkowskiMetric (l = featsL, r = featsR, k = 2)
+    elif basisFam == 'exponential':  # For this kernel it is necessary specifying features at the constructor
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(ExponentialKernel(featsL, featsR, w, dst, 0))
 
-    elif basisFam == 'anova': # This kernel presents a warning in training:
+    elif basisFam == 'anova':  # This kernel presents a warning in training:
         """RuntimeWarning: [WARN] In file /home/iarroyof/shogun/src/shogun/classifier/mkl/MKLMulticlass.cpp line
            198: CMKLMulticlass::evaluatefinishcriterion(...): deltanew<=0.Switching back to weight norsm
            difference as criterion.
@@ -253,8 +262,9 @@ def genKer(self, featsL, featsR, basisFam, widths = [5,4,3,2,1]):
 
     return combKer
 
+
 # Defining the compounding kernel object
-class mklObj (object):
+class mklObj(object):
     """Default self definition of the Multiple Kernel Learning object. This object uses previously defined methods for
     generating a linear combination of basis kernels that can be constituted from different families. See at
     fit_kernel() function documentation for details. This function trains the kernel weights. The object has other
@@ -288,31 +298,33 @@ class mklObj (object):
 
     Once the MKL object has been fitted, you can get what you need from it. See getters documentation listed below.
     """
-    def __init__(self, weightRegNorm = 2.0, mklC = 2.0, SVMepsilon = 1e-5,
-                 threads = 2, MKLepsilon = 0.001, binary = False, verbose = False):
+
+    def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=1e-5,
+                 threads=2, MKLepsilon=0.001, binary=False, verbose=False):
         """Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
         hyperparameters (kernel fitting).
         """
         self.__binary = binary
         if self.__binary:
             self.mkl = MKLClassification()  # MKL object (Binary)
-        else:                               # two classes are imbalanced. Equal for balanced densities
-            self.mkl = MKLMulticlass()      # MKL object (Multiclass).
+        else:  # two classes are imbalanced. Equal for balanced densities
+            self.mkl = MKLMulticlass()  # MKL object (Multiclass).
 
-        self.mklC = mklC                    # Setting regularization parameter. These are different when the
+        self.mklC = mklC  # Setting regularization parameter. These are different when the
         self.weightRegNorm = weightRegNorm  # Setting the basis' weight vector norm
-        self.SVMepsilon = SVMepsilon        # setting the transducer stop (convergence) criterion
-        self.MKLepsilon = MKLepsilon        # setting the MKL stop criterion. The value suggested by
-                                            # Shogun examples is 0.001. See setter docs for details
-        self.threads =threads 	            # setting number of training threads. Verify functionality!!
-        self.verbose = verbose              # inner training process verbose flag
-        self.Matrx = False                  # Kind of returned learned kernel object. See getter documentation of these
-        self.expansion = False              # object configuration parameters for details. Only modifiable by setter.
+        self.SVMepsilon = SVMepsilon  # setting the transducer stop (convergence) criterion
+        self.MKLepsilon = MKLepsilon  # setting the MKL stop criterion. The value suggested by
+        # Shogun examples is 0.001. See setter docs for details
+        self.threads = threads  # setting number of training threads. Verify functionality!!
+        self.verbose = verbose  # inner training process verbose flag
+        self.Matrx = False  # Kind of returned learned kernel object. See getter documentation of these
+        self.expansion = False  # object configuration parameters for details. Only modifiable by setter.
         self.__testerr = 0
-# Self Function for kernel generation
 
-    def fit_kernel(self, featsTr,  targetsTr, featsTs, targetsTs, randomRange = [1, 50], randomParams = [1, 1],
-                   hyper = 'linear', kernelFamily = 'guassian', pKers = 3):
+    # Self Function for kernel generation
+
+    def fit_kernel(self, featsTr, targetsTr, featsTs, targetsTs, randomRange=[1, 50], randomParams=[1, 1],
+                   hyper='linear', kernelFamily='guassian', pKers=3):
         """ :return: CombinedKernel Shogun object.
         This method is used for training the desired compound kernel. See documentation of the 'mklObj'
         object for using example. 'featsTr' and 'featsTs' are the training and test data respectively. 'targetsTr'
@@ -358,28 +370,28 @@ class mklObj (object):
         self._hyper = hyper
         self._pkers = pKers
         self.basisFamily = kernelFamily
-        if self.verbose:	# Printing the training progress
+        if self.verbose:  # Printing the training progress
             print '\nNacho, multiple <' + kernelFamily + '> Kernels have been initialized...'
             print "\nInput main parameters: "
-            print "\nHyperarameter distribution: ", self._hyper, "\nLinear combination size: ", pKers,\
+            print "\nHyperarameter distribution: ", self._hyper, "\nLinear combination size: ", pKers, \
                 '\nWeight regularization norm: ', self.weightRegNorm
             if not self.__binary:
                 print "Classes: ", targetsTr.get_num_classes()
             else:
                 print "Classes: Binary"
 
-# Generating the list of subkernels. Creating the compound kernel
-# For monomial-nonhomogeneous (polynomial) kernels the hyperparameters are uniquely the degree of each monomial
-# in the form of a sequence. MKL finds the coefficient for each monomial in order to find a compound polynomial.
+            # Generating the list of subkernels. Creating the compound kernel
+            # For monomial-nonhomogeneous (polynomial) kernels the hyperparameters are uniquely the degree of each monomial
+            # in the form of a sequence. MKL finds the coefficient for each monomial in order to find a compound polynomial.
         if kernelFamily == 'polynomial' or kernelFamily == 'power' or \
-                        kernelFamily == 'tstudent' or kernelFamily ==  'anova':
-            self.sigmas = list(range(0,pKers))
-            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = self.sigmas)
+                        kernelFamily == 'tstudent' or kernelFamily == 'anova':
+            self.sigmas = list(range(0, pKers))
+            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
         else:
-# We have called 'sigmas' to any basis kernel parameter, regardless if it is Gaussian or not. So generate the widths:
-            self.sigmas = sorted(sigmaGen(self, hyperDistribution = hyper, size = pKers,
-                               rango = randomRange, parameters = randomParams))
-            try: # Verifying if number of kernels is greater or equal to 2
+            # We have called 'sigmas' to any basis kernel parameter, regardless if it is Gaussian or not. So generate the widths:
+            self.sigmas = sorted(sigmaGen(self, hyperDistribution=hyper, size=pKers,
+                                          rango=randomRange, parameters=randomParams))
+            try:  # Verifying if number of kernels is greater or equal to 2
                 if pKers <= 1 or len(self.sigmas) < 2:
                     raise customException('Senseless MKLClassification use!!!')
             except customException, (instance):
@@ -389,24 +401,25 @@ class mklObj (object):
                      kernels, i.e. pKers <= 1, so 'mklObj' couldn't be instantiated."""
                 print "-----------------------------------------------------"
 
-            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam = kernelFamily, widths = self.sigmas)
+            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
             if self.verbose:
-                print 'Widths: ',self.sigmas
+                print 'Widths: ', self.sigmas
         # Initializing the compound kernel
         self.ker.init(self._featsTr, self._featsTr)
-        try: # Verifying if number of  kernels was greater or equal to 2 after training
+        try:  # Verifying if number of  kernels was greater or equal to 2 after training
             if self.ker.get_num_subkernels() < 2:
-                raise customException('Multikernel coeffients were less than 2 after training. Revise object settings!!!')
+                raise customException(
+                    'Multikernel coeffients were less than 2 after training. Revise object settings!!!')
         except customException, (instance):
             print 'Caugth: ' + instance.parameter
 
-# Verbose for learning surveying
+        # Verbose for learning surveying
         if self.verbose:
             print '\nKernel fitted...'
-# Initializing the transducer for multiclassification
+        # Initializing the transducer for multiclassification
         self.mkl.set_kernel(self.ker)
         self.mkl.set_labels(self._targetsTr)
-# Train to return the learnt kernel
+        # Train to return the learnt kernel
         if self.verbose:
             print '\nLearning the machine coefficients...'
 
@@ -414,26 +427,26 @@ class mklObj (object):
 
         if self.verbose:
             print 'Kernel trained... Weights: ', self.weights
-# Evaluate the learnt Kernel. Here it is asumed 'ker' is learnt, so we only need for initialize it again but with
-# the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
-        self.ker.init(self._featsTr, featsTs)	# Now with test examples. The inner product between training
-        self.mkl.set_kernel(self.ker)		    # and test examples generates the corresponding Gramm Matrix.
-        out = self.mkl.apply()			        # Applying the obtained Gramm Matrix
+        # Evaluate the learnt Kernel. Here it is asumed 'ker' is learnt, so we only need for initialize it again but with
+        # the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
+        self.ker.init(self._featsTr, featsTs)  # Now with test examples. The inner product between training
+        self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gramm Matrix.
+        out = self.mkl.apply()  # Applying the obtained Gramm Matrix
 
-        if self.__binary:			    # If the problem is either binary or multiclass, different
-            evalua = ErrorRateMeasure()	# performance measures are computed.
+        if self.__binary:  # If the problem is either binary or multiclass, different
+            evalua = ErrorRateMeasure()  # performance measures are computed.
         else:
             evalua = MulticlassAccuracy()
 
         if self.__binary:
-            self.__testerr = 100-evalua.evaluate(out, targetsTs)*100
+            self.__testerr = 100 - evalua.evaluate(out, targetsTs) * 100
         else:
-            self.__testerr = evalua.evaluate(out, targetsTs)*100
-# Verbose for learning surveying
+            self.__testerr = evalua.evaluate(out, targetsTs) * 100
+        # Verbose for learning surveying
         if self.verbose:
             print 'Kernel evaluation ready. The precision was: ', self.__testerr, '%'
 
-    def save_sigmas(self, file = 'sigmasFile.txt', mode = 'w', note = 'Some note'):
+    def save_sigmas(self, file='sigmasFile.txt', mode='w', note='Some note'):
         """This method saves the set of kernel parameters (e.g. gaussian widths) into a text file, which are
         associated to a basis kernel family. It could be used for loading a desired set of widths used in previous
         training epochs (i.e. when the F1-measure showed a maximum).
@@ -442,14 +455,14 @@ class mklObj (object):
         array, it could be used the 'note' input string.
         """
         f = open(file, mode)
-        f.write('# ----------------- '+ note +' ------------------')
+        f.write('# ----------------- ' + note + ' ------------------')
         f.write("\n# Basis kernel family: " + self.basisFamily + '\n')
         for s in self.sigmas:
             f.write("%s, " % s)
         f.close()
 
-# Multi-kernel object training procedure file reporting.
-    def filePrintingResults (self, fileName, mode):
+    # Multi-kernel object training procedure file reporting.
+    def filePrintingResults(self, fileName, mode):
         """This method is used for printing training results as well as used settings for each learned compounding
         kernel into a file for comparison. 'fileName' is the desired location of the file at your HD and 'mode' could
         be setted to 'a' for adding different training results to the same file. The default mode is 'w', which is
@@ -464,7 +477,7 @@ class mklObj (object):
 
         f.write("Basis kernel family: " + self.basisFamily)
         f.write("\nLinear combination size: " + str(self._pkers))
-        f.write('\nHyperparameter distribution: ' + str(self._hyper) )
+        f.write('\nHyperparameter distribution: ' + str(self._hyper))
         f.write('\nWeight regularization norm: ' + str(self.weightRegNorm))
         f.write('\nWeight regularization parameter: ' + str(self.mklC))
         f.write("\nWeights: ")
@@ -475,14 +488,15 @@ class mklObj (object):
         for item in self.sigmas:
             f.write("%s, " % item)
         if self.__binary:
-            f.write('\nTest error: ' + str(100 - self.__testerr*100) )
+            f.write('\nTest error: ' + str(100 - self.__testerr * 100))
         else:
-            f.write("\nClasses: " + str(self._targetsTr.get_num_classes()) )
-            f.write('\nTest error:' + str( self.__testerr*100 ))
+            f.write("\nClasses: " + str(self._targetsTr.get_num_classes()))
+            f.write('\nTest error:' + str(self.__testerr * 100))
         f.close()
-# It is pending defining functions for run time attribute modification, e.g. set_verbose(), set_regPar(), etc. unwrapped
 
-# Getters (properties):
+    # It is pending defining functions for run time attribute modification, e.g. set_verbose(), set_regPar(), etc. unwrapped
+
+    # Getters (properties):
     @property
     def compoundKernel(self):
         """This method is used for getting the kernel object, i.e. the learned MKL object, which can be unwrapped
@@ -508,19 +522,19 @@ class mklObj (object):
         if self.Matrx:
             kernels = []
             size = self.ker.get_num_subkernels()
-            for k in xrange(0, size-1):
+            for k in xrange(0, size - 1):
                 kernels.append(self.ker.get_kernel(k).get_kernel_matrix())
             ws = self.weights
             if self.expansion:
-                return kernels, ws #Returning the full expansion of the learned kernel.
+                return kernels, ws  # Returning the full expansion of the learned kernel.
             else:
-                return sum(kernels*ws) # Returning the matrix linear combination, in other words,
-        else:                               # a projector matrix representation.
-            return self.ker                 # If matrix representation is not required, only the Shogun kernel
-                                            # object is returned.
+                return sum(kernels * ws)  # Returning the matrix linear combination, in other words,
+        else:  # a projector matrix representation.
+            return self.ker  # If matrix representation is not required, only the Shogun kernel
+            # object is returned.
 
     @property
-    def sigmas (self):
+    def sigmas(self):
         """This method is used for getting the current set of basis kernel parameters, i.e. widths, in the case of
         the gaussian basis kernel.
         :rtype : list of float
@@ -535,7 +549,7 @@ class mklObj (object):
         return self._verbose
 
     @property
-    def Matrx (self):
+    def Matrx(self):
         """This is a boolean property of the object. Its aim is getting and, mainly, setting the kind of object
         we want to obtain as learned kernel, i.e. a Kernel Shogun object or a Kernel Matrix whose entries are
         reals. The latter could require large amounts of physical memory. See the mklObj.compoundKernel property
@@ -580,7 +594,8 @@ class mklObj (object):
         :rtype : vector of float
         """
         return self.__weightRegNorm
-# function getters
+
+    # function getters
     @property
     def weights(self):
         """This method is used for getting the learned weights of the MKL object.
@@ -638,7 +653,7 @@ class mklObj (object):
         """
         return self.__threads
 
-# Readonly properties:
+    # Readonly properties:
     @property
     def binary(self):
         """This method is used for getting the kind of problem the mklObj object will be trained for. If binary == True,
@@ -659,8 +674,8 @@ class mklObj (object):
         """
         return self.__testerr
 
-# mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
-# a new mklObj object.
+    # mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
+    # a new mklObj object.
     @Matrx.setter
     def Matrx(self, value):
         """
@@ -689,7 +704,7 @@ class mklObj (object):
         .. seealso:: @sigmas property documentation
         """
         try:
-            if len(value) == self._pkers:
+            if len(value) == self._pkers and min(value) > 0:
                 self.__sigmas = value
             else:
                 raise customException('Size of basis kernel parameter list missmatches the size of the combined\
@@ -757,7 +772,7 @@ class mklObj (object):
         """
         if self.__binary:
             assert len(value) == 2
-            assert (isinstance(value,(list, float)) and value[0] >= 0.0 and value[1] >= 0.0)
+            assert (isinstance(value, (list, float)) and value[0] >= 0.0 and value[1] >= 0.0)
             self.mkl.set_C(value[0], value[1])
         else:
             assert (isinstance(value, float) and value >= 0.0)
@@ -771,5 +786,5 @@ class mklObj (object):
         These threads are not different parallel processes running in different machine cores.
         """
         assert (isinstance(value, int) and value > 0)
-        self.mkl.parallel.set_num_threads(value) 	# setting number of training threads
+        self.mkl.parallel.set_num_threads(value)  # setting number of training threads
         self.__threads = value
