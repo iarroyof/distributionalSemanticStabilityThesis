@@ -55,6 +55,7 @@ kernelO = mklObj(mklC=10.0)
 a = 2*0.5**2 # = 0.5
 b = 2*10**2  # = 200
 #### With n basis kernels
+# //TODO: save widths each time when performance is better than prior experiment.
 for p in xrange(2, 15):
     kernelO.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,

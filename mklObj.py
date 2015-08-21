@@ -116,8 +116,8 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     # Validating inputs
     assert isinstance(size, int)
     assert (rango[0] < rango[1] and len(rango) == 2)
-    # .. todo: Revise the other linespaces of the other distributions. They must be equally consistent than the Gaussian
-    # .. todo: the gaussian one. Change 'is' when verifying equality beteen strings (PEP008 recommendation).
+    # .. todo: Revise the other linespaces of the other distributions. They must be equally consistent than the
+    # .. todo: Gaussian one. Change 'is' when verifying equality between strings (PEP008 recommendation).
     sig = []
     if hyperDistribution is 'linear':
         sig = random.sample(range(rango[0], rango[1]), size)
