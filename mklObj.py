@@ -33,7 +33,6 @@ def load_multiclassToy(dataRoute, fileTrain, fileLabels):
             MulticlassLabels(labels[0:3 * len(labels) / 4]),  # Return corresponding train and test labels
             MulticlassLabels(labels[(3 * len(labels) / 4):]))
 
-
 # 2D Toy data generator
 def generate_binToy():
     """:return: [RealFeatures(train_data),RealFeatures(train_data),BinaryLabels(train_labels),BinaryLabels(test_labels)]
@@ -70,7 +69,6 @@ def generate_binToy():
             BinaryLabels(concatenate((-ones(2 * num), ones(2 * num)))),  # Train Labels
             BinaryLabels(concatenate((-ones(10000), ones(10000)))))  # Test Labels
 
-
 # Exception handling:
 class customException(Exception):
     """ This exception prevents training inconsistencies. It could be edited for accepting a complete
@@ -83,22 +81,21 @@ class customException(Exception):
     def __str__(self):
         return repr(self.parameter)
 
-
 # Basis kernel parameter generation:
 def sigmaGen(self, hyperDistribution, size, rango, parameters):
     """ :return: list of float
     This module generates the pseudorandom vector of widths for basis Gaussian kernels according to a distribution, i.e.
     hyperDistribution =
-                         ['linear'|
-                          'quadratic'|
-                          'log-gauss'|
-                          'gaussian'|
-                          'triangular'|
-                          'pareto'|
-                          'beta'|
-                          'gamma'|
-                          'weibull'].
-    See http://pymotw.com/2/random/ for details about pseudorandom number generators in python. The input 'size' is the
+                         {'linear',
+                          'quadratic',
+                          'log-gauss'*,
+                          'gaussian'*,
+                          'triangular', # parameters[0] is the median of the distribution. parameters[1] has not effect.
+                          'pareto',
+                          'beta'*,
+                          'gamma',
+                          'weibull'}.
+    Names marked with * require parameters, e.g. for 'gaussian', parameters = [mean, width]. The input 'size' is the
     amount of segments the distribution domain will be discretized out. The 'rango' input are the minimum and maximum
     values of the obtained distributed values. The 'parameters' of these weight vector distributions are set to common
     values of each distribution by default, but they can be modified.
@@ -109,12 +106,12 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     this input parameter has not effect.
     :param parameters: It is a list of parameters of the distribution of the random weights, e.g. for a gaussian
     distribution with mean zero and variance 1, parameters = [0, 1]. For some basis kernel families this input parameter
-    has not effect.
+    has not effect: {'linear', 'quadratic', 'triangular', 'pareto', 'gamma', 'weilbull', }
 
     .. seealso: fit_kernel() function documentation.
     """
-    # Validating inputs
-    assert isinstance(size, int)
+    # Validating th inputs
+    assert (isinstance(size, int) and size > 0)
     assert (rango[0] < rango[1] and len(rango) == 2)
     # .. todo: Revise the other linespaces of the other distributions. They must be equally consistent than the
     # .. todo: Gaussian one. Change 'is' when verifying equality between strings (PEP008 recommendation).
@@ -123,38 +120,37 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         sig = random.sample(range(rango[0], rango[1]), size)
         return sig
     elif hyperDistribution is 'quadratic':
-        sig = numpy.square(random.sample(numpy.linspace(sqrt(rango[0]), int(sqrt(rango[1]))), size))
+        sig = numpy.square(random.sample(numpy.linspace(int(sqrt(rango[0])), int(sqrt(rango[1]))), size))
         return sig
     elif hyperDistribution is 'gaussian':
+        assert parameters[1] > 0 # The width is greater than zero?
         i = 0
         while i < size:
             numero = random.gauss(parameters[0], parameters[1])
-            if numero > rango[0] and numero < rango[1]:  # Validate the initial point of
+            if rango[0] <= numero <= rango[1]:  # Validate the initial point of
                 sig.append(numero)  # 'range'. If not met, loop does
                 i += 1  # not end, but resets
                 # If met, the number is appended
         return sig  # to 'sig' width list.
-    elif hyperDistribution == 'triangular':
-        for i in xrange(size):
-            sig.append(random.triangular(rango[0], rango[1]))
+    elif hyperDistribution is 'triangular':
+        assert rango[0] <= parameters[0] <= rango[1] # The median is in the range?
+        sig = numpy.random.triangular(rango[0], parameters[0], rango[1], size)
         return sig
-    elif hyperDistribution == 'beta':
-        i = 0
-        while i < size:
-            numero = random.betavariate(parameters[0], parameters[1]) * (rango[1] - rango[0]) + rango[0]
-            sig.append(numero)
-            i += 1
+    elif hyperDistribution is 'beta':
+        assert (parameters[0] >= 0 and parameters[1] >= 0) # Alpha and Beta parameters are non-negative?
+        sig = numpy.random.beta(parameters[0], parameters[1], size) * (rango[1] - rango[0]) + rango[0]
         return sig
-    elif hyperDistribution == 'pareto':
+    elif hyperDistribution is 'pareto':
         return numpy.random.pareto(5, size=size) * (rango[1] - rango[0]) + rango[0]
 
-    elif hyperDistribution == 'gamma':
+    elif hyperDistribution is 'gamma':
         return numpy.random.gamma(shape=1, size=size) * (rango[1] - rango[0]) + rango[0]
 
-    elif hyperDistribution == 'weibull':
+    elif hyperDistribution is 'weibull':
         return numpy.random.weibull(2, size=size) * (rango[1] - rango[0]) + rango[0]
 
-    elif hyperDistribution == 'log-gauss':
+    elif hyperDistribution is 'log-gauss':
+        assert parameters[1] > 0 # The width is greater than zero?
         i = 0
         while i < size:
             numero = random.lognormvariate(parameters[0], parameters[1])
@@ -165,7 +161,6 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         return sig
     else:
         print 'The entered hyperparameter distribution is not allowed.'
-
 
 # Combining kernels
 def genKer(self, featsL, featsR, basisFam, widths=[5, 4, 3, 2, 1]):
@@ -262,7 +257,6 @@ def genKer(self, featsL, featsR, basisFam, widths=[5, 4, 3, 2, 1]):
 
     return combKer
 
-
 # Defining the compounding kernel object
 class mklObj(object):
     """Default self definition of the Multiple Kernel Learning object. This object uses previously defined methods for
@@ -322,7 +316,6 @@ class mklObj(object):
         self.__testerr = 0
 
     # Self Function for kernel generation
-
     def fit_kernel(self, featsTr, targetsTr, featsTs, targetsTs, randomRange=[1, 50], randomParams=[1, 1],
                    hyper='linear', kernelFamily='guassian', pKers=3):
         """ :return: CombinedKernel Shogun object.
@@ -374,7 +367,8 @@ class mklObj(object):
             print '\nNacho, multiple <' + kernelFamily + '> Kernels have been initialized...'
             print "\nInput main parameters: "
             print "\nHyperarameter distribution: ", self._hyper, "\nLinear combination size: ", pKers, \
-                '\nWeight regularization norm: ', self.weightRegNorm
+                '\nWeight regularization norm: ', self.weightRegNorm, \
+                'Weight regularization parameter: ',self.mklC
             if not self.__binary:
                 print "Classes: ", targetsTr.get_num_classes()
             else:
