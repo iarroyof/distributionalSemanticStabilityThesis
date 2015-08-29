@@ -187,60 +187,60 @@ def genKer(self, featsL, featsR, basisFam, widths=[5, 4, 3, 2, 1]):
     """
 
     kernels = []
-    if basisFam == 'gaussian':
+    if basisFam is 'gaussian':
         for w in widths:
             kernels.append(GaussianKernel())
             kernels[len(kernels) - 1].set_width(w)
 
-    elif basisFam == 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment
+    elif basisFam is 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
         for w in widths:
             kernels.append(InverseMultiQuadricKernel(0, w, dst))
 
-    elif basisFam == 'polynomial':
+    elif basisFam is 'polynomial':
         for w in widths:
             kernels.append(PolyKernel(0, w, False))
 
-    elif basisFam == 'power':  # At least for images, the used norm does not make differences in performace
+    elif basisFam is 'power':  # At least for images, the used norm does not make differences in performace
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(PowerKernel(0, w, dst))
 
-    elif basisFam == 'rationalQuadratic':  # At least for images, using 3-norm  make differences
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performace
+    elif basisFam is 'rationalQuadratic':  # At least for images, using 3-norm  make differences
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
         for w in widths:
             kernels.append(RationalQuadraticKernel(0, w, dst))
 
-    elif basisFam == 'spherical':  # At least for images, the used norm does not make differences in performace
+    elif basisFam is 'spherical':  # At least for images, the used norm does not make differences in performace
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(SphericalKernel(0, w, dst))
 
-    elif basisFam == 'tstudent':  # At least for images, the used norm does not make differences in performace
+    elif basisFam is 'tstudent':  # At least for images, the used norm does not make differences in performace
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(TStudentKernel(0, w, dst))
 
-    elif basisFam == 'wave':  # At least for images, the used norm does not make differences in performace
+    elif basisFam is 'wave':  # At least for images, the used norm does not make differences in performace
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(WaveKernel(0, w, dst))
 
-    elif basisFam == 'wavelet':  # At least for images it is very low the performance with this kernel.
+    elif basisFam is 'wavelet':  # At least for images it is very low the performance with this kernel.
         for w in widths:  # It remains pending, for now, analysing its parameters.
             kernels.append(WaveletKernel(0, w, 0))
 
-    elif basisFam == 'cauchy':
+    elif basisFam is 'cauchy':
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(CauchyKernel(0, w, dst))
 
-    elif basisFam == 'exponential':  # For this kernel it is necessary specifying features at the constructor
+    elif basisFam is 'exponential':  # For this kernel it is necessary specifying features at the constructor
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(ExponentialKernel(featsL, featsR, w, dst, 0))
 
-    elif basisFam == 'anova':  # This kernel presents a warning in training:
+    elif basisFam is 'anova':  # This kernel presents a warning in training:
         """RuntimeWarning: [WARN] In file /home/iarroyof/shogun/src/shogun/classifier/mkl/MKLMulticlass.cpp line
            198: CMKLMulticlass::evaluatefinishcriterion(...): deltanew<=0.Switching back to weight norsm
            difference as criterion.

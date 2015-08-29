@@ -3,6 +3,7 @@
 __author__ = 'Ignacio Arroyo Fernandez'
 
 from mklObj import *
+from multiprocessing import Pool
 """ ----------------------------------------------------------------------------------------------------
     MKL object Default definition:
     class mklObj:
@@ -26,36 +27,26 @@ from mklObj import *
 
 # It is possible resetting the kernel for different principal parameters.
 # //TODO: It is pending programming a method for loading from file a list of principal parameters:
-#### With m basis kernels:
-basisKernelFamily = ['gaussian',
-                     'inverseQuadratic',
-                     'polynomial',
-                     'power',
-                     'rationalQuadratic',
-                     'spherical',
-                     'tstudent',
-                     'wave',
-                     'wavelet',
-                     'cauchy',
-                     'exponential']
-#### With different kernel parameter distributions:
-widthDistribution = ['linear',
-                     'quadratic',
-                     'log-gauss',
-                     'gaussian',
-                     'triangular',
-                     'pareto',
-                     'beta',
-                     'gamma',
-                     'weibull']
 
-#### Instantiating the learnable kernel object
 kernelO = mklObj(mklC=10.0)
 
 a = 2*0.5**2 # = 0.5
 b = 2*10**2  # = 200
 #### With n basis kernels
 # //TODO: save widths each time when performance is better than prior experiment.
+perform = 1000
+minPath = {}
+
+#### Loading the experimentation grid of parameters.
+grid = []
+with open('gridParameterDic.txt','r') as pointer:
+    grid = eval(pointer.read())
+
+def mkPool(parameterGrid):
+    for path in parameterGrid:
+
+
+
 for p in xrange(2, 15):
     kernelO.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,
@@ -66,7 +57,9 @@ for p in xrange(2, 15):
                    randomParams=[(a + b)/2, 1.0],            # have not effect. For quadratic there isn't parameter distribution
                    hyper=widthDistribution[3],       # With not effect when kernel family is polynomial and some
                    pKers=p)                         # other powering forms.
-    print p, kernelO.testerr, kernelO.weights
+    if kernelO.testerr < perform:
+        perform = kernelO.weights
+        minPath = path
 # mode = 'w'
 # kernelO.filePrintingResults('mkl_output.txt', mode)
 # kernelO.save_sigmas()
