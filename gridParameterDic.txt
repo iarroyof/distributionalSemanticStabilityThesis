@@ -1,7 +1,7 @@
 {
-'inputSLM': ['1-gr_tfidf', '2-gr_tfidf', '3-gr_tfidf', '1-gr', '2-gr', '3-gr'],
-'basisKernelFamily': {'gaussian': [0.5, 50], 'inverseQuadratic': [0, 10], 'polynomial': [1, 5], 'power': [1, 5], 'rationalQuadratic': [0, 10],  'spherical': [0.5, 50], 'tstudent': [0, 5], 'wave': [0.5, 100], 'wavelet': [0.5, 50], 'cauchy': [0.5, 50], 'exponential': [0.5, 50]},
-'basisKernelParameterDistribution': ['linear', 'quadratic', 'log-gauss', 'gaussian', 'triangular', 'pareto', 'beta', 'gamma', 'weibull'],
+'inputSLM': {0:'1-gr_tfidf', 1:'2-gr_tfidf', 2:'3-gr_tfidf', 3:'1-gr', 4:'2-gr', 5:'3-gr'},
+'basisKernelFamily': {0:('gaussian', [0.5, 50]), 1:('inverseQuadratic', [0, 10]), 2:('polynomial', [1, 5]), 3:('power', [1, 5]), 4:('rationalQuadratic', [0, 10]), 5:('spherical', [0.5, 50]), 6:('tstudent', [0, 5]), 7:('wave', [0.5, 100]), 8:('wavelet', [0.5, 50]), 9:('cauchy', [0.5, 50]), 10:('exponential', [0.5, 50])},
+'basisKernelParameterDistribution': {0:'linear', 1:'quadratic', 2:'log-gauss', 3:'gaussian', 4:'triangular', 5:'pareto', 6:'beta', 7:'gamma', 8:'weibull'},
 'linearCombinationSize': [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40],
 'weightRegularizer': [0.5, 1.0, 1.5, 2.0, 5.0],
 'regularizationParameter': [0.1,  0.2,  0.4,  0.6,  0.8,  1.0,  1.1,  1.2,  1.3,  1.4,  1.5,  1.6,  1.8,  2.0,  2.5,  3.0,  3.5,  4.4,  4.5,  5.0,  7.0,  9.0,  10.0,  20.0,  30.0,  40.0,  50.0,  100.0,  1000.0]
