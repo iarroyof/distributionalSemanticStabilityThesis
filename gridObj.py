@@ -43,10 +43,10 @@ class gridObj(object):
                 c = cycle(rdn.shuffle(item))
                 for i in xrange(trials):
                     dic.append(next(c))
-                gridPaths.append(dic)
-                dic = []
+                gridPaths.append((item, dic)) # Returns a list of tuples. Each showing the item key and the
+                dic = []                      # generated parameter list.
             else:
-                gridPaths.append(rdn.sample(self.grid[item], trials))
+                gridPaths.append((item, rdn.sample(self.grid[item], trials)))
 
         return gridPaths
 
