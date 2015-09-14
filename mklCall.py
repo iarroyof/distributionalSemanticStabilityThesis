@@ -5,6 +5,7 @@ __author__ = 'Ignacio Arroyo Fernandez'
 from mklObj import *
 from multiprocessing import Pool
 from gridObj import *
+from functools import partial
 """ ----------------------------------------------------------------------------------------------------
     MKL object Default definition:
     class mklObj:
@@ -40,6 +41,16 @@ def mkPool(path, mkl_object, data):
 
     return mkl_object.testerr
 
+[feats_train,
+ feats_test,
+ labelsTr,
+ labelsTs] = datax = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
+                      'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
+                      'label_train_multiclass_digits500.dat')       # Multi-class Labels file name
+
+mkl_kernel = mklObj(verbose=True)
+
+partial_mkPool = partial(mkPool, mkl_object = mkl_kernel, data = datax)
 #### Loading train and test data
 # 1) For multi-class problem loaded from file:
 if __name__ == '__main__':
@@ -49,16 +60,8 @@ if __name__ == '__main__':
 #### Loading the experimentation grid of parameters.
     grid = gridObj(file = 'gridParameterDic.txt')
     paths = grid.generateRandomGridPaths(trials = 5)
-    mkl_kernel = mklObj(verbose=True)
 
-    [feats_train,
-    feats_test,
-    labelsTr,
-    labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
-                      'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
-                      'label_train_multiclass_digits500.dat')       # Multi-class Labels file name
-
-    print p.map(mkPool(mkl_object=mkl_kernel, data=[feats_train, labelsTr, feats_test, labelsTs]), paths)
+    print p.map(partial_mkPool, paths)
 
                                          # other powering forms.
     #if kernelO.testerr < perform:
