@@ -7,6 +7,7 @@ from tools.load import LoadMatrix
 import random
 from math import sqrt
 import numpy
+import pdb
 
 
 # .. todo:: Specify and validate input and returning types for functions.
@@ -160,7 +161,8 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
 
         return sig
     else:
-        print 'The entered hyperparameter distribution is not allowed.'
+        print 'The entered hyperparameter distribution is not allowed: '+hyperDistribution
+        #pdb.set_trace()
 
 # Combining kernels
 def genKer(self, featsL, featsR, basisFam, widths=[5, 4, 3, 2, 1]):
@@ -704,7 +706,7 @@ class mklObj(object):
                 raise customException('Size of basis kernel parameter list missmatches the size of the combined\
                                        kernel. You can use len(CMKLobj.get_sigmas()) to revise the missmatching.')
         except customException, (instance):
-            print "Caught: " + instance.parameter
+            print "Caught: " + instance.parameter #;pdb.set_trace()
 
     @verbose.setter
     def verbose(self, value):

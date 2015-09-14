@@ -2,10 +2,15 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Ignacio Arroyo Fernandez'
 
-from mklObj import *
 from multiprocessing import Pool
+#from functools import partial
+import parmap as par
+
+from mklObj import *
 from gridObj import *
-from functools import partial
+
+import pdb
+
 """ ----------------------------------------------------------------------------------------------------
     MKL object Default definition:
     class mklObj:
@@ -19,38 +24,42 @@ from functools import partial
     ----------------------------------------------------------------------------------------------------
 """
 
-def mkPool(path, mkl_object, data):
-    if path[0][0] is 'gaussian':
-        a = 2*path[0][0]**2
-        b = 2*path[0][1]**2
-    else:
-        a = path[0][0]
-        b = path[0][1]
-
-    mkl_object.mklC = path[5]
-    mkl_object.weightRegNorm = path[4]
-    mkl_object.fit_kernel(featsTr=data[0],
-                   targetsTr=data[1],
-                   featsTs=data[2],
-                   targetsTs=data[3],
-                   kernelFamily=path[0][0],
-                   randomRange=[a, b],             # For homogeneous polynomial kernels these two parameter sets
-                   randomParams=[(a + b)/2, 1.0],            # have not effect. For quadratic there isn't parameter distribution
-                   hyper=path[3],       # With not effect when kernel family is polynomial and some
-                   pKers=path[2])
-
-    return mkl_object.testerr
-
-[feats_train,
- feats_test,
- labelsTr,
- labelsTs] = datax = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
+def mkPool(path):
+    [feats_train,
+        feats_test,
+        labelsTr,
+        labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
                       'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
                       'label_train_multiclass_digits500.dat')       # Multi-class Labels file name
 
-mkl_kernel = mklObj(verbose=True)
+    mkl_object = mklObj()
+    if path[0][0] is 'gaussian':
+        a = 2*path[0][1][0]**2
+        b = 2*path[0][1][1]**2
+    else:
+        a = path[0][1][0]
+        b = path[0][1][1] #; pdb.set_trace()
+    #pdb.set_trace()
+    mkl_object.mklC = path[5]
+    mkl_object.weightRegNorm = path[4]
+    mkl_object.fit_kernel(featsTr=feats_train,
+                   targetsTr=labelsTr,
+                   featsTs=feats_test,
+                   targetsTs= labelsTs,
+                   kernelFamily=path[0][0],
+                   randomRange=[a, b],             # For homogeneous polynomial kernels these two parameter sets
+                   randomParams=[(a + b)/2, 1.0],  # have not effect. For quadratic there isn't parameter distribution
+                   hyper=path[3],       # With not effect when kernel family is polynomial and some
+                   pKers=path[2])
 
-partial_mkPool = partial(mkPool, mkl_object = mkl_kernel, data = datax)
+    del feats_train, feats_test, labelsTr,labelsTs
+    return mkl_object.testerr
+
+
+
+#mkl_kernel = mklObj()
+
+#partial_mkPool = partial(mkPool, mkl_object = mkl_kernel, data = datax)
 #### Loading train and test data
 # 1) For multi-class problem loaded from file:
 if __name__ == '__main__':
@@ -59,9 +68,10 @@ if __name__ == '__main__':
     p = Pool(3)
 #### Loading the experimentation grid of parameters.
     grid = gridObj(file = 'gridParameterDic.txt')
-    paths = grid.generateRandomGridPaths(trials = 5)
-
-    print p.map(partial_mkPool, paths)
+    paths = grid.generateRandomGridPaths(trials = 3)
+    [a, b, c] = paths
+    #pdb.set_trace()
+    print p.map(mkPool, [a, b, c])
 
                                          # other powering forms.
     #if kernelO.testerr < perform:
