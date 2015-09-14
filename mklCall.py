@@ -4,6 +4,7 @@ __author__ = 'Ignacio Arroyo Fernandez'
 
 from mklObj import *
 from multiprocessing import Pool
+from gridObj import *
 """ ----------------------------------------------------------------------------------------------------
     MKL object Default definition:
     class mklObj:
@@ -16,50 +17,53 @@ from multiprocessing import Pool
                  hyper = 'linear', kernelFamily = 'guassian', pKers = 3):
     ----------------------------------------------------------------------------------------------------
 """
+
+def mkPool(path, mkl_object, data):
+    if path[0][0] is 'gaussian':
+        a = 2*path[0][0]**2
+        b = 2*path[0][1]**2
+    else:
+        a = path[0][0]
+        b = path[0][1]
+
+    mkl_object.mklC = path[5]
+    mkl_object.weightRegNorm = path[4]
+    mkl_object.fit_kernel(featsTr=data[0],
+                   targetsTr=data[1],
+                   featsTs=data[2],
+                   targetsTs=data[3],
+                   kernelFamily=path[0][0],
+                   randomRange=[a, b],             # For homogeneous polynomial kernels these two parameter sets
+                   randomParams=[(a + b)/2, 1.0],            # have not effect. For quadratic there isn't parameter distribution
+                   hyper=path[3],       # With not effect when kernel family is polynomial and some
+                   pKers=path[2])
+
+    return mkl_object.testerr
+
 #### Loading train and test data
 # 1) For multi-class problem loaded from file:
-[feats_train,
- feats_test,
- labelsTr,
- labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
+if __name__ == '__main__':
+    perform = 1000
+    minPath = {}
+    p = Pool(3)
+#### Loading the experimentation grid of parameters.
+    grid = gridObj(file = 'gridParameterDic.txt')
+    paths = grid.generateRandomGridPaths(trials = 5)
+    mkl_kernel = mklObj(verbose=True)
+
+    [feats_train,
+    feats_test,
+    labelsTr,
+    labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
                       'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
                       'label_train_multiclass_digits500.dat')       # Multi-class Labels file name
 
-# It is possible resetting the kernel for different principal parameters.
-# //TODO: It is pending programming a method for loading from file a list of principal parameters:
+    print p.map(mkPool(mkl_object=mkl_kernel, data=[feats_train, labelsTr, feats_test, labelsTs]), paths)
 
-kernelO = mklObj(mklC=10.0)
-
-a = 2*0.5**2 # = 0.5
-b = 2*10**2  # = 200
-#### With n basis kernels
-# //TODO: save widths each time when performance is better than prior experiment.
-perform = 1000
-minPath = {}
-
-#### Loading the experimentation grid of parameters.
-grid = []
-with open('gridParameterDic.txt','r') as pointer:
-    grid = eval(pointer.read())
-
-def mkPool(parameterGrid):
-    for path in parameterGrid:
-
-
-
-for p in xrange(2, 15):
-    kernelO.fit_kernel(featsTr=feats_train,
-                   targetsTr=labelsTr,
-                   featsTs=feats_test,
-                   targetsTs=labelsTs,
-                   kernelFamily=basisKernelFamily[0],
-                   randomRange=[a, b],             # For homogeneous polynomial kernels these two parameter sets
-                   randomParams=[(a + b)/2, 1.0],            # have not effect. For quadratic there isn't parameter distribution
-                   hyper=widthDistribution[3],       # With not effect when kernel family is polynomial and some
-                   pKers=p)                         # other powering forms.
-    if kernelO.testerr < perform:
-        perform = kernelO.weights
-        minPath = path
+                                         # other powering forms.
+    #if kernelO.testerr < perform:
+     #   perform = kernelO.weights
+      #  minPath = path
 # mode = 'w'
 # kernelO.filePrintingResults('mkl_output.txt', mode)
 # kernelO.save_sigmas()

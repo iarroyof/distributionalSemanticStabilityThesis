@@ -6,7 +6,8 @@ from mklObj import customException
 import random as rdn
 from itertools import cycle
 import os.path
-
+import numpy as np
+#import pdb
 
 class gridObj(object):
     """
@@ -36,19 +37,45 @@ class gridObj(object):
             print 'An error has occurred during \'gridObj\' initialization: ' + str(instance.parameter)
 
     def generateRandomGridPaths(self, trials = 2):
-        gridPaths = []
+        grid_items = {}
         dic = []
         for item in self.grid:
             if trials > len(item): # Cycle padding for parameter lists shorter than the number of trials
                 c = cycle(rdn.shuffle(item))
                 for i in xrange(trials):
                     dic.append(next(c))
-                gridPaths.append((item, dic)) # Returns a list of tuples. Each showing the item key and the
+                grid_items[item] = dic # Returns a list of tuples. Each showing the item key and the
                 dic = []                      # generated parameter list.
             else:
-                gridPaths.append((item, rdn.sample(self.grid[item], trials)))
+                grid_items[item] = rdn.sample(self.grid[item], trials)
+# Hereinafter, this code can be executed outside the function. Where the object was constructed.
+# It is because we are generating situation specific structures, according to the depth of the parameter dictionary for
+# some items, e.g. basisKernelFamily. Also other items are replaced by non-index values, in order to get them directly
+# for training. Thus This grid keeps universal if the code below is executed outside this object.
+        j = 0
+        for i in grid_items['basisKernelFamily']:
+            #start = self.grid['basisKernelFamily'][i][1][0]
+            #stop = self.grid['basisKernelFamily'][i][1][1]
+            #n_samples = grid_items['linearCombinationSize'][j]
+            grid_items['basisKernelFamily'][j] = (self.grid['basisKernelFamily'][i][0],
+                                                  self.grid['basisKernelFamily'][i][1])
+                                                 #list(np.linspace(start, stop, n_samples)))
+            j += 1
 
-        return gridPaths
+        j = 0
+        for i in grid_items['basisKernelParameterDistribution']:
+            grid_items['basisKernelParameterDistribution'][j] = self.grid['basisKernelParameterDistribution'][i]
+            j += 1
+
+
+        j = 0
+        for i in grid_items['inputSLM']:
+            grid_items['inputSLM'][j] = self.grid['inputSLM'][i]
+            j += 1
+        # This code transposes the path list and removes the item names (unuseful for grid search)
+        self.grid_paths =  [list(j) for j in zip(*[grid_items[i] for i in grid_items])]
+
+        return self.grid_paths
 
 
 # Object properties:
@@ -60,14 +87,9 @@ class gridObj(object):
         return self._grid
 
     @property
-    def path_list(self):
+    def grid_paths(self):
 
-        return self._path_list
-
-    @property
-    def grid_path(self):
-
-        return self._grid_path
+        return self._grid_paths
 
     @property
     def trials(self):
@@ -76,24 +98,17 @@ class gridObj(object):
 
 
 # Object setters:
-    @grid_path.setter
-    def grid_path(self, value):
+    @grid_paths.setter
+    def grid_paths(self, value):
 
         assert bool(value) # Verify if the any obtained grid path is not empty.
-        self._grid_path = value
+        self._grid_paths = value
 
     @trials.setter
     def trials(self, value):
 
         assert isinstance(value, int) and value > 0 # Verify if the number of trials is integer and grater than zero.
         self._trials = value
-
-    @path_list.setter
-    def path_list(self, value):
-
-        assert isinstance(value, list) # Verify if the object assigned to path_list is indeed a list.
-        #assert bool(value) # Verify if the any obtained list of paths is not empty.
-        self._path_list = value
 
     @grid.setter
     def grid(self, value):
