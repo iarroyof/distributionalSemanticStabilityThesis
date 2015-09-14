@@ -65,14 +65,17 @@ def mkPool(path):
 if __name__ == '__main__':
     perform = 1000
     minPath = {}
-    p = Pool(3)
+    p = Pool()
 #### Loading the experimentation grid of parameters.
     grid = gridObj(file = 'gridParameterDic.txt')
     paths = grid.generateRandomGridPaths(trials = 3)
     [a, b, c] = paths
     #pdb.set_trace()
-    print p.map(mkPool, [a, b, c])
-
+    r1 = p.apply_async(mkPool,[a])
+    r2 = p.apply_async(mkPool,[b])
+    r3 = p.apply_async(mkPool,[c])
+    pdb.set_trace()
+    print r1.get(timeout=50), r2.get(timeout=50), r3.get(timeout=50)
                                          # other powering forms.
     #if kernelO.testerr < perform:
      #   perform = kernelO.weights
