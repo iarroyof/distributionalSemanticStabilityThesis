@@ -7,7 +7,7 @@ import random as rdn
 from itertools import cycle
 import os.path
 import numpy as np
-#import pdb
+import pdb
 
 class gridObj(object):
     """
@@ -40,38 +40,56 @@ class gridObj(object):
         grid_items = {}
         dic = []
         for item in self.grid:
-            if trials > len(item): # Cycle padding for parameter lists shorter than the number of trials
-                c = cycle(rdn.shuffle(item))
-                for i in xrange(trials):
-                    dic.append(next(c))
+            if trials > len(self.grid[item]): # Cycle padding for parameter lists shorter than the number of trials
+                if not isinstance(self.grid[item], list):
+                    keys = self.grid[item].keys()
+                    rdn.shuffle(keys)
+                    c = cycle(keys)
+                    for i in xrange(trials):
+                        dic.append(self.grid[item][next(c)])
+                else:
+                    keys = self.grid[item]
+                    rdn.shuffle(keys)
+                    c = cycle(keys)
+                    for i in xrange(trials):
+                        dic.append(next(c))
+
                 grid_items[item] = dic # Returns a list of tuples. Each showing the item key and the
-                dic = []                      # generated parameter list.
+                dic = []                     # generated parameter list.
             else:
-                grid_items[item] = rdn.sample(self.grid[item], trials)
+                if not isinstance(self.grid[item], list):
+                    keys = rdn.sample(self.grid[item], trials)
+                    for i in xrange(trials):
+                        dic.append(self.grid[item][keys[i]])
+                else:
+                    keys = rdn.sample(self.grid[item], trials)
+                    for i in xrange(trials):
+                        dic.append(keys[i])
+
+                grid_items[item] = dic # Returns a list of tuples. Each showing the item key and the
+                dic = []
+
+        #pdb.set_trace()
 # Hereinafter, this code can be executed outside the function. Where the object was constructed.
 # It is because we are generating situation specific structures, according to the depth of the parameter dictionary for
 # some items, e.g. basisKernelFamily. Also other items are replaced by non-index values, in order to get them directly
 # for training. Thus This grid keeps universal if the code below is executed outside this object.
-        j = 0
-        for i in grid_items['basisKernelFamily']:
-            #start = self.grid['basisKernelFamily'][i][1][0]
-            #stop = self.grid['basisKernelFamily'][i][1][1]
-            #n_samples = grid_items['linearCombinationSize'][j]
-            grid_items['basisKernelFamily'][j] = (self.grid['basisKernelFamily'][i][0],
-                                                  self.grid['basisKernelFamily'][i][1])
-                                                 #list(np.linspace(start, stop, n_samples)))
-            j += 1
-
-        j = 0
-        for i in grid_items['basisKernelParameterDistribution']:
-            grid_items['basisKernelParameterDistribution'][j] = self.grid['basisKernelParameterDistribution'][i]
-            j += 1
-
-
-        j = 0
-        for i in grid_items['inputSLM']:
-            grid_items['inputSLM'][j] = self.grid['inputSLM'][i]
-            j += 1
+#         pdb.set_trace()
+#         j = 0
+#         for i in grid_items['basisKernelFamily']:
+#             grid_items['basisKernelFamily'][j] = (self.grid['basisKernelFamily'][i][0],
+#                                                    self.grid['basisKernelFamily'][i][1])
+#             j += 1
+#
+#         j = 0
+#         for i in grid_items['basisKernelParameterDistribution']:
+#             grid_items['basisKernelParameterDistribution'][j] = self.grid['basisKernelParameterDistribution'][i]
+#             j += 1
+#
+#         j = 0
+#         for i in grid_items['inputSLM']:
+#             grid_items['inputSLM'][j] = self.grid['inputSLM'][i]
+#             j += 1
         # This code transposes the path list and removes the item names (unuseful for grid search)
         self.grid_paths =  [list(j) for j in zip(*[grid_items[i] for i in grid_items])]
 
@@ -119,7 +137,7 @@ class gridObj(object):
                                 3:('power', [1, 5]), 4:('rationalQuadratic': [0, 10]), 5:('spherical', [0.5, 50]),
                                 6:('tstudent', [0, 5]), 7:('wave', [0.5, 100]), 8:('wavelet', [0.5, 50]),
                                 9:('cauchy', [0.5, 50]), 10:('exponential', [0.5, 50])},
-        'basisKernelParameterDistribution': {0:'linear', 1:'quadratic', 2:'log-gauss', 3:'gaussian', 4:'triangular',
+        'basisKernelParameterDistribution': {0:'linear', 1:'quadratic', 2:'loggauss', 3:'gaussian', 4:'triangular',
                                                 5:'pareto', 6:'beta', 7:'gamma', 8:'weibull'},
         'linearCombinationSize': [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40],
         'weightRegularizer': [0.5, 1.0, 1.5, 2.0, 5.0],

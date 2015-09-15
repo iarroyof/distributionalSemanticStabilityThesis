@@ -89,7 +89,7 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     hyperDistribution =
                          {'linear',
                           'quadratic',
-                          'log-gauss'*,
+                          'loggauss'*,
                           'gaussian'*,
                           'triangular', # parameters[0] is the median of the distribution. parameters[1] has not effect.
                           'pareto',
@@ -118,7 +118,8 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     # .. todo: Gaussian one. Change 'is' when verifying equality between strings (PEP008 recommendation).
     sig = []
     if hyperDistribution is 'linear':
-        sig = random.sample(range(rango[0], rango[1]), size)
+        line = numpy.linspace(rango[0], rango[1], size*2)
+        sig = random.sample(line, size)
         return sig
     elif hyperDistribution is 'quadratic':
         sig = numpy.square(random.sample(numpy.linspace(int(sqrt(rango[0])), int(sqrt(rango[1]))), size))
@@ -150,7 +151,7 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     elif hyperDistribution is 'weibull':
         return numpy.random.weibull(2, size=size) * (rango[1] - rango[0]) + rango[0]
 
-    elif hyperDistribution is 'log-gauss':
+    elif hyperDistribution is 'loggauss':
         assert parameters[1] > 0 # The width is greater than zero?
         i = 0
         while i < size:
@@ -165,7 +166,7 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         #pdb.set_trace()
 
 # Combining kernels
-def genKer(self, featsL, featsR, basisFam, widths=[5, 4, 3, 2, 1]):
+def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
     """:return: Shogun CombinedKernel object.
     This module generates a list of basis kernels. These kernels are tuned according to the vector ''widths''. Input
     parameters ''featsL'' and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS, these both objects
@@ -381,12 +382,18 @@ class mklObj(object):
             # in the form of a sequence. MKL finds the coefficient for each monomial in order to find a compound polynomial.
         if kernelFamily == 'polynomial' or kernelFamily == 'power' or \
                         kernelFamily == 'tstudent' or kernelFamily == 'anova':
-            self.sigmas = list(range(0, pKers))
+            self.sigmas = range(1, pKers+1)
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
         else:
             # We have called 'sigmas' to any basis kernel parameter, regardless if it is Gaussian or not. So generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution=hyper, size=pKers,
                                           rango=randomRange, parameters=randomParams))
+            try:
+                z = self.sigmas.index(0)
+                self.sigmas[z] = 0.1
+            except ValueError:
+                pass
+
             try:  # Verifying if number of kernels is greater or equal to 2
                 if pKers <= 1 or len(self.sigmas) < 2:
                     raise customException('Senseless MKLClassification use!!!')
@@ -458,7 +465,7 @@ class mklObj(object):
         f.close()
 
     # Multi-kernel object training procedure file reporting.
-    def filePrintingResults(self, fileName, mode):
+    def filePrintingResults(self, fileName, mode = 'w'):
         """This method is used for printing training results as well as used settings for each learned compounding
         kernel into a file for comparison. 'fileName' is the desired location of the file at your HD and 'mode' could
         be setted to 'a' for adding different training results to the same file. The default mode is 'w', which is
@@ -700,8 +707,11 @@ class mklObj(object):
         .. seealso:: @sigmas property documentation
         """
         try:
-            if len(value) == self._pkers and min(value) > 0:
-                self.__sigmas = value
+            if len(value) == self._pkers:
+                if min(value) > 0:
+                    self.__sigmas = value
+                else:
+                    raise customException('All sigmas must be greater than zero.')
             else:
                 raise customException('Size of basis kernel parameter list missmatches the size of the combined\
                                        kernel. You can use len(CMKLobj.get_sigmas()) to revise the missmatching.')

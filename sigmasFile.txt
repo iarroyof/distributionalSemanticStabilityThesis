@@ -1,3 +1,3 @@
 # ----------------- Some note ------------------
-# Basis kernel family: polynomial
-0, 1, 2, 
+# Basis kernel family: inverseQuadratic
+0.1, 1.2, 3.4, 4.5, 7.8, 
