@@ -24,16 +24,23 @@ import pdb
     ----------------------------------------------------------------------------------------------------
 """
 
-def mkPool(path):
-    [feats_train,
-        feats_test,
-        labelsTr,
-        labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
-                      'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
+[feats_train,
+feats_test,
+labelsTr,
+labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
+                  'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
                       'label_train_multiclass_digits500.dat')       # Multi-class Labels file name
 
-    mkl_object = mklObj()
-    if path[0][0] is 'gaussian':
+mkl_object = mklObj()
+
+def mkPool(path):
+    global feats_train
+    global feats_test
+    global labelsTr
+    global labelsTs
+    global mkl_object
+
+    if path[0][0] is 'gaussian' or 'loggauss':
         a = 2*path[0][1][0]**2
         b = 2*path[0][1][1]**2
     else:
@@ -52,7 +59,7 @@ def mkPool(path):
                    hyper=path[3],       # With not effect when kernel family is polynomial and some
                    pKers=path[2])
 
-    del feats_train, feats_test, labelsTr,labelsTs
+
     return mkl_object.testerr
 
 
@@ -63,20 +70,24 @@ def mkPool(path):
 #### Loading train and test data
 # 1) For multi-class problem loaded from file:
 if __name__ == '__main__':
-    perform = 1000
-    minPath = {}
-    p = Pool(3)
+    perform = 0
+    minPath = []
+#    p = Pool(3)
 #### Loading the experimentation grid of parameters.
     grid = gridObj(file = 'gridParameterDic.txt')
-    paths = grid.generateRandomGridPaths(trials = 3)
-    [a, b, c] = paths
+    paths = grid.generateRandomGridPaths(trials = 20)
+    #[a, b, c] = paths
     #pdb.set_trace()
-    print p.map(mkPool, [a, b, c])
+#    print p.map(mkPool, [a, b, c])
+    acc = []
+    for path in paths:
+        print '\nA path: ', path
+        acc.append(mkPool(path))
+        if acc[-1] > perform:
+            perform = acc[-1]
+            minPath = path
+        print 'Accuracy: ', acc[-1]
 
-                                         # other powering forms.
-    #if kernelO.testerr < perform:
-     #   perform = kernelO.weights
-      #  minPath = path
-# mode = 'w'
-# kernelO.filePrintingResults('mkl_output.txt', mode)
-# kernelO.save_sigmas()
+    print '\nMinimun Path: ', minPath, 'Accuracy: ', perform
+    print '\nAcuracies: ', acc
+
