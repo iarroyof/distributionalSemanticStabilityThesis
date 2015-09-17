@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5efb1540-c877-42e1-a77e-beba4d87e9d4" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gridObj.py" afterPath="$PROJECT_DIR$/gridObj.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="distributionalSemanticStabilityThesis.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -23,14 +23,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="mklCall.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="mklCall.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mklCall.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="41" column="31" selection-start-line="41" selection-start-column="11" selection-end-line="41" selection-end-column="31" />
-              <folding>
-                <element signature="e#87#107#0" expanded="true" />
-              </folding>
+            <state vertical-scroll-proportion="0.61165047">
+              <caret line="80" column="35" selection-start-line="80" selection-start-column="35" selection-end-line="80" selection-end-column="35" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -38,82 +36,22 @@
       <file leaf-file-name="mklObj.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mklObj.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-2.2142856">
-              <caret line="716" column="29" selection-start-line="708" selection-start-column="0" selection-end-line="716" selection-end-column="29" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="719" column="0" selection-start-line="719" selection-start-column="0" selection-end-line="719" selection-end-column="0" />
               <folding>
                 <element signature="e#87#110#0" expanded="true" />
-                <element signature="e#373#1856#0" expanded="false" />
-                <element signature="e#373#1348#1" expanded="true" />
-                <element signature="e#1909#3513#0" expanded="false" />
-                <element signature="e#1909#2151#1" expanded="true" />
-                <element signature="e#3575#3850#0" expanded="false" />
-                <element signature="e#3575#3721#1" expanded="true" />
-                <element signature="e#3955#8076#0" expanded="false" />
-                <element signature="e#8168#12235#0" expanded="false" />
-                <element signature="e#14478#15728#0" expanded="false" />
-                <element signature="e#15957#23857#0" expanded="false" />
-                <element signature="e#23945#24779#0" expanded="false" />
-                <element signature="e#23945#24528#1" expanded="true" />
-                <element signature="e#24901#25299#1" expanded="true" />
-                <element signature="e#26640#28354#0" expanded="false" />
-                <element signature="e#26640#27687#1" expanded="true" />
-                <element signature="e#28400#28613#0" expanded="false" />
-                <element signature="e#28400#28584#1" expanded="true" />
-                <element signature="e#28660#28811#0" expanded="false" />
-                <element signature="e#28660#28782#1" expanded="true" />
-                <element signature="e#28856#29299#0" expanded="false" />
-                <element signature="e#28856#29271#1" expanded="true" />
-                <element signature="e#29348#29910#0" expanded="false" />
-                <element signature="e#29348#29878#1" expanded="true" />
-                <element signature="e#29963#31898#0" expanded="false" />
-                <element signature="e#29963#31862#1" expanded="true" />
-                <element signature="e#31968#32173#0" expanded="false" />
-                <element signature="e#31968#32085#1" expanded="true" />
-                <element signature="e#32223#32575#0" expanded="false" />
-                <element signature="e#32223#32543#1" expanded="true" />
-                <element signature="e#32625#32975#0" expanded="false" />
-                <element signature="e#32625#32942#1" expanded="true" />
-                <element signature="e#33019#33694#0" expanded="false" />
-                <element signature="e#33019#33667#1" expanded="true" />
-                <element signature="e#33741#34032#0" expanded="false" />
-                <element signature="e#33741#34002#1" expanded="true" />
-                <element signature="e#34105#34548#0" expanded="false" />
-                <element signature="e#34105#34519#1" expanded="true" />
-                <element signature="e#34595#34793#0" expanded="false" />
-                <element signature="e#34595#34763#1" expanded="true" />
-                <element signature="e#34994#35155#0" expanded="false" />
-                <element signature="e#34994#35087#1" expanded="true" />
-                <element signature="e#35219#35387#0" expanded="false" />
-                <element signature="e#35219#35315#1" expanded="true" />
-                <element signature="e#35445#36315#0" expanded="false" />
-                <element signature="e#35445#35863#1" expanded="true" />
-                <element signature="e#36375#36613#0" expanded="false" />
-                <element signature="e#36375#36544#1" expanded="true" />
-                <element signature="e#36685#37094#0" expanded="false" />
-                <element signature="e#36685#36961#1" expanded="true" />
-                <element signature="e#37160#37728#0" expanded="false" />
-                <element signature="e#37160#37600#1" expanded="true" />
-                <element signature="e#37794#38386#0" expanded="false" />
-                <element signature="e#37794#38253#1" expanded="true" />
-                <element signature="e#38440#39324#0" expanded="false" />
-                <element signature="e#38440#38982#1" expanded="true" />
-                <element signature="e#39384#39770#0" expanded="false" />
-                <element signature="e#39384#39598#1" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="gridObj.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="gridObj.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gridObj.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6213592">
-              <caret line="49" column="116" selection-start-line="49" selection-start-column="116" selection-end-line="49" selection-end-column="116" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="49" column="21" selection-start-line="49" selection-start-column="21" selection-end-line="49" selection-end-column="21" />
               <folding>
                 <element signature="e#87#121#0" expanded="true" />
-                <element signature="e#215#227#1" expanded="true" />
-                <element signature="e#290#330#1" expanded="true" />
-                <element signature="e#2890#4292#1" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -157,9 +95,9 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/mklObj.py" />
-        <option value="$PROJECT_DIR$/mklCall.py" />
         <option value="$PROJECT_DIR$/gridParameterDic.txt" />
         <option value="$PROJECT_DIR$/gridObj.py" />
+        <option value="$PROJECT_DIR$/mklCall.py" />
       </list>
     </option>
   </component>
@@ -211,7 +149,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -233,12 +170,14 @@
         </subPane>
       </pane>
       <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Python" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="recentsLimit" value="5" />
+    <property name="FullScreen" value="false" />
   </component>
   <component name="RunManager" selected="Python.mklCall">
     <configuration default="false" name="mklCall" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -442,31 +381,37 @@
       <option name="project" value="LOCAL" />
       <updated>1442019536662</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Random grid in linear way is working. Possible we can use Bash code for parallelizing, instead of Python multiprocessing.">
+      <created>1442294416966</created>
+      <option name="number" value="00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1442294416966</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-2" y="-1" width="1924" height="1057" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32952183" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32952183" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.10625" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32952183" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32952183" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -487,7 +432,8 @@
     <MESSAGE value="There were tested different width ranges. At least for images in digit recognition task." />
     <MESSAGE value="Some correction to comments." />
     <MESSAGE value="initializing the random grid." />
-    <option name="LAST_COMMIT_MESSAGE" value="initializing the random grid." />
+    <MESSAGE value="Random grid in linear way is working. Possible we can use Bash code for parallelizing, instead of Python multiprocessing." />
+    <option name="LAST_COMMIT_MESSAGE" value="Random grid in linear way is working. Possible we can use Bash code for parallelizing, instead of Python multiprocessing." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -502,6 +448,42 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/mklCall.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="41" column="20" selection-start-line="41" selection-start-column="11" selection-end-line="41" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mklObj.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="716" column="29" selection-start-line="708" selection-start-column="0" selection-end-line="716" selection-end-column="29" />
+          <folding>
+            <element signature="e#87#110#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gridObj.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#87#121#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gridParameterDic.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$USER_HOME$/.PyCharm40/system/python_stubs/-1247972723/exceptions.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3322034">
@@ -547,93 +529,31 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/gridObj.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="49" column="21" selection-start-line="49" selection-start-column="21" selection-end-line="49" selection-end-column="21" />
+          <folding>
+            <element signature="e#87#121#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mklObj.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-2.2142856">
-          <caret line="716" column="29" selection-start-line="708" selection-start-column="0" selection-end-line="716" selection-end-column="29" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="719" column="0" selection-start-line="719" selection-start-column="0" selection-end-line="719" selection-end-column="0" />
           <folding>
             <element signature="e#87#110#0" expanded="true" />
-            <element signature="e#373#1856#0" expanded="false" />
-            <element signature="e#373#1348#1" expanded="true" />
-            <element signature="e#1909#3513#0" expanded="false" />
-            <element signature="e#1909#2151#1" expanded="true" />
-            <element signature="e#3575#3850#0" expanded="false" />
-            <element signature="e#3575#3721#1" expanded="true" />
-            <element signature="e#3955#8076#0" expanded="false" />
-            <element signature="e#8168#12235#0" expanded="false" />
-            <element signature="e#14478#15728#0" expanded="false" />
-            <element signature="e#15957#23857#0" expanded="false" />
-            <element signature="e#23945#24779#0" expanded="false" />
-            <element signature="e#23945#24528#1" expanded="true" />
-            <element signature="e#24901#25299#1" expanded="true" />
-            <element signature="e#26640#28354#0" expanded="false" />
-            <element signature="e#26640#27687#1" expanded="true" />
-            <element signature="e#28400#28613#0" expanded="false" />
-            <element signature="e#28400#28584#1" expanded="true" />
-            <element signature="e#28660#28811#0" expanded="false" />
-            <element signature="e#28660#28782#1" expanded="true" />
-            <element signature="e#28856#29299#0" expanded="false" />
-            <element signature="e#28856#29271#1" expanded="true" />
-            <element signature="e#29348#29910#0" expanded="false" />
-            <element signature="e#29348#29878#1" expanded="true" />
-            <element signature="e#29963#31898#0" expanded="false" />
-            <element signature="e#29963#31862#1" expanded="true" />
-            <element signature="e#31968#32173#0" expanded="false" />
-            <element signature="e#31968#32085#1" expanded="true" />
-            <element signature="e#32223#32575#0" expanded="false" />
-            <element signature="e#32223#32543#1" expanded="true" />
-            <element signature="e#32625#32975#0" expanded="false" />
-            <element signature="e#32625#32942#1" expanded="true" />
-            <element signature="e#33019#33694#0" expanded="false" />
-            <element signature="e#33019#33667#1" expanded="true" />
-            <element signature="e#33741#34032#0" expanded="false" />
-            <element signature="e#33741#34002#1" expanded="true" />
-            <element signature="e#34105#34548#0" expanded="false" />
-            <element signature="e#34105#34519#1" expanded="true" />
-            <element signature="e#34595#34793#0" expanded="false" />
-            <element signature="e#34595#34763#1" expanded="true" />
-            <element signature="e#34994#35155#0" expanded="false" />
-            <element signature="e#34994#35087#1" expanded="true" />
-            <element signature="e#35219#35387#0" expanded="false" />
-            <element signature="e#35219#35315#1" expanded="true" />
-            <element signature="e#35445#36315#0" expanded="false" />
-            <element signature="e#35445#35863#1" expanded="true" />
-            <element signature="e#36375#36613#0" expanded="false" />
-            <element signature="e#36375#36544#1" expanded="true" />
-            <element signature="e#36685#37094#0" expanded="false" />
-            <element signature="e#36685#36961#1" expanded="true" />
-            <element signature="e#37160#37728#0" expanded="false" />
-            <element signature="e#37160#37600#1" expanded="true" />
-            <element signature="e#37794#38386#0" expanded="false" />
-            <element signature="e#37794#38253#1" expanded="true" />
-            <element signature="e#38440#39324#0" expanded="false" />
-            <element signature="e#38440#38982#1" expanded="true" />
-            <element signature="e#39384#39770#0" expanded="false" />
-            <element signature="e#39384#39598#1" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mklCall.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="41" column="31" selection-start-line="41" selection-start-column="11" selection-end-line="41" selection-end-column="31" />
-          <folding>
-            <element signature="e#87#107#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gridObj.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6213592">
-          <caret line="49" column="116" selection-start-line="49" selection-start-column="116" selection-end-line="49" selection-end-column="116" />
-          <folding>
-            <element signature="e#87#121#0" expanded="true" />
-            <element signature="e#215#227#1" expanded="true" />
-            <element signature="e#290#330#1" expanded="true" />
-            <element signature="e#2890#4292#1" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.61165047">
+          <caret line="80" column="35" selection-start-line="80" selection-start-column="35" selection-end-line="80" selection-end-column="35" />
+          <folding />
         </state>
       </provider>
     </entry>

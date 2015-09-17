@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Ignacio Arroyo Fernandez'
 
-from multiprocessing import Pool
+#from multiprocessing import Pool
 #from functools import partial
-import parmap as par
+#import parmap as par
 
 from mklObj import *
 from gridObj import *
@@ -40,7 +40,7 @@ def mkPool(path):
     global labelsTs
     global mkl_object
 
-    if path[0][0] is 'gaussian' or 'loggauss':
+    if path[0][0] is 'gaussian':
         a = 2*path[0][1][0]**2
         b = 2*path[0][1][1]**2
     else:
@@ -72,10 +72,12 @@ def mkPool(path):
 if __name__ == '__main__':
     perform = 0
     minPath = []
+    weights = []
+    widths = []
 #    p = Pool(3)
 #### Loading the experimentation grid of parameters.
     grid = gridObj(file = 'gridParameterDic.txt')
-    paths = grid.generateRandomGridPaths(trials = 20)
+    paths = grid.generateRandomGridPaths(trials = 5)
     #[a, b, c] = paths
     #pdb.set_trace()
 #    print p.map(mkPool, [a, b, c])
@@ -86,8 +88,15 @@ if __name__ == '__main__':
         if acc[-1] > perform:
             perform = acc[-1]
             minPath = path
+            widths = mkl_object.sigmas
+            weights = mkl_object.weights
         print 'Accuracy: ', acc[-1]
 
-    print '\nMinimun Path: ', minPath, 'Accuracy: ', perform
-    print '\nAcuracies: ', acc
-
+    f = open('mkl_MinPath.txt', 'w')
+    f.write('--------- Random Grid Search results ----------------')
+    f.write('\nMinimum Path: ' + str(minPath))
+    f.write('\nMaximun Accuracy: ' + str(perform))
+    f.write('\n\nAll Accuracies: ' + str(acc))
+    f.write('\n\nWeights: ' + str(weights))
+    f.write('\n\nWidths: ' + str(widths))
+    f.close()
