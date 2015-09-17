@@ -1,0 +1,11 @@
+                   Results            
+--------------------------------------------------------------------
+Basis kernel family: inverseQuadratic
+Linear combination size: 5
+Hyperparameter distribution: linear
+Weight regularization norm: 5.0
+Weight regularization parameter: 40.0
+Weights: 0.955928048978, 0.62687910523, 0.545472919386, 0.519008833384, 0.452702419994, 
+Widths: 0.1, 1.2, 3.4, 4.5, 7.8, 
+Classes: 10
+Test error:8400.0

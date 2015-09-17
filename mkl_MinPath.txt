@@ -1,0 +1,9 @@
+--------- Random Grid Search results ----------------
+Minimum Path: [('polynomial', [1, 5]), '3-gr_tfidf', 3, 'quadratic', 2.0, 4.5]
+Maximun Accuracy: 93.6
+
+All Accuracies: [88.8, 92.80000000000001, 90.4, 92.0, 93.60000000000001]
+
+Weights: [ 0.46861636  0.60798285  0.64090215]
+
+Widths: [1, 2, 3]
