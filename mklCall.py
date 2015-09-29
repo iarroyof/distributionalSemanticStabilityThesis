@@ -58,9 +58,9 @@ def mkPool(path):
 
 #### Loading train and test data
 if __name__ == '__main__':
-    p = sys.argv[1]
-    pdb.set_trace()
-    path = list(literal_eval(p))
+
+    path = list(literal_eval(sys.argv[1]))
+
     print mkPool(path)
 #    perform = 0
 #    minPath = []
