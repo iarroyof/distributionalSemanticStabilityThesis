@@ -1,6 +1,5 @@
 from gridObj import *
-import sys
-
+import argparse
 
 def gridGen(fileN, trials):
     grid = gridObj(file = fileN)
@@ -8,10 +7,11 @@ def gridGen(fileN, trials):
        yield p
                 
 if __name__ == "__main__":
-    args = sys.argv
-    assert len(args) is 3 # The amount of input args is 3 (the script plus its arguments)?
+    parser = argparse.ArgumentParser(description='This script generates multiple grid search paths.')
+    parser.add_argument('-f', type=str, dest = 'grid_search_file', help='Specifies the grid search complete dictionary.', metavar='FILE')
+    parser.add_argument('-t', type=int, dest = 'number_of_trials', metavar = 'N', help = 'Specifies the number of search paths wanted.')
+    args = parser.parse_args()
+
 # Create the random grid:
-    grid = gridObj(file = args[1])
-    #print grid.generateRandomGridPaths(trials = int(args[2]))
-    for p in grid.generateRandomGridPaths(trials = int(args[2])): # the dict object is put to the output stream.
-        print p
+    for path in gridGen(fileN = args.grid_search_file, trials = args.number_of_trials): # the dict object is put to the output stream.
+        print path

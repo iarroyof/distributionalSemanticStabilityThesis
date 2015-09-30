@@ -1,1 +1,27 @@
-__author__ = 'iarroyof'
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+__author__ = 'Ignacio Arroyo Fernandez'
+
+import sys
+import argparse
+
+acc = []
+paths = []
+
+parser = argparse.ArgumentParser(description='Reducer for multiple MKL distributed jobs.')
+parser.add_argument('-r', type=str, dest = 'reducer_file', help='Specifies the file of outputs writen by the multiple mkl objects.')
+args = parser.parse_args()
+
+if args.reducer_file:
+    with open(args.reducer_file) as ac:
+        a = ac.readline().split(';')
+        acc.append((float(a[0]), a[1]))
+else:
+    ac = sys.stdin
+    for line in sys.stdin:
+        a = line.strip().split(';')
+        print a
+        acc.append((float(a[0]), a[1]))
+
+
+print 'The maximum performance path: ', max(acc)

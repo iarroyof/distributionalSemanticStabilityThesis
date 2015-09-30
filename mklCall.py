@@ -2,15 +2,11 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Ignacio Arroyo Fernandez'
 
-#from multiprocessing import Pool
-#from functools import partial
-#import parmap as par
-
 from mklObj import *
 from gridObj import *
-import subprocess
-import pdb, sys
+import pdb
 from ast import literal_eval
+import argparse
 
 [feats_train,
 feats_test,
@@ -50,46 +46,17 @@ def mkPool(path):
 
     return mkl_object.testerr
 
-#def gridGen(fileN, trials):
-#    grid = gridObj(file = fileN)
-        #print grid.generateRandomGridPaths(trials = int(args[2]))
-#    for p in grid.generateRandomGridPaths(trials = trials): # the dict object is put to the output stream.
-#       yield p
+def gridGen(fileN, trials):
+    grid = gridObj(file = fileN)
+    for p in grid.generateRandomGridPaths(trials = trials): # the dict object is put to the output stream.
+       yield p
 
 #### Loading train and test data
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='mklObject calling')
+    parser.add_argument('-p', type=str, dest = 'current_path', help='Specifies the grid path to be tested by the mkl object.')
+    #parser.add_argument('-t', type=int, dest = 'number_of_trials', metavar = 'N')
+    args = parser.parse_args()
+    path = list(literal_eval(args.current_path))
+    print mkPool(path),';',path
 
-    path = list(literal_eval(sys.argv[1]))
-
-    print mkPool(path)
-#    perform = 0
-#    minPath = []
-#    weights = []
-#    widths = []
-#    acc = []
-    #grid = gridObj(file = sys.argv[1])
-    #paths = grid.generateRandomGridPaths(trials = sys.argv[2])
-    #paths = gridGen(sys.argv[1], 2):#int(sys.argv[2])):
-    
-#    for path in paths:
-        #pdb.set_trace()
-#        print '\nA path: ', path
-#        acc.append(mkPool(path))
-#        if acc[-1] > perform:
-#            perform = acc[-1]
-#            minPath = path
-#            widths = mkl_object.sigmas
-#            weights = mkl_object.weights
-#        print 'Accuracy: ', acc[-1]
-
-#    print 'Minimum path: ', minPath
-#    print 'Max accuracy: ', perform  
-    
-#    f = open('mkl_MinPath.txt', 'w')
-#    f.write('--------- Random Grid Search results ----------------')
-#    f.write('\nMinimum Path: ' + str(minPath))
-#    f.write('\nMaximun Accuracy: ' + str(perform))
-#    f.write('\n\nAll Accuracies: ' + str(acc))
-#    f.write('\n\nWeights: ' + str(weights))
-#    f.write('\n\nWidths: ' + str(widths))
-#    f.close()
