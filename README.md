@@ -5,20 +5,22 @@ See at my personal web site the initial publication for futher details: http://d
 
 # Usage
 
-We have made some tests with toy datasets. At the moment we have paralelized the tool in a local machine. 
+We have made some tests with toy datasets. At the moment we have parallelized the tool in a local machine. 
 
 -- Dependencies --
 
-Ububtu 14.04 - The Operating system we developed this tool
+Ubunbtu 14.04 - The Operating system we developed this tool
+
 modshogun - The Shogun Machine Learning Toolbox
+
 scipy - The scientific Python stack
 
 -- Command line --
 
-We need excecuting the following command in the Ubuntu shell:
+We need excecuting the following piped command in the Ubuntu shell:
 
-$ python gridGen.py -f gridParameterDic.txt -t 5 | ./mklParallel.sh | python mklReducer.py > o.txt
+`$ python gridGen.py -f gridParameterDic.txt -t 5 | ./mklParallel.sh | python mklReducer.py > o.txt`
 
-The `gridGen.py` script writes, e.g., 5 paramemter search paths to the stdout separately. These paths are randomly generated from the  file `gridParameterDic.txt` which contains a ditionary of parameters. The set of paths is read by the `mklParallel.sh` bash script who yields multiple processing jobs. Until the results of these jobs are writen to stdout, the `mklReducer.py` script read them, print them and calculates the one with the maximum performace. These results are subsequenly writen either to an output file, e.g. `o.txt`, or to stdout.
+The `gridGen.py` script writes, e.g., 5 paramemter search paths to the stdout separately. These paths are randomly generated from the  file `gridParameterDic.txt` which contains a ditionary of parameters. The set of paths is read by the `mklParallel.sh` bash script who yields multiple processing jobs (The OS manages the thing if there are more processes than machine cores). Until the results of these jobs are writen to stdout, the `mklReducer.py` script reads them, prints them and emites the one with the maximum performace. These results are subsequenly writen either to an output file, e.g. `o.txt`, or to stdout (if the last one is not specified).
 
-After results are emited, we can use the resulting path for being our consistency inner product between pairs of input vectors.
+After results are emited, we can use the resulting best path for being our consistency inner product between pairs of input word/prhase/sentence (WPS) vectors.
