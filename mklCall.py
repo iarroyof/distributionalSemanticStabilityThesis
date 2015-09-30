@@ -3,7 +3,6 @@
 __author__ = 'Ignacio Arroyo Fernandez'
 
 from mklObj import *
-from gridObj import *
 import pdb
 from ast import literal_eval
 import argparse
@@ -12,8 +11,8 @@ import argparse
 feats_test,
 labelsTr,
 labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
-                  'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
-                      'label_train_multiclass_digits500.dat')       # Multi-class Labels file name
+                            'fm_train_multiclass_digits500.dat',   # Multi-class dataSet examples file name
+                            'label_train_multiclass_digits500.dat')# Multi-class Labels file name
 
 mkl_object = mklObj()
 
@@ -29,8 +28,8 @@ def mkPool(path):
         b = 2*path[0][1][1]**2
     else:
         a = path[0][1][0]
-        b = path[0][1][1] #; pdb.set_trace()
-    #pdb.set_trace()
+        b = path[0][1][1]
+
     mkl_object.mklC = path[5]
     mkl_object.weightRegNorm = path[4]
     mkl_object.fit_kernel(featsTr=feats_train,
@@ -45,11 +44,6 @@ def mkPool(path):
 
 
     return mkl_object.testerr
-
-def gridGen(fileN, trials):
-    grid = gridObj(file = fileN)
-    for p in grid.generateRandomGridPaths(trials = trials): # the dict object is put to the output stream.
-       yield p
 
 #### Loading train and test data
 if __name__ == '__main__':

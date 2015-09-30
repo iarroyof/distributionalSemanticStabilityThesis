@@ -1,6 +1,7 @@
 from gridObj import *
 import argparse
 
+# Yields a generator containing multiple paths for being processed en parallel
 def gridGen(fileN, trials):
     grid = gridObj(file = fileN)
     for p in grid.generateRandomGridPaths(trials = trials): # the dict object is put to the output stream.
@@ -14,4 +15,4 @@ if __name__ == "__main__":
 
 # Create the random grid:
     for path in gridGen(fileN = args.grid_search_file, trials = args.number_of_trials): # the dict object is put to the output stream.
-        print path
+        print path # The paths are append to the stdout.
