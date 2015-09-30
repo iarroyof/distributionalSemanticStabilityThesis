@@ -1,9 +1,0 @@
---------- Random Grid Search results ----------------
-Minimum Path: []
-Maximun Accuracy: 0
-
-All Accuracies: []
-
-Weights: []
-
-Widths: []
