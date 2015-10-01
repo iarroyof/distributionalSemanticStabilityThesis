@@ -52,5 +52,5 @@ if __name__ == '__main__':
     #parser.add_argument('-t', type=int, dest = 'number_of_trials', metavar = 'N')
     args = parser.parse_args()
     path = list(literal_eval(args.current_path))
-    print mkPool(path),';',path
+    print str(mkPool(path))+';'+str(path)
 

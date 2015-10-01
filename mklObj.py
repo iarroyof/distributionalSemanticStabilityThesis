@@ -385,9 +385,10 @@ class mklObj(object):
             self.sigmas = range(1, pKers+1)
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
         else:
-            # We have called 'sigmas' to any basis kernel parameter, regardless if it is Gaussian or not. So generate the widths:
+            # We have called 'sigmas' to any basis kernel parameter, regardless if the kernel is Gaussian or not. So
+            # generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution=hyper, size=pKers,
-                                          rango=randomRange, parameters=randomParams))
+                                          rango=randomRange, parameters=randomParams))#; pdb.set_trace()
             try:
                 z = self.sigmas.index(0)
                 self.sigmas[z] = 0.1
@@ -713,8 +714,8 @@ class mklObj(object):
                 else:
                     raise customException('All sigmas must be greater than zero.')
             else:
-                raise customException('Size of basis kernel parameter list missmatches the size of the combined\
-                                       kernel. You can use len(CMKLobj.get_sigmas()) to revise the missmatching.')
+                raise customException('Size of basis kernel parameter list mismatches the size of the combined\
+                                       kernel. You can use len(CMKLobj.sigmas) to revise the mismatching.')
         except customException, (instance):
             print "Caught: " + instance.parameter #;pdb.set_trace()
 
