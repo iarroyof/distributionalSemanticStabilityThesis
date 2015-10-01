@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 __author__ = 'Ignacio Arroyo Fernandez'
@@ -23,4 +24,4 @@ else: # If outputs are writen to stdin by the multiple mkl objects (piped mode)
         print a
         acc.append((float(a[0]), a[1]))
 
-print 'The maximum performance path: ', max(acc)
+print '\nThe maximum performance path: ', max(acc)
