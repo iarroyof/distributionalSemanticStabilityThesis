@@ -389,11 +389,11 @@ class mklObj(object):
             # generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution=hyper, size=pKers,
                                           rango=randomRange, parameters=randomParams))#; pdb.set_trace()
-            #try:
-            #    z = self.sigmas.index(0)
-            #    self.sigmas[z] = 0.1
-            #except ValueError:
-            #    pass
+            try:
+                z = self.sigmas.index(0)
+                self.sigmas[z] = 0.1
+            except ValueError:
+                pass
 
             try:  # Verifying if number of kernels is greater or equal to 2
                 if pKers <= 1 or len(self.sigmas) < 2:
@@ -426,7 +426,7 @@ class mklObj(object):
         # Train to return the learnt kernel
         if self.verbose:
             print '\nLearning the machine coefficients...'
-
+        # ------------------ The most time consuming code segment --------------------------
         self.mkl.train()
 
         if self.verbose:
@@ -436,16 +436,14 @@ class mklObj(object):
         self.ker.init(self._featsTr, featsTs)  # Now with test examples. The inner product between training
         self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gramm Matrix.
         out = self.mkl.apply()  # Applying the obtained Gramm Matrix
-
+        # ----------------------------------------------------------------------------------
         if self.__binary:  # If the problem is either binary or multiclass, different
             evalua = ErrorRateMeasure()  # performance measures are computed.
-        else:
-            evalua = MulticlassAccuracy()
-
-        if self.__binary:
             self.__testerr = 100 - evalua.evaluate(out, targetsTs) * 100
         else:
+            evalua = MulticlassAccuracy()
             self.__testerr = evalua.evaluate(out, targetsTs) * 100
+
         # Verbose for learning surveying
         if self.verbose:
             print 'Kernel evaluation ready. The precision was: ', self.__testerr, '%'
@@ -497,8 +495,6 @@ class mklObj(object):
             f.write("\nClasses: " + str(self._targetsTr.get_num_classes()))
             f.write('\nTest error:' + str(self.__testerr * 100))
         f.close()
-
-    # It is pending defining functions for run time attribute modification, e.g. set_verbose(), set_regPar(), etc. unwrapped
 
     # Getters (properties):
     @property
