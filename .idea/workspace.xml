@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5efb1540-c877-42e1-a77e-beba4d87e9d4" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mklCall.py" afterPath="$PROJECT_DIR$/mklCall.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mklObj.py" afterPath="$PROJECT_DIR$/mklObj.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/paths.txt" afterPath="$PROJECT_DIR$/paths.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -42,8 +40,8 @@
       <file leaf-file-name="mklObj.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mklObj.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.48108107">
-              <caret line="716" column="78" selection-start-line="716" selection-start-column="78" selection-end-line="716" selection-end-column="78" />
+            <state vertical-scroll-proportion="0.26486486">
+              <caret line="711" column="37" selection-start-line="711" selection-start-column="37" selection-end-line="711" selection-end-column="37" />
               <folding>
                 <element signature="e#87#110#0" expanded="true" />
               </folding>
@@ -107,7 +105,7 @@
         <entry file="file://$PROJECT_DIR$/o.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -448,7 +446,13 @@
       <option name="project" value="LOCAL" />
       <updated>1443581519637</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Error in printing of the reducer fixed">
+      <created>1443676679301</created>
+      <option name="number" value="00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1443676679301</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -457,6 +461,7 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.10507246" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32952183" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32952183" sideWeight="0.50208336" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32952183" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -465,7 +470,6 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32952183" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -495,7 +499,8 @@
     <MESSAGE value="initializing the random grid." />
     <MESSAGE value="Random grid in linear way is working. Possible we can use Bash code for parallelizing, instead of Python multiprocessing." />
     <MESSAGE value="Local parallelization reached. There are still some problems in unknown conditions: $ python gridGen.py -f gridParameterDic.txt -t 5 | ./mklParallel.sh | python mklReducer.py &gt; o.txt&#10;Traceback (most recent call last):&#10;  File &quot;mklCall.py&quot;, line 61, in &lt;module&gt;&#10;    print mkPool(path),';',path&#10;  File &quot;mklCall.py&quot;, line 44, in mkPool&#10;    pKers=path[2])&#10;  File &quot;/home/iarroyof/distributionalSemanticStabilityThesis/mklObj.py&quot;, line 392, in fit_kernel&#10;    z = self.sigmas.index(0)&#10;  File &quot;/home/iarroyof/distributionalSemanticStabilityThesis/mklObj.py&quot;, line 545, in sigmas&#10;    return self.__sigmas&#10;AttributeError: 'mklObj' object has no attribute '_mklObj__sigmas'&#10;Traceback (most recent call last):&#10;  File &quot;mklReducer.py&quot;, line 24, in &lt;module&gt;&#10;    acc.append((float(a[0]), a[1]))&#10;ValueError: could not convert string to float: Caught: All sigmas must be greater than zero" />
-    <option name="LAST_COMMIT_MESSAGE" value="Local parallelization reached. There are still some problems in unknown conditions: $ python gridGen.py -f gridParameterDic.txt -t 5 | ./mklParallel.sh | python mklReducer.py &gt; o.txt&#10;Traceback (most recent call last):&#10;  File &quot;mklCall.py&quot;, line 61, in &lt;module&gt;&#10;    print mkPool(path),';',path&#10;  File &quot;mklCall.py&quot;, line 44, in mkPool&#10;    pKers=path[2])&#10;  File &quot;/home/iarroyof/distributionalSemanticStabilityThesis/mklObj.py&quot;, line 392, in fit_kernel&#10;    z = self.sigmas.index(0)&#10;  File &quot;/home/iarroyof/distributionalSemanticStabilityThesis/mklObj.py&quot;, line 545, in sigmas&#10;    return self.__sigmas&#10;AttributeError: 'mklObj' object has no attribute '_mklObj__sigmas'&#10;Traceback (most recent call last):&#10;  File &quot;mklReducer.py&quot;, line 24, in &lt;module&gt;&#10;    acc.append((float(a[0]), a[1]))&#10;ValueError: could not convert string to float: Caught: All sigmas must be greater than zero" />
+    <MESSAGE value="Error in printing of the reducer fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Error in printing of the reducer fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -939,7 +944,7 @@
     <entry file="file://$PROJECT_DIR$/o.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -964,8 +969,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mklObj.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.48108107">
-          <caret line="716" column="78" selection-start-line="716" selection-start-column="78" selection-end-line="716" selection-end-column="78" />
+        <state vertical-scroll-proportion="0.26486486">
+          <caret line="711" column="37" selection-start-line="711" selection-start-column="37" selection-end-line="711" selection-end-column="37" />
           <folding>
             <element signature="e#87#110#0" expanded="true" />
           </folding>

@@ -389,11 +389,11 @@ class mklObj(object):
             # generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution=hyper, size=pKers,
                                           rango=randomRange, parameters=randomParams))#; pdb.set_trace()
-            try:
-                z = self.sigmas.index(0)
-                self.sigmas[z] = 0.1
-            except ValueError:
-                pass
+            #try:
+            #    z = self.sigmas.index(0)
+            #    self.sigmas[z] = 0.1
+            #except ValueError:
+            #    pass
 
             try:  # Verifying if number of kernels is greater or equal to 2
                 if pKers <= 1 or len(self.sigmas) < 2:
@@ -709,10 +709,7 @@ class mklObj(object):
         """
         try:
             if len(value) == self._pkers:
-                if min(value) > 0:
-                    self.__sigmas = value
-                else:
-                    raise customException('All sigmas must be greater than zero.')
+                self.__sigmas = value
             else:
                 raise customException('Size of basis kernel parameter list mismatches the size of the combined\
                                        kernel. You can use len(CMKLobj.sigmas) to revise the mismatching.')
