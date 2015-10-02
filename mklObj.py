@@ -117,14 +117,14 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
     # .. todo: Revise the other linespaces of the other distributions. They must be equally consistent than the
     # .. todo: Gaussian one. Change 'is' when verifying equality between strings (PEP008 recommendation).
     sig = []
-    if hyperDistribution is 'linear':
+    if hyperDistribution == 'linear':
         line = numpy.linspace(rango[0], rango[1], size*2)
         sig = random.sample(line, size)
         return sig
-    elif hyperDistribution is 'quadratic':
+    elif hyperDistribution == 'quadratic':
         sig = numpy.square(random.sample(numpy.linspace(int(sqrt(rango[0])), int(sqrt(rango[1]))), size))
         return sig
-    elif hyperDistribution is 'gaussian':
+    elif hyperDistribution == 'gaussian':
         assert parameters[1] > 0 # The width is greater than zero?
         i = 0
         while i < size:
@@ -134,24 +134,24 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
                 i += 1  # not end, but resets
                 # If met, the number is appended
         return sig  # to 'sig' width list.
-    elif hyperDistribution is 'triangular':
+    elif hyperDistribution == 'triangular':
         assert rango[0] <= parameters[0] <= rango[1] # The median is in the range?
         sig = numpy.random.triangular(rango[0], parameters[0], rango[1], size)
         return sig
-    elif hyperDistribution is 'beta':
+    elif hyperDistribution == 'beta':
         assert (parameters[0] >= 0 and parameters[1] >= 0) # Alpha and Beta parameters are non-negative?
         sig = numpy.random.beta(parameters[0], parameters[1], size) * (rango[1] - rango[0]) + rango[0]
         return sig
-    elif hyperDistribution is 'pareto':
+    elif hyperDistribution == 'pareto':
         return numpy.random.pareto(5, size=size) * (rango[1] - rango[0]) + rango[0]
 
-    elif hyperDistribution is 'gamma':
+    elif hyperDistribution == 'gamma':
         return numpy.random.gamma(shape=1, size=size) * (rango[1] - rango[0]) + rango[0]
 
-    elif hyperDistribution is 'weibull':
+    elif hyperDistribution == 'weibull':
         return numpy.random.weibull(2, size=size) * (rango[1] - rango[0]) + rango[0]
 
-    elif hyperDistribution is 'loggauss':
+    elif hyperDistribution == 'loggauss':
         assert parameters[1] > 0 # The width is greater than zero?
         i = 0
         while i < size:
@@ -190,60 +190,60 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
     """
 
     kernels = []
-    if basisFam is 'gaussian':
+    if basisFam == 'gaussian':
         for w in widths:
             kernels.append(GaussianKernel())
             kernels[len(kernels) - 1].set_width(w)
 
-    elif basisFam is 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
+    elif basisFam == 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
         for w in widths:
             kernels.append(InverseMultiQuadricKernel(0, w, dst))
 
-    elif basisFam is 'polynomial':
+    elif basisFam == 'polynomial':
         for w in widths:
             kernels.append(PolyKernel(0, w, False))
 
-    elif basisFam is 'power':  # At least for images, the used norm does not make differences in performace
+    elif basisFam == 'power':  # At least for images, the used norm does not make differences in performace
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(PowerKernel(0, w, dst))
 
-    elif basisFam is 'rationalQuadratic':  # At least for images, using 3-norm  make differences
+    elif basisFam == 'rationalQuadratic':  # At least for images, using 3-norm  make differences
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
         for w in widths:
             kernels.append(RationalQuadraticKernel(0, w, dst))
 
-    elif basisFam is 'spherical':  # At least for images, the used norm does not make differences in performace
+    elif basisFam == 'spherical':  # At least for images, the used norm does not make differences in performace
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(SphericalKernel(0, w, dst))
 
-    elif basisFam is 'tstudent':  # At least for images, the used norm does not make differences in performace
+    elif basisFam == 'tstudent':  # At least for images, the used norm does not make differences in performace
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(TStudentKernel(0, w, dst))
 
-    elif basisFam is 'wave':  # At least for images, the used norm does not make differences in performace
+    elif basisFam == 'wave':  # At least for images, the used norm does not make differences in performace
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(WaveKernel(0, w, dst))
 
-    elif basisFam is 'wavelet':  # At least for images it is very low the performance with this kernel.
+    elif basisFam == 'wavelet':  # At least for images it is very low the performance with this kernel.
         for w in widths:  # It remains pending, for now, analysing its parameters.
             kernels.append(WaveletKernel(0, w, 0))
 
-    elif basisFam is 'cauchy':
+    elif basisFam == 'cauchy':
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(CauchyKernel(0, w, dst))
 
-    elif basisFam is 'exponential':  # For this kernel it is necessary specifying features at the constructor
+    elif basisFam == 'exponential':  # For this kernel it is necessary specifying features at the constructor
         dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
         for w in widths:
             kernels.append(ExponentialKernel(featsL, featsR, w, dst, 0))
 
-    elif basisFam is 'anova':  # This kernel presents a warning in training:
+    elif basisFam == 'anova':  # This kernel presents a warning in training:
         """RuntimeWarning: [WARN] In file /home/iarroyof/shogun/src/shogun/classifier/mkl/MKLMulticlass.cpp line
            198: CMKLMulticlass::evaluatefinishcriterion(...): deltanew<=0.Switching back to weight norsm
            difference as criterion.
@@ -385,9 +385,10 @@ class mklObj(object):
             self.sigmas = range(1, pKers+1)
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
         else:
-            # We have called 'sigmas' to any basis kernel parameter, regardless if it is Gaussian or not. So generate the widths:
+            # We have called 'sigmas' to any basis kernel parameter, regardless if the kernel is Gaussian or not. So
+            # generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution=hyper, size=pKers,
-                                          rango=randomRange, parameters=randomParams))
+                                          rango=randomRange, parameters=randomParams))#; pdb.set_trace()
             try:
                 z = self.sigmas.index(0)
                 self.sigmas[z] = 0.1
@@ -425,7 +426,7 @@ class mklObj(object):
         # Train to return the learnt kernel
         if self.verbose:
             print '\nLearning the machine coefficients...'
-
+        # ------------------ The most time consuming code segment --------------------------
         self.mkl.train()
 
         if self.verbose:
@@ -435,16 +436,14 @@ class mklObj(object):
         self.ker.init(self._featsTr, featsTs)  # Now with test examples. The inner product between training
         self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gramm Matrix.
         out = self.mkl.apply()  # Applying the obtained Gramm Matrix
-
+        # ----------------------------------------------------------------------------------
         if self.__binary:  # If the problem is either binary or multiclass, different
             evalua = ErrorRateMeasure()  # performance measures are computed.
-        else:
-            evalua = MulticlassAccuracy()
-
-        if self.__binary:
             self.__testerr = 100 - evalua.evaluate(out, targetsTs) * 100
         else:
+            evalua = MulticlassAccuracy()
             self.__testerr = evalua.evaluate(out, targetsTs) * 100
+
         # Verbose for learning surveying
         if self.verbose:
             print 'Kernel evaluation ready. The precision was: ', self.__testerr, '%'
@@ -496,8 +495,6 @@ class mklObj(object):
             f.write("\nClasses: " + str(self._targetsTr.get_num_classes()))
             f.write('\nTest error:' + str(self.__testerr * 100))
         f.close()
-
-    # It is pending defining functions for run time attribute modification, e.g. set_verbose(), set_regPar(), etc. unwrapped
 
     # Getters (properties):
     @property
@@ -708,13 +705,10 @@ class mklObj(object):
         """
         try:
             if len(value) == self._pkers:
-                if min(value) > 0:
-                    self.__sigmas = value
-                else:
-                    raise customException('All sigmas must be greater than zero.')
+                self.__sigmas = value
             else:
-                raise customException('Size of basis kernel parameter list missmatches the size of the combined\
-                                       kernel. You can use len(CMKLobj.get_sigmas()) to revise the missmatching.')
+                raise customException('Size of basis kernel parameter list mismatches the size of the combined\
+                                       kernel. You can use len(CMKLobj.sigmas) to revise the mismatching.')
         except customException, (instance):
             print "Caught: " + instance.parameter #;pdb.set_trace()
 

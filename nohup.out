@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "mklCall.py", line 74, in <module>
-    paths = grid.generateRandomGridPaths(trials = 20)
-  File "/home/iarroyof/distributionalSemanticStabilityThesis/gridObj.py", line 44, in generateRandomGridPaths
-    keys = self.grid[item].keys()
-AttributeError: 'list' object has no attribute 'keys'

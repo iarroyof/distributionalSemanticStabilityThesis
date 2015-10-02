@@ -1,0 +1,5 @@
+[('exponential', [0.5, 50]), '1-gr_tfidf', 28, 'triangular', 5.0, 20.0]
+[('wave', [0.5, 100]), '2-gr_tfidf', 7, 'beta', 2.0, 30.0]
+[('spherical', [0.5, 50]), '1-gr', 32, 'quadratic', 1.5, 0.4]
+[('tstudent', [0.1, 5]), '3-gr_tfidf', 24, 'gaussian', 1.0, 1.8]
+[('polynomial', [1, 5]), '3-gr', 20, 'pareto', 5.0, 1.2]

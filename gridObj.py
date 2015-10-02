@@ -6,7 +6,6 @@ from mklObj import customException
 import random as rdn
 from itertools import cycle
 import os.path
-import numpy as np
 import pdb
 
 class gridObj(object):

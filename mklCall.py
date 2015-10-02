@@ -2,34 +2,17 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Ignacio Arroyo Fernandez'
 
-#from multiprocessing import Pool
-#from functools import partial
-#import parmap as par
-
 from mklObj import *
-from gridObj import *
-
 import pdb
-
-""" ----------------------------------------------------------------------------------------------------
-    MKL object Default definition:
-    class mklObj:
-        def __init__(self, weightRegNorm = 2, regPar = 2, epsilon = 1e-5,
-                     threads = 2, mkl_epsilon = 0.001, binary = False, verbose = False):
-
-    Kernel fitting function
-    fit_kernel(self, featsTr,  targetsTr, featsTs, targetsTs,
-                randomRange = [1, 50], randomParams = [1, 1],
-                 hyper = 'linear', kernelFamily = 'guassian', pKers = 3):
-    ----------------------------------------------------------------------------------------------------
-"""
+from ast import literal_eval
+import argparse
 
 [feats_train,
 feats_test,
 labelsTr,
 labelsTs] = load_multiclassToy('/home/iarroyof/shogun-data/toy/',  # Data directory
-                  'fm_train_multiclass_digits500.dat',          # Multi-class dataSet examples file name
-                      'label_train_multiclass_digits500.dat')       # Multi-class Labels file name
+                            'fm_train_multiclass_digits500.dat',   # Multi-class dataSet examples file name
+                            'label_train_multiclass_digits500.dat')# Multi-class Labels file name
 
 mkl_object = mklObj()
 
@@ -45,8 +28,8 @@ def mkPool(path):
         b = 2*path[0][1][1]**2
     else:
         a = path[0][1][0]
-        b = path[0][1][1] #; pdb.set_trace()
-    #pdb.set_trace()
+        b = path[0][1][1]
+
     mkl_object.mklC = path[5]
     mkl_object.weightRegNorm = path[4]
     mkl_object.fit_kernel(featsTr=feats_train,
@@ -62,41 +45,12 @@ def mkPool(path):
 
     return mkl_object.testerr
 
-
-
-#mkl_kernel = mklObj()
-
-#partial_mkPool = partial(mkPool, mkl_object = mkl_kernel, data = datax)
 #### Loading train and test data
-# 1) For multi-class problem loaded from file:
 if __name__ == '__main__':
-    perform = 0
-    minPath = []
-    weights = []
-    widths = []
-#    p = Pool(3)
-#### Loading the experimentation grid of parameters.
-    grid = gridObj(file = 'gridParameterDic.txt')
-    paths = grid.generateRandomGridPaths(trials = 5)
-    #[a, b, c] = paths
-    #pdb.set_trace()
-#    print p.map(mkPool, [a, b, c])
-    acc = []
-    for path in paths:
-        print '\nA path: ', path
-        acc.append(mkPool(path))
-        if acc[-1] > perform:
-            perform = acc[-1]
-            minPath = path
-            widths = mkl_object.sigmas
-            weights = mkl_object.weights
-        print 'Accuracy: ', acc[-1]
+    parser = argparse.ArgumentParser(description='mklObject calling')
+    parser.add_argument('-p', type=str, dest = 'current_path', help='Specifies the grid path to be tested by the mkl object.')
+    #parser.add_argument('-t', type=int, dest = 'number_of_trials', metavar = 'N')
+    args = parser.parse_args()
+    path = list(literal_eval(args.current_path))
+    print str(mkPool(path))+';'+str(path)
 
-    f = open('mkl_MinPath.txt', 'w')
-    f.write('--------- Random Grid Search results ----------------')
-    f.write('\nMinimum Path: ' + str(minPath))
-    f.write('\nMaximun Accuracy: ' + str(perform))
-    f.write('\n\nAll Accuracies: ' + str(acc))
-    f.write('\n\nWeights: ' + str(weights))
-    f.write('\n\nWidths: ' + str(widths))
-    f.close()
