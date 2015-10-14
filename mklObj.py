@@ -41,34 +41,34 @@ def generate_binToy():
     """
     num = 30
     num_components = 4
-    means = zeros((num_components, 2))
+    means = numpy.zeros((num_components, 2))
     means[0] = [-1, 1]
     means[1] = [2, -1.5]
     means[2] = [-1, -3]
     means[3] = [2, 1]
 
-    covs = array([[1.0, 0.0], [0.0, 1.0]])
+    covs = numpy.array([[1.0, 0.0], [0.0, 1.0]])
 
     gmm = GMM(num_components)
     [gmm.set_nth_mean(means[i], i) for i in range(num_components)]
     [gmm.set_nth_cov(covs, i) for i in range(num_components)]
-    gmm.set_coef(array([1.0, 0.0, 0.0, 0.0]))
-    xntr = array([gmm.sample() for i in xrange(num)]).T
-    xnte = array([gmm.sample() for i in xrange(5000)]).T
-    gmm.set_coef(array([0.0, 1.0, 0.0, 0.0]))
-    xntr1 = array([gmm.sample() for i in xrange(num)]).T
-    xnte1 = array([gmm.sample() for i in xrange(5000)]).T
-    gmm.set_coef(array([0.0, 0.0, 1.0, 0.0]))
-    xptr = array([gmm.sample() for i in xrange(num)]).T
-    xpte = array([gmm.sample() for i in xrange(5000)]).T
-    gmm.set_coef(array([0.0, 0.0, 0.0, 1.0]))
-    xptr1 = array([gmm.sample() for i in xrange(num)]).T
-    xpte1 = array([gmm.sample() for i in xrange(5000)]).T
+    gmm.set_coef(numpy.array([1.0, 0.0, 0.0, 0.0]))
+    xntr = numpy.array([gmm.sample() for i in xrange(num)]).T
+    xnte = numpy.array([gmm.sample() for i in xrange(5000)]).T
+    gmm.set_coef(numpy.array([0.0, 1.0, 0.0, 0.0]))
+    xntr1 = numpy.array([gmm.sample() for i in xrange(num)]).T
+    xnte1 = numpy.array([gmm.sample() for i in xrange(5000)]).T
+    gmm.set_coef(numpy.array([0.0, 0.0, 1.0, 0.0]))
+    xptr = numpy.array([gmm.sample() for i in xrange(num)]).T
+    xpte = numpy.array([gmm.sample() for i in xrange(5000)]).T
+    gmm.set_coef(numpy.array([0.0, 0.0, 0.0, 1.0]))
+    xptr1 = numpy.array([gmm.sample() for i in xrange(num)]).T
+    xpte1 = numpy.array([gmm.sample() for i in xrange(5000)]).T
 
-    return (RealFeatures(concatenate((xntr, xntr1, xptr, xptr1), axis=1)),  # Train Data
-            RealFeatures(concatenate((xnte, xnte1, xpte, xpte1), axis=1)),  # Test Data
-            BinaryLabels(concatenate((-ones(2 * num), ones(2 * num)))),  # Train Labels
-            BinaryLabels(concatenate((-ones(10000), ones(10000)))))  # Test Labels
+    return (RealFeatures(numpy.concatenate((xntr, xntr1, xptr, xptr1), axis=1)),  # Train Data
+            RealFeatures(numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)),  # Test Data
+            BinaryLabels(numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num)))),  # Train Labels
+            BinaryLabels(numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))))  # Test Labels
 
 # Exception handling:
 class customException(Exception):
@@ -304,10 +304,11 @@ class mklObj(object):
         self.__binary = binary
         if self.__binary:
             self.mkl = MKLClassification()  # MKL object (Binary)
+            self.mklC = [2.0, 2.0]  # Setting MKL regularization parameters (different values for imbalanced classes).
         else:  # two classes are imbalanced. Equal for balanced densities
             self.mkl = MKLMulticlass()  # MKL object (Multiclass).
+            self.mklC = mklC  # Setting MKL regularization parameter
 
-        self.mklC = mklC  # Setting regularization parameter. These are different when the
         self.weightRegNorm = weightRegNorm  # Setting the basis' weight vector norm
         self.SVMepsilon = SVMepsilon  # setting the transducer stop (convergence) criterion
         self.MKLepsilon = MKLepsilon  # setting the MKL stop criterion. The value suggested by
