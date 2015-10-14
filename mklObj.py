@@ -767,15 +767,15 @@ class mklObj(object):
         problems imbalanced densities are not considered, so uniquely the first argument is caught by the method.
         If one or both arguments are misplaced the default values are one both them.
 
-        @type value: float
+        @type value: float (greater than zero. There exits the zero-norm, but it is not considered here.)
         .. seealso:: Page 4 of Bagchi,(2014) SVM Classifiers Based On Imperfect Training Data.
         """
         if self.__binary:
             assert len(value) == 2
-            assert (isinstance(value, (list, float)) and value[0] >= 0.0 and value[1] >= 0.0)
+            assert (isinstance(value, (list, float)) and value[0] > 0.0 and value[1] > 0.0)
             self.mkl.set_C(value[0], value[1])
         else:
-            assert (isinstance(value, float) and value >= 0.0)
+            assert (isinstance(value, float) and value > 0.0)
             self.mkl.set_C(value)
 
         self.__mklC = value
