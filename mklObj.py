@@ -67,7 +67,7 @@ def generate_binToy(file_data = None, file_labels = None):
     xpte1 = numpy.array([gmm.sample() for i in xrange(5000)]).T
 
     if not file_data:
-        pdb.set_trace()
+
         return (RealFeatures(numpy.concatenate((xntr, xntr1, xptr, xptr1), axis=1)),  # Train Data
             RealFeatures(numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)),  # Test Data
             BinaryLabels(numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num)))),  # Train Labels
@@ -78,21 +78,21 @@ def generate_binToy(file_data = None, file_labels = None):
                                       numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)), axis = 1)
         labels = numpy.concatenate((numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num))),
                                     numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))), axis = 1).astype(int)
-        #pdb.set_trace()
+        numpy.random.shuffle(labels)
         numpy.savetxt(file_data, data_set, fmt='%f')
         numpy.savetxt(file_labels, labels, fmt='%d')
 
 
-def load_binData( tr_ts_portion, fileTrain, fileLabels, dataRoute = None):
+def load_binData(tr_ts_portion = None, fileTrain = None, fileLabels = None, dataRoute = None):
     if not dataRoute:
         dataRoute = getcwd()+'/'
-
-    assert (tr_ts_portion > 0.0 and tr_ts_portion <= 1.0) # The proportion of dividing the dataset into train and test is in (0, 1]
+    assert fileTrain and fileLabels # One (or both) of the input files are not given.
+    assert (tr_ts_portion > 0.0 and tr_ts_portion <= 1.0) # The proportion of dividing the data set into train and test is in (0, 1]
 
     lm = LoadMatrix()
     dataSet = lm.load_numbers(dataRoute + fileTrain)
     labels = lm.load_labels(dataRoute + fileLabels)
-    pdb.set_trace()
+    #pdb.set_trace()
     return (RealFeatures(dataSet.T[0:tr_ts_portion * len(dataSet.T)].T),  # Return the training set, 3/4 * dataSet
             RealFeatures(dataSet.T[tr_ts_portion * len(dataSet.T):].T),  # Return the test set, 1/4 * dataSet
             BinaryLabels(labels[0:tr_ts_portion * len(labels)]),  # Return corresponding train and test labels

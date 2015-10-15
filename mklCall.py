@@ -15,8 +15,8 @@ import argparse
 #                             'label_train_multiclass_digits500.dat')# Multi-class Labels file name
 
 # tr_ts_portion, fileTrain, fileLabels, dataRoute
-[feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain='fm_train_binary_92.dat',
-                                                             fileLabels='label_train_twoclass.dat',
+[feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain='fm_train_real.dat',
+                                                             fileLabels='shuffle_twoClass_labels.dat',
                                                              dataRoute='/home/iarroyof/shogun-data/toy/')
 
 #[feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
