@@ -7,6 +7,7 @@ from tools.load import LoadMatrix
 import random
 from math import sqrt
 import numpy
+from os import getcwd
 import pdb
 
 
@@ -35,7 +36,7 @@ def load_multiclassToy(dataRoute, fileTrain, fileLabels):
             MulticlassLabels(labels[(3 * len(labels) / 4):]))
 
 # 2D Toy data generator
-def generate_binToy():
+def generate_binToy(file_data = None, file_labels = None):
     """:return: [RealFeatures(train_data),RealFeatures(train_data),BinaryLabels(train_labels),BinaryLabels(test_labels)]
     This method generates random 2D training and test data for binary classification. The labels are {-1, 1} vectors.
     """
@@ -65,10 +66,37 @@ def generate_binToy():
     xptr1 = numpy.array([gmm.sample() for i in xrange(num)]).T
     xpte1 = numpy.array([gmm.sample() for i in xrange(5000)]).T
 
-    return (RealFeatures(numpy.concatenate((xntr, xntr1, xptr, xptr1), axis=1)),  # Train Data
+    if not file_data:
+        pdb.set_trace()
+        return (RealFeatures(numpy.concatenate((xntr, xntr1, xptr, xptr1), axis=1)),  # Train Data
             RealFeatures(numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)),  # Test Data
             BinaryLabels(numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num)))),  # Train Labels
             BinaryLabels(numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))))  # Test Labels
+    else:
+        #pdb.set_trace()
+        data_set = numpy.concatenate((numpy.concatenate((xntr, xntr1, xptr, xptr1), axis=1),
+                                      numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)), axis = 1)
+        labels = numpy.concatenate((numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num))),
+                                    numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))), axis = 1).astype(int)
+        #pdb.set_trace()
+        numpy.savetxt(file_data, data_set, fmt='%f')
+        numpy.savetxt(file_labels, labels, fmt='%d')
+
+
+def load_binData( tr_ts_portion, fileTrain, fileLabels, dataRoute = None):
+    if not dataRoute:
+        dataRoute = getcwd()+'/'
+
+    assert (tr_ts_portion > 0.0 and tr_ts_portion <= 1.0) # The proportion of dividing the dataset into train and test is in (0, 1]
+
+    lm = LoadMatrix()
+    dataSet = lm.load_numbers(dataRoute + fileTrain)
+    labels = lm.load_labels(dataRoute + fileLabels)
+    pdb.set_trace()
+    return (RealFeatures(dataSet.T[0:tr_ts_portion * len(dataSet.T)].T),  # Return the training set, 3/4 * dataSet
+            RealFeatures(dataSet.T[tr_ts_portion * len(dataSet.T):].T),  # Return the test set, 1/4 * dataSet
+            BinaryLabels(labels[0:tr_ts_portion * len(labels)]),  # Return corresponding train and test labels
+            BinaryLabels(labels[tr_ts_portion * len(labels):]))
 
 # Exception handling:
 class customException(Exception):

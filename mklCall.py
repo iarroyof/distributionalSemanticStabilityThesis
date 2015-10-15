@@ -14,7 +14,13 @@ import argparse
 #                             'fm_train_multiclass_digits500.dat',   # Multi-class dataSet examples file name
 #                             'label_train_multiclass_digits500.dat')# Multi-class Labels file name
 
-[feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
+# tr_ts_portion, fileTrain, fileLabels, dataRoute
+[feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain='fm_train_binary_92.dat',
+                                                             fileLabels='label_train_twoclass.dat',
+                                                             dataRoute='/home/iarroyof/shogun-data/toy/')
+
+#[feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
+
 # We have redesigned our classification problem to be binary. It is because of the semantic similarity problem proposed
 # by SemEval. An input (combined) vector encodes distributional and word context information from a pair of sentences.
 # We hypothesized this vector also encodes the similarity of such a pair. How ever, we thing this combination can be
