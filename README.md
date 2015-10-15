@@ -23,7 +23,7 @@ We need excecuting the following piped command in the Ubuntu shell (be sure all 
 
 The `gridGen.py` script writes, e.g., 5 paramemter search paths to the stdout separately. These paths are randomly generated from the  file `gridParameterDic.txt` which contains a dictionary of parameters. The set of paths is read by the `mklParallel.sh` bash script who yields multiple processing jobs (The OS manages the thing if there are more processes than machine cores). Until the results of these jobs are writen at all to stdout, the `mklReducer.py` script reads them, prints them and emites the one with the maximum performace. These results are subsequenly writen either to an output file, e.g. `o.txt`, or to stdout (if the last one is not specified).
 
-After results are emited, we can use the resulting best path as parameter set for performing consistet inner products between pairs of input word/prhase/sentence (WPS) vectors. 
+After results are emited, we can use the resulting best path as parameter set for performing inner products between pairs of input word/prhase/sentence (WPS) vectors. These pairwise products are easily conceived as consistent semantic similarity scores.
 
 # Current idea
 
