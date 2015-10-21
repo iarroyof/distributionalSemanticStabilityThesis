@@ -12,6 +12,34 @@ import pdb
 
 
 # .. todo:: Specify and validate input and returning types for functions.
+
+def open_configuration_file(fileName):
+    """ Loads the input data configuration file. The first line is the name of the training dataset. The second line is
+    the name of the file containing labels and the third one is the directory of these files. See an example:
+
+    fm_train_binary_92.dat
+    shuffle_twoClass_labels.dat
+    /home/iarroyof/shogun-data/toy/
+
+    The third line can be omitted (do not include it without the ending slash '/'). No other lines can be partially
+    omitted. In case you do not need for specifying files for training, let empty the configuration file. Comments or
+    other different information are not allowed.
+    """
+    f = open(fileName)
+    data_files = f.read().splitlines()
+# Validate the file for correct formatting
+    if len(data_files) > 1:
+        assert data_files[0] != '' and data_files[1] != '' # Bad config file format or less parameters than needed. Fix the format.
+        if len(data_files) > 2:
+            if data_files[2] == '':
+                data_files[2] = None
+        else:
+            data_files.append(None)
+    else:
+        data_files = [None, None, None]
+
+    return  data_files
+
 # Loading toy multiclass data from files
 def load_multiclassToy(dataRoute, fileTrain, fileLabels):
     """ :returns: [RealFeatures(training_data), RealFeatures(test_data), MulticlassLabels(train_labels),
@@ -73,9 +101,9 @@ def generate_binToy(file_data = None, file_labels = None):
             BinaryLabels(numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num)))),  # Train Labels
             BinaryLabels(numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))))  # Test Labels
     else:
-        #pdb.set_trace()
+
         data_set = numpy.concatenate((numpy.concatenate((xntr, xntr1, xptr, xptr1), axis=1),
-                                      numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)), axis = 1)
+                                      numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)), axis = 1).T
         labels = numpy.concatenate((numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num))),
                                     numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))), axis = 1).astype(int)
         numpy.random.shuffle(labels)
@@ -92,7 +120,7 @@ def load_binData(tr_ts_portion = None, fileTrain = None, fileLabels = None, data
     lm = LoadMatrix()
     dataSet = lm.load_numbers(dataRoute + fileTrain)
     labels = lm.load_labels(dataRoute + fileLabels)
-    #pdb.set_trace()
+
     return (RealFeatures(dataSet.T[0:tr_ts_portion * len(dataSet.T)].T),  # Return the training set, 3/4 * dataSet
             RealFeatures(dataSet.T[tr_ts_portion * len(dataSet.T):].T),  # Return the test set, 1/4 * dataSet
             BinaryLabels(labels[0:tr_ts_portion * len(labels)]),  # Return corresponding train and test labels
@@ -332,8 +360,8 @@ class mklObj(object):
         self.__binary = binary
         if self.__binary:
             self.mkl = MKLClassification()  # MKL object (Binary)
-            self.mklC = [2.0, 2.0]  # Setting MKL regularization parameters (different values for imbalanced classes).
-        else:  # two classes are imbalanced. Equal for balanced densities
+            self.mklC = [mklC, mklC]  # Setting MKL regularization parameters (different values for imbalanced classes).
+        else:
             self.mkl = MKLMulticlass()  # MKL object (Multiclass).
             self.mklC = mklC  # Setting MKL regularization parameter
 
@@ -442,7 +470,7 @@ class mklObj(object):
         try:  # Verifying if number of  kernels was greater or equal to 2 after training
             if self.ker.get_num_subkernels() < 2:
                 raise customException(
-                    'Multikernel coeffients were less than 2 after training. Revise object settings!!!')
+                    'Multikernel coefficients were less than 2 after training. Revise object settings!!!')
         except customException, (instance):
             print 'Caugth: ' + instance.parameter
 
@@ -460,8 +488,8 @@ class mklObj(object):
 
         if self.verbose:
             print 'Kernel trained... Weights: ', self.weights
-        # Evaluate the learnt Kernel. Here it is asumed 'ker' is learnt, so we only need for initialize it again but with
-        # the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
+        # Evaluate the learnt Kernel. Here it is assumed 'ker' is learnt, so we only need for initialize it again but
+        # with the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
         self.ker.init(self._featsTr, featsTs)  # Now with test examples. The inner product between training
         self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gramm Matrix.
         out = self.mkl.apply()  # Applying the obtained Gramm Matrix
