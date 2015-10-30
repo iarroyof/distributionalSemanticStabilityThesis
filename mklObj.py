@@ -328,8 +328,8 @@ class mklObj(object):
                         threads = 2,
                         MKLepsilon = 0.001,
                         binary = False,
-                        verbose = False)
-
+                        verbose = False) # IMPORTANT: Don't use this feature (True) if you are working in pipe mode.
+                                         # The object will print undesired outputs to the stdout.
     The above values are the defaults, so if they are suitable for you it is possible instantiating the object by simply
     stating: kernel = mk.mklObj(). Even it is possible modifying a subset of input parameters (keeping others as
     default): kernel = mk.mklObj(weightRegNorm = 1, mklC = 10, SVMepsilon = 1e-2). See the documentation of each setter
@@ -598,6 +598,10 @@ class mklObj(object):
     @property
     def verbose(self):
         """This is the verbose flag, which is used for monitoring the object training procedure.
+
+        IMPORTANT: Don't use this feature (True) if you are working in pipe mode. The object will print undesired
+        outputs to the stdout.
+
         :rtype : bool
         """
         return self._verbose
@@ -656,10 +660,10 @@ class mklObj(object):
 
         :rtype : list of float
         """
-        x = self.ker.get_subkernel_weights()
-        we=[]
-        for w in x:
-            we.append(w)
+        x = self.ker.get_subkernel_weights() # We first get the kernel weights into 'x' because this function not always
+        we=[]                                   # returns a list, which causes error while printing to an output file.
+        for w in x:                             # Thus the loop below stores 'x' into 'we', item by item for generating
+            we.append(w)                        # a valid python list to be returned.
         self.__weights = we
         return self.__weights
 
