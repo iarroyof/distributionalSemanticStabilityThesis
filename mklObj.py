@@ -10,9 +10,6 @@ import numpy
 from os import getcwd
 import pdb
 
-
-# .. todo:: Specify and validate input and returning types for functions.
-
 def open_configuration_file(fileName):
     """ Loads the input data configuration file. The first line is the name of the training dataset. The second line is
     the name of the file containing labels and the third one is the directory of these files. See an example:
@@ -659,7 +656,11 @@ class mklObj(object):
 
         :rtype : list of float
         """
-        self.__weights = self.ker.get_subkernel_weights()
+        x = self.ker.get_subkernel_weights()
+        we=[]
+        for w in x:
+            we.append(w)
+        self.__weights = we
         return self.__weights
 
     @property

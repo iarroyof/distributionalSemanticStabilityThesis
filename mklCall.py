@@ -61,7 +61,7 @@ def mkPool(path):
                    hyper=path[3],                   # With not effect when kernel family is polynomial and some
                    pKers=path[2])
 
-    return mkl_object.testerr, str(mkl_object.weights), str(mkl_object.sigmas)
+    return mkl_object.testerr, mkl_object.weights, mkl_object.sigmas
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='mklObject calling')
@@ -71,5 +71,5 @@ if __name__ == '__main__':
     path = list(literal_eval(args.current_path))
     [performance, weights, kernel_params] = mkPool(path)
     stdout.flush()
-    stdout.write('%s;%s;%s;%s\n' % (performance,path,weights,kernel_params))
+    stdout.write('%s;%s;%s;%s\n' % (performance, path,weights, kernel_params))
     #print performance,';',path,';',weights,';',kernel_params

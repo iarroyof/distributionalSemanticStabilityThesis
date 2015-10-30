@@ -36,7 +36,6 @@ else:
 
 for line in ac:
     a = line.strip().split(';')
-    print a
     for att, value in args.__dict__.iteritems():
         if att == 'paths':
             if value: d['path']=a[1]
@@ -53,6 +52,7 @@ for line in ac:
         else:
             acc.append((float(a[0]), a[1:]))
             print d
+            d = {}
 
 if args.ranked:
     for i in sorted(r, key=lambda k : k['performance'], reverse=True):
