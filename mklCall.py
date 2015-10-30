@@ -5,26 +5,26 @@ __author__ = 'Ignacio Arroyo Fernandez'
 from mklObj import *
 import pdb
 from ast import literal_eval
+from sys import stdout
 import argparse
 
 files = open_configuration_file('mkl_object.conf')
-# [feats_train,
-# feats_test,
-# labelsTr,
-# labelsTs] = load_multiclassToy(files[2],  # Data directory
-#                               files[0],   # Multi-class dataSet examples file name
-#                               files[1])# Multi-class Labels file name
+
+# [feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
+
+#[feats_train, feats_test, labelsTr, labelsTs] = load_multiclassToy(files[2],  # Data directory
+#                                                                   files[0],   # Multi-class dataSet examples file name
+#                                                                   files[1])# Multi-class Labels file name
 
 [feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain=files[0], #'toy_data.dat'
                                                              fileLabels =files[1],
                                                              dataRoute=files[2])
 
-#[feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
-
 # We have redesigned our classification problem to be binary. It is because of the semantic similarity problem proposed
 # by SemEval. An input (combined) vector encodes distributional and word context information from a pair of sentences.
-# We hypothesized this vector also encodes the similarity of such a pair. How ever, we thing this combination can be
+# We hypothesized this vector also encodes the similarity of such a pair. How ever, we think this combination can be
 # made in different ways, so we will test some of them which are inspired in signal processing theory.
+
 binary = True
 mkl_object = mklObj(binary=binary)
 
@@ -61,7 +61,7 @@ def mkPool(path):
                    hyper=path[3],                   # With not effect when kernel family is polynomial and some
                    pKers=path[2])
 
-    return mkl_object.testerr
+    return mkl_object.testerr, str(mkl_object.weights), str(mkl_object.sigmas)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='mklObject calling')
@@ -69,5 +69,7 @@ if __name__ == '__main__':
     #parser.add_argument('-t', type=int, dest = 'number_of_trials', metavar = 'N')
     args = parser.parse_args()
     path = list(literal_eval(args.current_path))
-    print str(mkPool(path))+';'+str(path)
-
+    [performance, weights, kernel_params] = mkPool(path)
+    stdout.flush()
+    stdout.write('%s;%s;%s;%s\n' % (performance,path,weights,kernel_params))
+    #print performance,';',path,';',weights,';',kernel_params

@@ -1,7 +1,2 @@
-['98.8235294118', "[('polynomial', [1, 5]), '3-gr', 28, 'linear', 1.5, 2.0]"]
-['100.0', "[('cauchy', [0.5, 50]), '1-gr_tfidf', 12, 'gamma', 5.0, 40.0]"]
-['100.0', "[('exponential', [0.5, 50]), '1-gr', 7, 'gaussian', 2.0, 10.0]"]
-['100.0', "[('inverseQuadratic', [0.1, 10]), '2-gr', 14, 'quadratic', 2.0, 2.5]"]
-['100.0', "[('wave', [0.5, 100]), '3-gr_tfidf', 40, 'triangular', 1.0, 20.0]"]
+#All paths:
 
-The maximum performance path:  (100.0, "[('wave', [0.5, 100]), '3-gr_tfidf', 40, 'triangular', 1.0, 20.0]")
