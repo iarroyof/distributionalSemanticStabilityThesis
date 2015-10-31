@@ -19,9 +19,9 @@ scipy - The scientific Python stack
 
 We need executing the following piped command in the Ubuntu shell (be sure all files are in the same system file path where you execute the command):
 
-`$ python gridGen.py -f gridParameterDic.txt -t 5 | ./mklParallel.sh | python mklReducer.py > o.txt`
+`$ python gridGen.py -f gridParameterDic.txt -t 5 | ./mklParallel.sh | python mklReducer.py [-options] > o.txt`
 
-The `gridGen.py` script writes, e.g., 5 parameter search paths to the `stdout` separately. These paths are randomly generated from the  file `gridParameterDic.txt` which contains a dictionary of parameters. The set of paths is read by the `mklParallel.sh` bash script who yields multiple processing jobs (The OS manages the thing if there are more processes than machine cores). Until the results of these jobs are writen at all to stdout, the `mklReducer.py` script reads them, prints them and emites the one with the maximum performace. These results are subsequenly writen either to an output file, e.g. `o.txt`, or to stdout (if the last one is not specified).
+The `gridGen.py` script writes, e.g., 5 parameter search paths to the `stdout` separately. These paths are randomly generated from the  file `gridParameterDic.txt` which contains a dictionary of parameters. The set of paths is read by the `mklParallel.sh` bash script who yields multiple processing jobs (The OS manages the thing if there are more processes than machine cores). Until the results of these jobs are writen at all to stdout, the `mklReducer.py` script reads them, prints them and emites the one with the maximum performace (command python mklReducer.py -h for seeing -options). These results are subsequenly writen either to an output file, e.g. `o.txt`, or to stdout (if the last one is not specified).
 
 After results are emitted, we can use the resulting best path as parameter set for performing inner products between pairs of input word/phrase/sentence (WPS) vectors. These pairwise products are easily conceived as consistent semantic similarity scores.
 
