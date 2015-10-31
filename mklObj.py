@@ -488,8 +488,8 @@ class mklObj(object):
         # Evaluate the learnt Kernel. Here it is assumed 'ker' is learnt, so we only need for initialize it again but
         # with the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
         self.ker.init(self._featsTr, featsTs)  # Now with test examples. The inner product between training
-        self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gramm Matrix.
-        out = self.mkl.apply()  # Applying the obtained Gramm Matrix
+        self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gram Matrix.
+        out = self.mkl.apply()  # Applying the obtained Gram Matrix
         # ----------------------------------------------------------------------------------
         if self.__binary:  # If the problem is either binary or multiclass, different
             evalua = ErrorRateMeasure()  # performance measures are computed.

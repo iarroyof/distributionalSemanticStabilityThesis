@@ -9,47 +9,28 @@ from sys import stdout
 import argparse
 
 files = open_configuration_file('mkl_object.conf')
-
 # [feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
-
-#[feats_train, feats_test, labelsTr, labelsTs] = load_multiclassToy(files[2],  # Data directory
-#                                                                   files[0],   # Multi-class dataSet examples file name
-#                                                                   files[1])# Multi-class Labels file name
-
-[feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain=files[0], #'toy_data.dat'
+[feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain=files[0],
                                                              fileLabels =files[1],
-                                                             dataRoute=files[2])
-
+                                                             dataRoute=files[2]) # Data directory
 # We have redesigned our classification problem to be binary. It is because of the semantic similarity problem proposed
 # by SemEval. An input (combined) vector encodes distributional and word context information from a pair of sentences.
 # We hypothesized this vector also encodes the similarity of such a pair. How ever, we think this combination can be
 # made in different ways, so we will test some of them which are inspired in signal processing theory.
-
 binary = True
 mkl_object = mklObj(binary=binary)
 
 def mkPool(path):
-    global feats_train
-    global feats_test
-    global labelsTr
-    global labelsTs
-    global mkl_object
+    global feats_train; global feats_test; global labelsTr; global labelsTs; global mkl_object
 
-    if path[0][0] is 'gaussian':
-        a = 2*path[0][1][0]**2
-        b = 2*path[0][1][1]**2
-    else:
-        a = path[0][1][0]
-        b = path[0][1][1]
+    if path[0][0] is 'gaussian': a = 2*path[0][1][0]**2; b = 2*path[0][1][1]**2
+    else: a = path[0][1][0]; b = path[0][1][1]
     # For now, similarity and dissimilarity are assumed to be exactly equally corpus-distributed, i.e. the amount of
     # semantically similar sentences is very likely the same than the amount of dissimilar ones over the corpus. Thus
     # the regularization parameters for the binary view of our problem are the same for both classes. In the case we
     # determine a counterapproach it is needed to determine the unbalancing proportion for including it bellow.
-    if binary:
-        mkl_object.mklC = [path[5], path[5]]
-    else:
-        mkl_object.mklC = path[5]
-
+    if binary: mkl_object.mklC = [path[5], path[5]]
+    else: mkl_object.mklC = path[5]
     mkl_object.weightRegNorm = path[4]
     mkl_object.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,
@@ -66,10 +47,8 @@ def mkPool(path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='mklObject calling')
     parser.add_argument('-p', type=str, dest = 'current_path', help='Specifies the grid path to be tested by the mkl object.')
-    #parser.add_argument('-t', type=int, dest = 'number_of_trials', metavar = 'N')
     args = parser.parse_args()
     path = list(literal_eval(args.current_path))
     [performance, weights, kernel_params] = mkPool(path)
     stdout.flush()
     stdout.write('%s;%s;%s;%s\n' % (performance, path,weights, kernel_params))
-    #print performance,';',path,';',weights,';',kernel_params
