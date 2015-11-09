@@ -10,9 +10,6 @@ import numpy
 from os import getcwd
 import pdb
 
-
-# .. todo:: Specify and validate input and returning types for functions.
-
 def open_configuration_file(fileName):
     """ Loads the input data configuration file. The first line is the name of the training dataset. The second line is
     the name of the file containing labels and the third one is the directory of these files. See an example:
@@ -331,8 +328,8 @@ class mklObj(object):
                         threads = 2,
                         MKLepsilon = 0.001,
                         binary = False,
-                        verbose = False)
-
+                        verbose = False) # IMPORTANT: Don't use this feature (True) if you are working in pipe mode.
+                                         # The object will print undesired outputs to the stdout.
     The above values are the defaults, so if they are suitable for you it is possible instantiating the object by simply
     stating: kernel = mk.mklObj(). Even it is possible modifying a subset of input parameters (keeping others as
     default): kernel = mk.mklObj(weightRegNorm = 1, mklC = 10, SVMepsilon = 1e-2). See the documentation of each setter
@@ -491,8 +488,8 @@ class mklObj(object):
         # Evaluate the learnt Kernel. Here it is assumed 'ker' is learnt, so we only need for initialize it again but
         # with the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
         self.ker.init(self._featsTr, featsTs)  # Now with test examples. The inner product between training
-        self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gramm Matrix.
-        out = self.mkl.apply()  # Applying the obtained Gramm Matrix
+        self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gram Matrix.
+        out = self.mkl.apply()  # Applying the obtained Gram Matrix
         # ----------------------------------------------------------------------------------
         if self.__binary:  # If the problem is either binary or multiclass, different
             evalua = ErrorRateMeasure()  # performance measures are computed.
@@ -601,6 +598,10 @@ class mklObj(object):
     @property
     def verbose(self):
         """This is the verbose flag, which is used for monitoring the object training procedure.
+
+        IMPORTANT: Don't use this feature (True) if you are working in pipe mode. The object will print undesired
+        outputs to the stdout.
+
         :rtype : bool
         """
         return self._verbose
@@ -659,7 +660,11 @@ class mklObj(object):
 
         :rtype : list of float
         """
-        self.__weights = self.ker.get_subkernel_weights()
+        x = self.ker.get_subkernel_weights() # We first get the kernel weights into 'x' because this function not always
+        we=[]                                   # returns a list, which causes error while printing to an output file.
+        for w in x:                             # Thus the loop below stores 'x' into 'we', item by item for generating
+            we.append(w)                        # a valid python list to be returned.
+        self.__weights = we
         return self.__weights
 
     @property
