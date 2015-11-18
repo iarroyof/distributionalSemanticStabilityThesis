@@ -68,27 +68,6 @@ class gridObj(object):
                 grid_items[item] = dic # Returns a list of tuples. Each showing the item key and the
                 dic = []
 
-        #pdb.set_trace()
-# Hereinafter, this code can be executed outside the function. Where the object was constructed.
-# It is because we are generating situation specific structures, according to the depth of the parameter dictionary for
-# some items, e.g. basisKernelFamily. Also other items are replaced by non-index values, in order to get them directly
-# for training. Thus This grid keeps universal if the code below is executed outside this object.
-#         pdb.set_trace()
-#         j = 0
-#         for i in grid_items['basisKernelFamily']:
-#             grid_items['basisKernelFamily'][j] = (self.grid['basisKernelFamily'][i][0],
-#                                                    self.grid['basisKernelFamily'][i][1])
-#             j += 1
-#
-#         j = 0
-#         for i in grid_items['basisKernelParameterDistribution']:
-#             grid_items['basisKernelParameterDistribution'][j] = self.grid['basisKernelParameterDistribution'][i]
-#             j += 1
-#
-#         j = 0
-#         for i in grid_items['inputSLM']:
-#             grid_items['inputSLM'][j] = self.grid['inputSLM'][i]
-#             j += 1
         # This code transposes the path list and removes the item names (unuseful for grid search)
         self.grid_paths =  [list(j) for j in zip(*[grid_items[i] for i in grid_items])]
 
@@ -150,10 +129,6 @@ class gridObj(object):
         try:
             if not value:
                 raise customException('The parameter dictionary is empty.')
-            #elif isinstance(value, dict):
-            #    raise customException('The value assigned to \'grid\' is not a Python dictionary. \
-            #                            Please see the format by typing help(grdObj.grid) in your Python console for\
-            #                            seeing an example.')
 
             for param in value:
                 if not param:
