@@ -8,7 +8,7 @@ import random
 from math import sqrt
 import numpy
 from os import getcwd
-import pdb
+from pdb import set_trace
 
 def open_configuration_file(fileName):
     """ Loads the input data configuration file. The first line is the name of the training dataset. The second line is
@@ -103,9 +103,19 @@ def generate_binToy(file_data = None, file_labels = None):
                                       numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)), axis = 1).T
         labels = numpy.concatenate((numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num))),
                                     numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))), axis = 1).astype(int)
-        numpy.random.shuffle(labels)
-        numpy.savetxt(file_data, data_set, fmt='%f')
-        numpy.savetxt(file_labels, labels, fmt='%d')
+        #set_trace()
+        indexes = range(len(data_set))
+        numpy.random.shuffle(indexes)
+        fd = open(file_data, 'w')
+        fl = open(file_labels, 'w')
+        for i in indexes:
+            fd.write('%f %f\n' % (data_set[i][0],data_set[i][1]))
+            fl.write(str(labels[i])+'\n')
+
+        fd.close()
+        fl.close()
+        #numpy.savetxt(file_data, data_set, fmt='%f')
+        #numpy.savetxt(file_labels, labels, fmt='%d')
 
 
 def load_binData(tr_ts_portion = None, fileTrain = None, fileLabels = None, dataRoute = None):
@@ -219,7 +229,7 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         #pdb.set_trace()
 
 # Combining kernels
-def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
+def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
     """:return: Shogun CombinedKernel object.
     This module generates a list of basis kernels. These kernels are tuned according to the vector ''widths''. Input
     parameters ''featsL'' and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS, these both objects
@@ -358,7 +368,7 @@ class mklObj(object):
         if self.__binary:
             self.mkl = MKLClassification()  # MKL object (Binary)
             self.mklC = [mklC, mklC]  # Setting MKL regularization parameters (different values for imbalanced classes).
-        else:
+        else:                         # You can modify them separately by using the corresponding setter.
             self.mkl = MKLMulticlass()  # MKL object (Multiclass).
             self.mklC = mklC  # Setting MKL regularization parameter
 
@@ -487,12 +497,12 @@ class mklObj(object):
             print 'Kernel trained... Weights: ', self.weights
         # Evaluate the learnt Kernel. Here it is assumed 'ker' is learnt, so we only need for initialize it again but
         # with the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
-        self.ker.init(self._featsTr, featsTs)  # Now with test examples. The inner product between training
-        self.mkl.set_kernel(self.ker)  # and test examples generates the corresponding Gram Matrix.
+        self.ker.init(self._featsTr, featsTs)   # Now with test examples. The inner product between training
+        self.mkl.set_kernel(self.ker)           # and test examples generates the corresponding Gram Matrix.
         out = self.mkl.apply()  # Applying the obtained Gram Matrix
         # ----------------------------------------------------------------------------------
-        if self.__binary:  # If the problem is either binary or multiclass, different
-            evalua = ErrorRateMeasure()  # performance measures are computed.
+        if self.__binary:                   # If the problem is either binary or multiclass, different
+            evalua = ErrorRateMeasure()     # performance measures are computed.
             self.__testerr = 100 - evalua.evaluate(out, targetsTs) * 100
         else:
             evalua = MulticlassAccuracy()
@@ -656,15 +666,14 @@ class mklObj(object):
     # function getters
     @property
     def weights(self):
-        """This method is used for getting the learned weights of the MKL object.
+        """This method is used for getting the learned weights of the MKL object. We first get the kernel weights into
+        a list object, before returning it. This is because 'get_subkernel_weights()' causes error while printing to an
+        output file by means of returning a nonlist object.
 
         :rtype : list of float
         """
-        x = self.ker.get_subkernel_weights() # We first get the kernel weights into 'x' because this function not always
-        we=[]                                   # returns a list, which causes error while printing to an output file.
-        for w in x:                             # Thus the loop below stores 'x' into 'we', item by item for generating
-            we.append(w)                        # a valid python list to be returned.
-        self.__weights = we
+        self.__weights = list(self.ker.get_subkernel_weights())
+
         return self.__weights
 
     @property
