@@ -17,8 +17,8 @@ files = open_configuration_file('mkl_object.conf')
 # by SemEval. An input (combined) vector encodes distributional and word context information from a pair of sentences.
 # We hypothesized this vector also encodes the similarity of such a pair. How ever, we think this combination can be
 # made in different ways, so we will test some of them which are inspired in signal processing theory.
-binary = True
-mkl_object = mklObj(binary=binary)
+problem_type = 'binary'
+mkl_object = mklObj(problem=problem_type)
 
 def mkPool(path):
     global feats_train; global feats_test; global labelsTr; global labelsTs; global mkl_object
@@ -29,8 +29,9 @@ def mkPool(path):
     # semantically similar sentences is very likely the same than the amount of dissimilar ones over the corpus. Thus
     # the regularization parameters for the binary view of our problem are the same for both classes. In the case we
     # determine a counterapproach it is needed to determine the unbalancing proportion for including it bellow.
-    if binary: mkl_object.mklC = [path[5], path[5]]
-    else: mkl_object.mklC = path[5]
+    if problem_type == 'binary' or problem_type == 'regression':
+        mkl_object.mklC = [path[5], path[5]]
+    elif problem_type == 'multiclass': mkl_object.mklC = path[5]
     mkl_object.weightRegNorm = path[4]
     mkl_object.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,

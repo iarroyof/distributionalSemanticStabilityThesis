@@ -35,7 +35,7 @@ def open_configuration_file(fileName):
     else:
         data_files = [None, None, None]
 
-    return  data_files
+    return data_files
 
 # Loading toy multiclass data from files
 def load_multiclassToy(dataRoute, fileTrain, fileLabels):
@@ -92,7 +92,7 @@ def generate_binToy(file_data = None, file_labels = None):
     xpte1 = numpy.array([gmm.sample() for i in xrange(5000)]).T
 
     if not file_data:
-
+        set_trace()
         return (RealFeatures(numpy.concatenate((xntr, xntr1, xptr, xptr1), axis=1)),  # Train Data
             RealFeatures(numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)),  # Test Data
             BinaryLabels(numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num)))),  # Train Labels
@@ -132,6 +132,37 @@ def load_binData(tr_ts_portion = None, fileTrain = None, fileLabels = None, data
             RealFeatures(dataSet.T[tr_ts_portion * len(dataSet.T):].T),  # Return the test set, 1/4 * dataSet
             BinaryLabels(labels[0:tr_ts_portion * len(labels)]),  # Return corresponding train and test labels
             BinaryLabels(labels[tr_ts_portion * len(labels):]))
+
+def load_sparse_data(file_name = None):
+#, SparseRealFeatures
+
+
+
+
+
+
+
+def load_sparse_regressionData(fileTrain = None, fileTest = None, fileLabelsTr = None, fileLabelsTs = None):
+    """ This method loads data from sparse mtx format. Loading uniquely test data is allowed (train data is optional).
+    When training data file names are not specified, None is returned out.
+    """
+    assert fileTest and fileLabelsTs # Necessary test data set specification.
+    assert not ((fileTrain or fileLabelsTr) and not (fileTrain and fileLabelsTr)) # xor. Specify two train files
+    from scipy.io import mmread
+    from scipy.sparse import find
+
+    lm = LoadMatrix()
+    if fileTrain:
+        sci_data_tr = mmread(fileTrain).asformat('csr')
+        features_tr = SparseRealFeatures(sci_data_tr)
+        labels_tr = RegressionLabels(lm.load_labels(fileLabelsTr))
+    else: labels_tr = features_tr = None
+
+    sci_data_ts = mmread(fileTest).asformat('csr')
+    features_ts = SparseRealFeatures(sci_data_ts)
+    labels_ts = RegressionLabels(lm.load_labels(fileLabelsTs))
+
+    return features_tr, features_ts, labels_tr, labels_ts
 
 # Exception handling:
 class customException(Exception):
@@ -337,7 +368,7 @@ class mklObj(object):
                         SVMepsilon = 1e-5,
                         threads = 2,
                         MKLepsilon = 0.001,
-                        binary = False,
+                        probome = 'Multiclass',
                         verbose = False) # IMPORTANT: Don't use this feature (True) if you are working in pipe mode.
                                          # The object will print undesired outputs to the stdout.
     The above values are the defaults, so if they are suitable for you it is possible instantiating the object by simply
@@ -360,17 +391,20 @@ class mklObj(object):
     """
 
     def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=1e-5,
-                 threads=2, MKLepsilon=0.001, binary=False, verbose=False):
+                 threads=2, MKLepsilon=0.001, problem='regression', verbose=False):
         """Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
         hyperparameters (kernel fitting).
         """
-        self.__binary = binary
-        if self.__binary:
+        self.__problem = problem
+        if self.__problem == 'binary':
             self.mkl = MKLClassification()  # MKL object (Binary)
             self.mklC = [mklC, mklC]  # Setting MKL regularization parameters (different values for imbalanced classes).
-        else:                         # You can modify them separately by using the corresponding setter.
+        elif self.__problem == 'multiclass':                         # You can modify them separately by using the corresponding setter.
             self.mkl = MKLMulticlass()  # MKL object (Multiclass).
             self.mklC = mklC  # Setting MKL regularization parameter
+        elif self.__problem == 'regression':
+            self.mkl = MKLRegression()
+            self.mklC = [mklC, mklC]
 
         self.weightRegNorm = weightRegNorm  # Setting the basis' weight vector norm
         self.SVMepsilon = SVMepsilon  # setting the transducer stop (convergence) criterion
@@ -436,10 +470,12 @@ class mklObj(object):
             print "\nHyperarameter distribution: ", self._hyper, "\nLinear combination size: ", pKers, \
                 '\nWeight regularization norm: ', self.weightRegNorm, \
                 'Weight regularization parameter: ',self.mklC
-            if not self.__binary:
+            if self.__problem == 'multiclass':
                 print "Classes: ", targetsTr.get_num_classes()
-            else:
+            elif self.__problem == 'binary':
                 print "Classes: Binary"
+            elif self.__problem == 'regression':
+                print 'Regression problem'
 
             # Generating the list of subkernels. Creating the compound kernel
             # For monomial-nonhomogeneous (polynomial) kernels the hyperparameters are uniquely the degree of each monomial
@@ -501,12 +537,16 @@ class mklObj(object):
         self.mkl.set_kernel(self.ker)           # and test examples generates the corresponding Gram Matrix.
         out = self.mkl.apply()  # Applying the obtained Gram Matrix
         # ----------------------------------------------------------------------------------
-        if self.__binary:                   # If the problem is either binary or multiclass, different
+        if self.__problem == 'binary':                   # If the problem is either binary or multiclass, different
             evalua = ErrorRateMeasure()     # performance measures are computed.
             self.__testerr = 100 - evalua.evaluate(out, targetsTs) * 100
-        else:
+        elif self.__problem == 'multiclass':
             evalua = MulticlassAccuracy()
             self.__testerr = evalua.evaluate(out, targetsTs) * 100
+        elif self.__problem == 'regression':
+            evalua = MeanSquaredError()
+            m = numpy.ones(targetsTs.get_num_labels())*numpy.mean(targetsTs.get_values()) # Determination Coefficient
+            self.__testerr = evalua.evaluate(out, targetsTs)*100 / evalua.evaluate(out,RegressionLabels(m))
 
         # Verbose for learning surveying
         if self.verbose:
@@ -553,7 +593,7 @@ class mklObj(object):
         f.write('\nWidths: ')
         for item in self.sigmas:
             f.write("%s, " % item)
-        if self.__binary:
+        if self.__problem == 'binary':
             f.write('\nTest error: ' + str(100 - self.__testerr * 100))
         else:
             f.write("\nClasses: " + str(self._targetsTr.get_num_classes()))
@@ -726,7 +766,7 @@ class mklObj(object):
 
     # Readonly properties:
     @property
-    def binary(self):
+    def problem(self):
         """This method is used for getting the kind of problem the mklObj object will be trained for. If binary == True,
         the you want to train the object for a two-class classification problem. Otherwise if binary == False, you want
         to train the object for multiclass classification problems. This property can't be modified once the object has
@@ -734,7 +774,7 @@ class mklObj(object):
 
         :rtype : bool
         """
-        return self.__binary
+        return self.__problem
 
     @property
     def testerr(self):
@@ -841,11 +881,11 @@ class mklObj(object):
         @type value: float (greater than zero. There exits the zero-norm, but it is not considered here.)
         .. seealso:: Page 4 of Bagchi,(2014) SVM Classifiers Based On Imperfect Training Data.
         """
-        if self.__binary:
+        if self.__problem == 'binary' or self.__problem == 'regression':
             assert len(value) == 2
             assert (isinstance(value, (list, float)) and value[0] > 0.0 and value[1] > 0.0)
             self.mkl.set_C(value[0], value[1])
-        else:
+        elif self.__problem == 'multiclass':
             assert (isinstance(value, float) and value > 0.0)
             self.mkl.set_C(value)
 
