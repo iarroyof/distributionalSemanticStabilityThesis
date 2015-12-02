@@ -133,32 +133,27 @@ def load_binData(tr_ts_portion = None, fileTrain = None, fileLabels = None, data
             BinaryLabels(labels[0:tr_ts_portion * len(labels)]),  # Return corresponding train and test labels
             BinaryLabels(labels[tr_ts_portion * len(labels):]))
 
-def load_sparse_data(file_name = None):
-#, SparseRealFeatures
-
-
-
-
-
-
 
 def load_sparse_regressionData(fileTrain = None, fileTest = None, fileLabelsTr = None, fileLabelsTs = None):
-    """ This method loads data from sparse mtx format. Loading uniquely test data is allowed (train data is optional).
-    When training data file names are not specified, None is returned out.
+    """ This method loads data from sparse mtx file format. Loading uniquely test data is allowed (optional training
+    data). When training data file names are not specified, None is returned out for corresponding Shogun feature
+    objects. Feature list returned: [features_tr, features_ts, labels_tr, labels_ts]
+    Returned data is Short float type, which is preferable for us for memory saving, i.e. input data is not only sparse,
+    but also each vector entry is represented as a 32bit floating point (instead of the full 64bit float one). This is
+    the minimum allowed data length by Shogun (the Short<type>).
     """
     assert fileTest and fileLabelsTs # Necessary test data set specification.
-    assert not ((fileTrain or fileLabelsTr) and not (fileTrain and fileLabelsTr)) # xor. Specify two train files
+    assert not ((fileTrain or fileLabelsTr) and not (fileTrain and fileLabelsTr)) # xnor. Specify two train files
     from scipy.io import mmread
-    from scipy.sparse import find
 
     lm = LoadMatrix()
     if fileTrain:
-        sci_data_tr = mmread(fileTrain).asformat('csr')
-        features_tr = SparseRealFeatures(sci_data_tr)
-        labels_tr = RegressionLabels(lm.load_labels(fileLabelsTr))
+        sci_data_tr = mmread(fileTrain).asformat('csr').astype('float64')   # sci_data_x: COO sparse as 'int' data type,
+        features_tr = SparseRealFeatures(sci_data_tr)                  # reformated as CSR and 'float32' type for
+        labels_tr = RegressionLabels(lm.load_labels(fileLabelsTr))          # compatibility with SparseShortRealFeatures
     else: labels_tr = features_tr = None
 
-    sci_data_ts = mmread(fileTest).asformat('csr')
+    sci_data_ts = mmread(fileTest).asformat('csr').astype('float64')
     features_ts = SparseRealFeatures(sci_data_ts)
     labels_ts = RegressionLabels(lm.load_labels(fileLabelsTs))
 
@@ -169,7 +164,6 @@ class customException(Exception):
     """ This exception prevents training inconsistencies. It could be edited for accepting a complete
     dictionary of exceptions if desired.
     """
-
     def __init__(self, message):
         self.parameter = message
 
@@ -260,7 +254,7 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         #pdb.set_trace()
 
 # Combining kernels
-def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
+def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
     """:return: Shogun CombinedKernel object.
     This module generates a list of basis kernels. These kernels are tuned according to the vector ''widths''. Input
     parameters ''featsL'' and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS, these both objects
@@ -287,10 +281,11 @@ def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
     if basisFam == 'gaussian':
         for w in widths:
             kernels.append(GaussianKernel())
-            kernels[len(kernels) - 1].set_width(w)
+            kernels[-1].set_width(w)
 
     elif basisFam == 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(InverseMultiQuadricKernel(0, w, dst))
 
@@ -299,27 +294,32 @@ def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
             kernels.append(PolyKernel(0, w, False))
 
     elif basisFam == 'power':  # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(PowerKernel(0, w, dst))
 
     elif basisFam == 'rationalQuadratic':  # At least for images, using 3-norm  make differences
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(RationalQuadraticKernel(0, w, dst))
 
     elif basisFam == 'spherical':  # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(SphericalKernel(0, w, dst))
 
     elif basisFam == 'tstudent':  # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(TStudentKernel(0, w, dst))
 
     elif basisFam == 'wave':  # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(WaveKernel(0, w, dst))
 
@@ -328,12 +328,14 @@ def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
             kernels.append(WaveletKernel(0, w, 0))
 
     elif basisFam == 'cauchy':
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(CauchyKernel(0, w, dst))
 
     elif basisFam == 'exponential':  # For this kernel it is necessary specifying features at the constructor
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(ExponentialKernel(featsL, featsR, w, dst, 0))
 
@@ -486,9 +488,9 @@ class mklObj(object):
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
         else:
             # We have called 'sigmas' to any basis kernel parameter, regardless if the kernel is Gaussian or not. So
-            # generate the widths:
+            # let's generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution=hyper, size=pKers,
-                                          rango=randomRange, parameters=randomParams))#; pdb.set_trace()
+                                          rango=randomRange, parameters=randomParams))
             try:
                 z = self.sigmas.index(0)
                 self.sigmas[z] = 0.1
@@ -545,8 +547,8 @@ class mklObj(object):
             self.__testerr = evalua.evaluate(out, targetsTs) * 100
         elif self.__problem == 'regression':
             evalua = MeanSquaredError()
-            m = numpy.ones(targetsTs.get_num_labels())*numpy.mean(targetsTs.get_values()) # Determination Coefficient
-            self.__testerr = evalua.evaluate(out, targetsTs)*100 / evalua.evaluate(out,RegressionLabels(m))
+            m = numpy.ones(targetsTs.get_num_labels())*numpy.mean(targetsTs.get_labels()) # Determination Coefficient
+            self.__testerr = evalua.evaluate(out, RegressionLabels(m))*100/evalua.evaluate(targetsTs, RegressionLabels(m))
 
         # Verbose for learning surveying
         if self.verbose:

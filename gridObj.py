@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-__author__ = 'Ignacio Arroyo-Fernandez'
+__author__ = 'Ignacio Arroyo-Fernández'
 
 from mklObj import customException
 import random as rdn
 from itertools import cycle
 import os.path
-import pdb
 
 class gridObj(object):
     """

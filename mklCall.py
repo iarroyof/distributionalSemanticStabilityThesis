@@ -3,21 +3,27 @@
 __author__ = 'Ignacio Arroyo Fernandez'
 
 from mklObj import *
-import pdb
+#import pdb
 from ast import literal_eval
-from sys import stdout
+from sys import stdout, stderr
 import argparse
-
-files = open_configuration_file('mkl_object.conf')
+#//TODO: modify open_configuration_file() function for loading regression data
+# files = open_configuration_file('mkl_object.conf')
 # [feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
-[feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain=files[0],
-                                                             fileLabels =files[1],
-                                                             dataRoute=files[2]) # Data directory
+# [feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain=files[0],
+#                                                             fileLabels =files[1],
+#                                                             dataRoute=files[2]) # Data directory
 # We have redesigned our classification problem to be binary. It is because of the semantic similarity problem proposed
 # by SemEval. An input (combined) vector encodes distributional and word context information from a pair of sentences.
 # We hypothesized this vector also encodes the similarity of such a pair. How ever, we think this combination can be
 # made in different ways, so we will test some of them which are inspired in signal processing theory.
-problem_type = 'binary'
+
+[feats_train, feats_test, labelsTr, labelsTs] = load_sparse_regressionData(fileTrain = '/home/iarroyof/sparse_train.mtx',
+                                                                           fileTest = '/home/iarroyof/sparse_test.mtx',
+                                                                           fileLabelsTr = '/home/iarroyof/labelSparse_train.mtx',
+                                                                           fileLabelsTs = '/home/iarroyof/labelSparse_train.mtx')
+
+problem_type = 'regression'
 mkl_object = mklObj(problem=problem_type)
 
 def mkPool(path):
@@ -32,7 +38,7 @@ def mkPool(path):
     if problem_type == 'binary' or problem_type == 'regression':
         mkl_object.mklC = [path[5], path[5]]
     elif problem_type == 'multiclass': mkl_object.mklC = path[5]
-    mkl_object.weightRegNorm = path[4]
+    mkl_object.weightRegNorm = path[4]; stderr.write('\n-----'+path[0][0]+'-----\n')
     mkl_object.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,
                    featsTs=feats_test,
@@ -52,4 +58,4 @@ if __name__ == '__main__':
     path = list(literal_eval(args.current_path))
     [performance, weights, kernel_params] = mkPool(path)
     stdout.flush()
-    stdout.write('%s;%s;%s;%s\n' % (performance, path,weights, kernel_params))
+    stdout.write('%s;%s;%s;%s\n' % (performance, path, weights, kernel_params))
