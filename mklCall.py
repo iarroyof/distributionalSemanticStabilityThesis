@@ -50,7 +50,7 @@ def mkPool(path):
     if problem_type == 'binary' or problem_type == 'regression':
         mkl_object.mklC = [path[5], path[5]]
     elif problem_type == 'multiclass': mkl_object.mklC = path[5]
-    mkl_object.weightRegNorm = path[4]; stderr.write('\n-----'+path[0][0]+'-----\n')
+    mkl_object.weightRegNorm = path[4]
     mkl_object.fit_kernel(featsTr=feats_train,
                    targetsTr=labelsTr,
                    featsTs=feats_test,
@@ -61,7 +61,8 @@ def mkPool(path):
                    hyper=path[3],                   # With not effect when kernel family is polynomial and some
                    pKers=path[2])
 
-    return mkl_object.testerr, mkl_object.weights, mkl_object.sigmas    # If possible, return the maximum performance
+    return mkl_object.testerr, mkl_object.weights, mkl_object.sigmas, mkl_object.estimated_out
+                                                                        # If possible, return the maximum performance
                                                                         # learned machine. It it were not possible,
                                                                         # return al learned machines and make the choice
                                                                         # of saving the best one, in order to retrieve
@@ -71,6 +72,8 @@ if __name__ == '__main__':
     parser.add_argument('-p', type=str, dest = 'current_path', help='Specifies the grid path to be tested by the mkl object.')
     args = parser.parse_args()
     path = list(literal_eval(args.current_path))
-    [performance, weights, kernel_params] = mkPool(path)
-    stdout.flush()
-    stdout.write('%s;%s;%s;%s\n' % (performance, path, weights, kernel_params))
+    [performance, weights, kernel_params, output] = mkPool(path)
+    #stderr.write('\n-----'+str(output)+'-----\n')
+    #stderr.write('%s;%s;%s;%s;%s\n' % (performance, path, weights, kernel_params, output))
+    stdout.write('%s;%s;%s;%s;%s\n' % (performance, path, weights, kernel_params, output))
+

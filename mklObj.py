@@ -538,6 +538,7 @@ class mklObj(object):
         self.ker.init(self._featsTr, featsTs)   # Now with test examples. The inner product between training
         self.mkl.set_kernel(self.ker)           # and test examples generates the corresponding Gram Matrix.
         out = self.mkl.apply()  # Applying the obtained Gram Matrix
+        self.estimated_out = list(out.get_labels())
         # ----------------------------------------------------------------------------------
         if self.__problem == 'binary':                   # If the problem is either binary or multiclass, different
             evalua = ErrorRateMeasure()     # performance measures are computed.
@@ -603,6 +604,12 @@ class mklObj(object):
         f.close()
 
     # Getters (properties):
+    @property
+    def estimated_out(self):
+        """ This property is the mkl result after applying.
+        """
+        return self.__estimated_out
+
     @property
     def compoundKernel(self):
         """This method is used for getting the kernel object, i.e. the learned MKL object, which can be unwrapped
@@ -789,6 +796,12 @@ class mklObj(object):
 
     # mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
     # a new mklObj object.
+
+    @estimated_out.setter
+    def estimated_out(self, value):
+
+        self.__estimated_out = value
+
     @Matrx.setter
     def Matrx(self, value):
         """
