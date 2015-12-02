@@ -8,7 +8,8 @@ from itertools import cycle
 import os.path
 
 class gridObj(object):
-    """
+    """ This object class reads a dictionary of parameters from a file. These parameters are randomly selected for
+     generating a grid search, for model selection.
 
     """
 
