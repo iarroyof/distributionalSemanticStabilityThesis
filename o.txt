@@ -1,102 +1,102 @@
 #All paths:
 
-{'path': "[('polynomial', [1, 5]), '2-gr', 7, 'beta', 2.0, 100.0]", 'performance': 90.7497727657} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 5, 'quadratic', 5.0, 1000.0]", 'performance': 93.8603298063} 
 
-{'path': "[('polynomial', [1, 5]), '2-gr', 7, 'beta', 2.0, 1000.0]", 'performance': 90.7497646737} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 14, 'gamma', 5.0, 100.0]", 'performance': 86.3756721009} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 9, 'pareto', 5.0, 30.0]", 'performance': 88.8352006743} 
+{'path': "[('polynomial', [1, 5]), '2-gr_tfidf', 32, 'quadratic', 5.0, 30.0]", 'performance': 83.2187408798} 
 
-{'path': "[('polynomial', [1, 5]), '2-gr', 28, 'quadratic', 5.0, 10.0]", 'performance': 83.6875032389} 
+{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 38, 'linear', 1.5, 50.0]", 'performance': 82.4328955268} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 34, 'beta', 2.0, 50.0]", 'performance': 82.969627638} 
+{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 22, 'gamma', 5.0, 9.0]", 'performance': 71.0039077607} 
 
-{'path': "[('polynomial', [1, 5]), '3-gr', 40, 'pareto', 5.0, 20.0]", 'performance': 82.2294231337} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 9, 'weibull', 1.0, 100.0]", 'performance': 60.927305073} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 22, 'weibull', 1.5, 50.0]", 'performance': 54.8516821649} 
+{'path': "[('gaussian', [0.5, 50]), '3-gr', 2, 'gaussian', 2.0, 1000.0]", 'performance': 55.3783980576} 
 
-{'path': "[('polynomial', [1, 5]), '3-gr', 40, 'pareto', 5.0, 4.5]", 'performance': 53.2916282081} 
+{'path': "[('gaussian', [0.5, 50]), '1-gr', 30, 'gaussian', 2.0, 40.0]", 'performance': 54.452735167} 
 
-{'path': "[('gaussian', [0.5, 50]), '1-gr', 10, 'weibull', 1.5, 1000.0]", 'performance': 50.8295413182} 
+{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 16, 'triangular', 1.5, 0.1]", 'performance': 38.7856488945} 
 
-{'path': "[('polynomial', [1, 5]), '3-gr', 30, 'gamma', 2.0, 0.1]", 'performance': 38.7758951055} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 40, 'triangular', 1.5, 1.5]", 'performance': 38.781386991} 
 
-{'path': "[('polynomial', [1, 5]), '2-gr', 18, 'gamma', 2.0, 0.2]", 'performance': 38.733153873} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 40, 'triangular', 1.5, 0.2]", 'performance': 38.7757067825} 
 
-{'path': "[('gaussian', [0.5, 50]), '1-gr', 12, 'triangular', 1.0, 0.1]", 'performance': 38.6698090564} 
+{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 38, 'linear', 1.5, 1.2]", 'performance': 38.7337788459} 
 
-{'path': "[('polynomial', [1, 5]), '3-gr', 3, 'beta', 2.0, 0.6]", 'performance': 38.6402775597} 
+{'path': "[('gaussian', [0.5, 50]), '1-gr', 6, 'pareto', 1.0, 0.1]", 'performance': 38.6703890064} 
 
-{'path': "[('polynomial', [1, 5]), '3-gr', 3, 'beta', 2.0, 0.8]", 'performance': 38.590215498} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 24, 'beta', 2.0, 0.2]", 'performance': 38.6573131062} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 36, 'triangular', 1.0, 0.2]", 'performance': 38.5619317426} 
+{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 22, 'gamma', 5.0, 0.4]", 'performance': 38.6473187611} 
 
-{'path': "[('polynomial', [1, 5]), '2-gr', 14, 'pareto', 5.0, 0.4]", 'performance': 38.5503829129} 
+{'path': "[('polynomial', [1, 5]), '2-gr_tfidf', 12, 'triangular', 1.5, 1.0]", 'performance': 38.5792322205} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 24, 'gamma', 2.0, 1.2]", 'performance': 38.4571483901} 
+{'path': "[('polynomial', [1, 5]), '2-gr_tfidf', 12, 'triangular', 1.5, 1.3]", 'performance': 38.5359083428} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 22, 'weibull', 1.5, 0.4]", 'performance': 38.3813910522} 
+{'path': "[('gaussian', [0.5, 50]), '1-gr', 26, 'beta', 2.0, 0.4]", 'performance': 38.5076291098} 
 
-{'path': "[('polynomial', [1, 5]), '3-gr', 5, 'quadratic', 5.0, 1.0]", 'performance': 38.3715227665} 
+{'path': "[('polynomial', [1, 5]), '2-gr_tfidf', 8, 'gamma', 5.0, 0.8]", 'performance': 38.4049569754} 
 
-{'path': "[('gaussian', [0.5, 50]), '2-gr_tfidf', 8, 'gaussian', 1.5, 1.1]", 'performance': 37.9502808238} 
+{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 4, 'quadratic', 5.0, 1.4]", 'performance': 38.3737215217} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 34, 'beta', 2.0, 1.4]", 'performance': 37.9016384406} 
+{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 4, 'quadratic', 5.0, 1.6]", 'performance': 38.3560404274} 
 
-{'path': "[('gaussian', [0.5, 50]), '2-gr_tfidf', 16, 'weibull', 1.5, 1.3]", 'performance': 37.663775996} 
+{'path': "[('gaussian', [0.5, 50]), '3-gr', 3, 'pareto', 1.0, 1.5]", 'performance': 38.3409837181} 
 
-{'path': "[('gaussian', [0.5, 50]), '1-gr', 4, 'linear', 1.0, 0.8]", 'performance': 37.6414658891} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 24, 'beta', 2.0, 0.8]", 'performance': 38.2818994292} 
 
-{'path': "[('gaussian', [0.5, 50]), '2-gr_tfidf', 16, 'weibull', 1.5, 1.6]", 'performance': 37.5755189073} 
+{'path': "[('gaussian', [0.5, 50]), '3-gr', 2, 'gaussian', 2.0, 1.2]", 'performance': 38.2016846982} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 9, 'pareto', 5.0, 1.6]", 'performance': 37.0098363958} 
+{'path': "[('polynomial', [1, 5]), '2-gr_tfidf', 8, 'gamma', 5.0, 1.1]", 'performance': 38.1488785327} 
 
-{'path': "[('gaussian', [0.5, 50]), '2-gr_tfidf', 6, 'triangular', 1.0, 2.5]", 'performance': 36.9459322025} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 28, 'pareto', 1.0, 0.6]", 'performance': 37.9322756792} 
 
-{'path': "[('gaussian', [0.5, 50]), '2-gr_tfidf', 6, 'triangular', 1.0, 4.5]", 'performance': 36.8836534531} 
+{'path': "[('gaussian', [0.5, 50]), '1-gr', 26, 'beta', 2.0, 1.3]", 'performance': 37.8381174204} 
 
-{'path': "[('gaussian', [0.5, 50]), '2-gr_tfidf', 32, 'linear', 1.0, 1.4]", 'performance': 36.7703602535} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 7, 'linear', 1.5, 3.5]", 'performance': 37.7969200768} 
 
-{'path': "[('gaussian', [0.5, 50]), '1-gr', 26, 'gaussian', 1.5, 2.0]", 'performance': 36.7316388302} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 28, 'pareto', 1.0, 1.0]", 'performance': 37.3527801069} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 24, 'gamma', 2.0, 2.5]", 'performance': 36.7090951615} 
+{'path': "[('gaussian', [0.5, 50]), '1-gr', 34, 'weibull', 1.0, 2.0]", 'performance': 37.1752883095} 
 
-{'path': "[('gaussian', [0.5, 50]), '1-gr', 4, 'linear', 1.0, 1.5]", 'performance': 36.6309182691} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 7, 'linear', 1.5, 5.0]", 'performance': 36.8611265299} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 2, 'linear', 1.0, 1.8]", 'performance': 36.2018847829} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 10, 'gaussian', 2.0, 1.8]", 'performance': 36.8115324886} 
 
-{'path': "[('polynomial', [1, 5]), '2-gr', 18, 'gamma', 2.0, 3.5]", 'performance': 35.9345954644} 
+{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 16, 'triangular', 1.5, 4.4]", 'performance': 36.7544380914} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 24, 'gamma', 2.0, 9.0]", 'performance': 35.6669973686} 
+{'path': "[('gaussian', [0.5, 50]), '3-gr', 3, 'pareto', 1.0, 1.6]", 'performance': 36.4842029924} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 38, 'quadratic', 5.0, 1.1]", 'performance': 35.6149361633} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 5, 'quadratic', 5.0, 4.5]", 'performance': 35.2926953003} 
 
-{'path': "[('polynomial', [1, 5]), '2-gr', 28, 'quadratic', 5.0, 1.5]", 'performance': 35.2127153391} 
+{'path': "[('polynomial', [1, 5]), '2-gr_tfidf', 18, 'linear', 1.5, 7.0]", 'performance': 35.2789604184} 
 
-{'path': "[('polynomial', [1, 5]), '1-gr_tfidf', 38, 'quadratic', 5.0, 1.8]", 'performance': 35.0123770841} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 7, 'linear', 1.5, 20.0]", 'performance': 35.0695077052} 
 
-{'path': "[('polynomial', [1, 5]), '3-gr', 30, 'gamma', 2.0, 5.0]", 'performance': 34.8300831317} 
+{'path': "[('polynomial', [1, 5]), '2-gr_tfidf', 32, 'quadratic', 5.0, 1.8]", 'performance': 34.845766777} 
 
-{'path': "[('polynomial', [1, 5]), '3-gr', 5, 'quadratic', 5.0, 7.0]", 'performance': 34.4930836556} 
+{'path': "[('polynomial', [1, 5]), '3-gr_tfidf', 14, 'gamma', 5.0, 2.5]", 'performance': 34.7407633559} 
 
-{'path': "[('polynomial', [1, 5]), '2-gr', 14, 'pareto', 5.0, 3.0]", 'performance': 34.3029126176} 
+{'path': "[('polynomial', [1, 5]), '2-gr_tfidf', 18, 'linear', 1.5, 10.0]", 'performance': 34.4019679566} 
 
-{'path': "[('gaussian', [0.5, 50]), '2-gr_tfidf', 8, 'gaussian', 1.5, 5.0]", 'performance': 34.0845059528} 
+{'path': "[('gaussian', [0.5, 50]), '3-gr', 36, 'beta', 2.0, 2.5]", 'performance': 34.0127125101} 
 
-{'path': "[('gaussian', [0.5, 50]), '1-gr', 26, 'gaussian', 1.5, 3.5]", 'performance': 33.8325885596} 
+{'path': "[('gaussian', [0.5, 50]), '3-gr', 20, 'weibull', 1.0, 9.0]", 'performance': 33.770237212} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 2, 'linear', 1.0, 4.4]", 'performance': 32.5900028533} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 10, 'gaussian', 2.0, 3.5]", 'performance': 33.3277030563} 
 
-{'path': "[('gaussian', [0.5, 50]), '1-gr', 10, 'weibull', 1.5, 20.0]", 'performance': 31.2044801723} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 9, 'weibull', 1.0, 7.0]", 'performance': 33.2826030909} 
 
-{'path': "[('gaussian', [0.5, 50]), '2-gr_tfidf', 32, 'linear', 1.0, 7.0]", 'performance': 29.4594088533} 
+{'path': "[('gaussian', [0.5, 50]), '3-gr', 36, 'beta', 2.0, 3.0]", 'performance': 33.1116077214} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 20, 'gaussian', 1.5, 9.0]", 'performance': 27.0502710773} 
+{'path': "[('gaussian', [0.5, 50]), '2-gr', 28, 'pareto', 1.0, 4.5]", 'performance': 32.4456200985} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 20, 'gaussian', 1.5, 10.0]", 'performance': 26.4235082589} 
+{'path': "[('gaussian', [0.5, 50]), '1-gr', 30, 'gaussian', 2.0, 10.0]", 'performance': 32.4035263381} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 2, 'linear', 1.0, 100.0]", 'performance': 5.61815713067} 
+{'path': "[('gaussian', [0.5, 50]), '3-gr', 20, 'weibull', 1.0, 20.0]", 'performance': 17.6332418885} 
 
-{'path': "[('gaussian', [0.5, 50]), '3-gr_tfidf', 36, 'triangular', 1.0, 30.0]", 'performance': 3.67348491018} 
+{'path': "[('gaussian', [0.5, 50]), '1-gr', 6, 'pareto', 1.0, 30.0]", 'performance': 3.60688704746} 
 
-{'path': "[('gaussian', [0.5, 50]), '1-gr', 12, 'triangular', 1.0, 40.0]", 'performance': 3.38628690308} 
+{'path': "[('gaussian', [0.5, 50]), '1-gr', 34, 'weibull', 1.0, 50.0]", 'performance': 0.591394188331} 
 

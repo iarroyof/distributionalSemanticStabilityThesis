@@ -8,7 +8,7 @@ import random
 from math import sqrt
 import numpy
 from os import getcwd
-from pdb import set_trace
+#from pdb import set_trace
 
 def open_configuration_file(fileName):
     """ Loads the input data configuration file. The first line is the name of the training dataset. The second line is
@@ -92,7 +92,7 @@ def generate_binToy(file_data = None, file_labels = None):
     xpte1 = numpy.array([gmm.sample() for i in xrange(5000)]).T
 
     if not file_data:
-        set_trace()
+
         return (RealFeatures(numpy.concatenate((xntr, xntr1, xptr, xptr1), axis=1)),  # Train Data
             RealFeatures(numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)),  # Test Data
             BinaryLabels(numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num)))),  # Train Labels
@@ -103,7 +103,7 @@ def generate_binToy(file_data = None, file_labels = None):
                                       numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)), axis = 1).T
         labels = numpy.concatenate((numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num))),
                                     numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))), axis = 1).astype(int)
-        #set_trace()
+
         indexes = range(len(data_set))
         numpy.random.shuffle(indexes)
         fd = open(file_data, 'w')
@@ -138,23 +138,23 @@ def load_sparse_regressionData(fileTrain = None, fileTest = None, fileLabelsTr =
     """ This method loads data from sparse mtx file format. Loading uniquely test data is allowed (optional training
     data). When training data file names are not specified, None is returned out for corresponding Shogun feature
     objects. Feature list returned: [features_tr, features_ts, labels_tr, labels_ts]
-    Returned data is Short float type, which is preferable for us for memory saving, i.e. input data is not only sparse,
-    but also each vector entry is represented as a 32bit floating point (instead of the full 64bit float one). This is
-    the minimum allowed data length by Shogun (the Short<type>).
+    Returned data is short float type (dtype='float32'), i.e. input data is not only sparse, but also each vector entry
+    is represented as a 32bit floating point (instead of the full 64bit float one). This is the minimum allowed data
+    length by Shogun (the Short<type>).
     """
     assert fileTest and fileLabelsTs # Necessary test data set specification.
-    assert not ((fileTrain or fileLabelsTr) and not (fileTrain and fileLabelsTr)) # xnor. Specify two train files
+    assert not ((fileTrain or fileLabelsTr) and not (fileTrain and fileLabelsTr)) # xnor. Specify both train files.
     from scipy.io import mmread
 
     lm = LoadMatrix()
     if fileTrain:
-        sci_data_tr = mmread(fileTrain).asformat('csr').astype('float64')   # sci_data_x: COO sparse as 'int' data type,
-        features_tr = SparseRealFeatures(sci_data_tr)                  # reformated as CSR and 'float32' type for
+        sci_data_tr = mmread(fileTrain).asformat('csr').astype('float32')   # sci_data_x: COO sparse as 'int' data type.
+        features_tr = SparseShortRealFeatures(sci_data_tr)                  # Reformated as CSR and 'float32' type for
         labels_tr = RegressionLabels(lm.load_labels(fileLabelsTr))          # compatibility with SparseShortRealFeatures
     else: labels_tr = features_tr = None
 
-    sci_data_ts = mmread(fileTest).asformat('csr').astype('float64')
-    features_ts = SparseRealFeatures(sci_data_ts)
+    sci_data_ts = mmread(fileTest).asformat('csr').astype('float32')
+    features_ts = SparseShortRealFeatures(sci_data_ts)
     labels_ts = RegressionLabels(lm.load_labels(fileLabelsTs))
 
     return features_tr, features_ts, labels_tr, labels_ts
