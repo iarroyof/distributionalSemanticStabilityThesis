@@ -7,8 +7,7 @@ from mklObj import *
 from ast import literal_eval
 from sys import stdout, stderr
 import argparse
-#//TODO: modify open_configuration_file() function for loading regression data
-# files = open_configuration_file('mkl_object.conf')
+
 # [feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
 # [feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain=files[0],
 #                                                             fileLabels =files[1],
@@ -32,48 +31,78 @@ import argparse
 # other ones for processing dense data and their behavior is to similar (at least for image classification). Thus the
 # final performance rather depends on the learning hyperparameters and basis kernel parameters (e.g. C, l_p norm, kernel
 # widths).
+def mkl_Pool(path):
+    global feats_train; global feats_test; global labelsTr; global labelsTs; global conf
 
-[feats_train, feats_test, labelsTr, labelsTs] = load_sparse_regressionData(fileTrain = '/home/iarroyof/sparse_train.mtx',
-                                                                           fileTest = '/home/iarroyof/sparse_test.mtx',
-                                                                           fileLabelsTr = '/home/iarroyof/labelSparse_train.mtx',
-                                                                           fileLabelsTs = '/home/iarroyof/labelSparse_train.mtx')
-
-problem_type = 'regression'
-mkl_object = mklObj(problem=problem_type)
-
-def mkPool(path):
-    global feats_train; global feats_test; global labelsTr; global labelsTs; global mkl_object
-
+    mkl_object = mklObj(problem=conf['problem_mode'])
     if path[0][0] is 'gaussian': a = 2*path[0][1][0]**2; b = 2*path[0][1][1]**2
     else: a = path[0][1][0]; b = path[0][1][1]
 
-    if problem_type == 'binary' or problem_type == 'regression':
+    if conf['problem_mode'] == 'binary' or conf['problem_mode'] == 'regression':
         mkl_object.mklC = [path[5], path[5]]
-    elif problem_type == 'multiclass': mkl_object.mklC = path[5]
-    mkl_object.weightRegNorm = path[4]
-    mkl_object.fit_kernel(featsTr=feats_train,
-                   targetsTr=labelsTr,
-                   featsTs=feats_test,
-                   targetsTs= labelsTs,
-                   kernelFamily=path[0][0],
-                   randomRange=[a, b],              # For homogeneous polynomial kernels these two parameter sets
-                   randomParams=[(a + b)/2, 1.0],   # have not effect. For quadratic there isn't parameter distribution
-                   hyper=path[3],                   # With not effect when kernel family is polynomial and some
-                   pKers=path[2])
+    elif conf['problem_mode'] == 'multiclass': mkl_object.mklC = path[5]
 
-    return mkl_object.testerr, mkl_object.weights, mkl_object.sigmas, mkl_object.estimated_out
-                                                                        # If possible, return the maximum performance
+    mkl_object.weightRegNorm = path[4]
+    mkl_object.fit_kernel(
+                    featsTr=feats_train,
+                    targetsTr=labelsTr,
+                    featsTs=feats_test,
+                    targetsTs= labelsTs,
+                    kernelFamily=path[0][0],
+                    randomRange=[a, b],              # For homogeneous polynomial kernels these two parameter sets
+                    randomParams=[(a + b)/2, 1.0],   # have not effect. For quadratic there isn't parameter distribution
+                    hyper=path[3],                   # With not effect when kernel family is polynomial and some
+                    pKers=path[2])
+    mkl_object.pattern_recognition()
+    #return mkl_object.testerr, mkl_object.weights, mkl_object.sigmas, mkl_object.estimated_out
+    return mkl_object.testerr, mkl_object.mkl_model, mkl_object.estimated_out                                                                    # If possible, return the maximum performance
                                                                         # learned machine. It it were not possible,
                                                                         # return al learned machines and make the choice
                                                                         # of saving the best one, in order to retrieve
                                                                         # it when necessary.
+
+def mkl_Pr():
+    """ This function loads a MKL pretrained model from specified file. All model parameters are loaded from that file,
+    e.g. the kernel family, widths, subkernel weights, support, alphas, bias.
+    In order to use loaded model for predicting, the mkl_object is instantiated in 'pattern_recognition' mode.
+    """
+    global feats_train; global feats_test; global labelsTs; global conf
+
+    mkl_object = mklObj(problem = conf['problem_mode'], model_file = conf['model_file'], mode = conf['machine_mode'])
+    mkl_object.fit_pretrained(feats_train, feats_test, labelsTs)
+    mkl_object.pattern_recognition()
+
+    return mkl_object.testerr, mkl_object.estimated_out
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='mklObject calling')
-    parser.add_argument('-p', type=str, dest = 'current_path', help='Specifies the grid path to be tested by the mkl object.')
-    args = parser.parse_args()
-    path = list(literal_eval(args.current_path))
-    [performance, weights, kernel_params, output] = mkPool(path)
-    #stderr.write('\n-----'+str(output)+'-----\n')
-    #stderr.write('%s;%s;%s;%s;%s\n' % (performance, path, weights, kernel_params, output))
-    stdout.write('%s;%s;%s;%s;%s\n' % (performance, path, weights, kernel_params, output))
+    conf = open_configuration_file('mkl_object.conf')
+    [feats_train, feats_test, labelsTr, labelsTs] = load_sparse_regressionData(fileTrain = conf['training_file'],
+                                                                           fileTest = conf['test_file'],
+                                                                           fileLabelsTr = conf['training_labels_file'],
+                                                                           fileLabelsTs = conf['test_labels_file'])
+    if conf['machine_mode'] == 'learning':
+        # Each training path is got either from stdin or from a path file. This part of the script is executed from
+        # bash (mklParallel.sh) as many times as paths are present in the input.
+        parser = argparse.ArgumentParser(description='mklObject calling')
+        parser.add_argument('-p', type=str, dest = 'current_path', help='Specifies the grid path to be tested by the mkl object.')
+        args = parser.parse_args()
+        path = list(literal_eval(args.current_path))
+        [performance, model, output] = mkl_Pool(path)
+
+        stdout.write('%s;%s;%s;%s\n' % (performance, path, model, output))
+
+        # This script (mklCall.py) is called multiple times in learning mode, so multiple outputs are written to the
+        # stdout. These outputs are managed by the reducer script (mklReducer.py).
+    elif conf['machine_mode'] == 'pattern_recognition':
+        # The input file in pattern_recognition mode must be specified in mkl_object.conf file. Unlike the learning mode
+        # no piped operation is used here, so the script is used once for a given test set. Even though the above, it is
+        # possible testing several modes in pipe operation, but it is needed modifying this script for parsing these
+        # models from stdin.
+        [performance, output] = mkl_Pr()
+        stdout.write('# Performance (determination coefficient): %s\n' % performance)
+        for predicted in output:
+            stdout.write('%s\n' % predicted)
+
+        # No reducer script is used in pattern_recognition mode, so predicted values are directly printed to stdout.
+
 

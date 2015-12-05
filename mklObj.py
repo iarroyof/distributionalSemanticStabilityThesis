@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
+
 __author__ = 'Ignacio Arroyo-Fernandez'
 
 from modshogun import *
@@ -11,31 +13,69 @@ from os import getcwd
 #from pdb import set_trace
 
 def open_configuration_file(fileName):
-    """ Loads the input data configuration file. The first line is the name of the training dataset. The second line is
-    the name of the file containing labels and the third one is the directory of these files. See an example:
+    """ Loads the input data configuration file. Lines which start with '#' are ignored. No lines different from
+    configuration ones (even blank ones) at top are allowed. The amount of lines at top are exclusively either three or
+    five (see below for allowed contents).
 
-    fm_train_binary_92.dat
-    shuffle_twoClass_labels.dat
-    /home/iarroyof/shogun-data/toy/
-
-    The third line can be omitted (do not include it without the ending slash '/'). No other lines can be partially
-    omitted. In case you do not need for specifying files for training, let empty the configuration file. Comments or
-    other different information are not allowed.
+    The first line may be specifying the train data file in sparse market matrix format.
+    The second line may be specifying the test data file in sparse market matrix format.
+    The third line may be specifying the train labels file. An scalar by line must be associated as label of a vector
+    in training data.
+    The fourth line may be specifying the test labels file. An scalar by line must be associated as label of a vector
+    in test data.
+    The fifth line indicates options for the MKL object:
+        First character : Problem type : valid_options = {r: regression, b: binary, m: multiclass}
+        Second character: Machine mode : valid_options = {l: learning_mode, p: pattern_recognition_mode}
+    Any other characters and amount of they will be ignored or caught as errors.
+    For all configuration lines no other kind of content is allowed (e.g. comments in line ahead).
+    Training data (and its labels) is optional. Whenever no five configuration lines are detected in this file,
+    the first line will be considered as the test data file name, the second line as de test labels and third line as
+    the MKL options. An error exception will be raised otherwise (e.g. no three or no five configuration lines).
     """
-    f = open(fileName)
-    data_files = f.read().splitlines()
-# Validate the file for correct formatting
-    if len(data_files) > 1:
-        assert data_files[0] != '' and data_files[1] != '' # Bad config file format or less parameters than needed. Fix the format.
-        if len(data_files) > 2:
-            if data_files[2] == '':
-                data_files[2] = None
+    with open(fileName) as f:
+        configuration_lines = f.read().splitlines()
+    problem_modes = {'r':'regression', 'b':'binary', 'm':'multiclass'}
+    machine_modes = {'l':'learning', 'p':'pattern_recognition'}
+    cls = 0     # Counted number of configuration lines from top.
+    ncls = 5    # Number of configuration lines allowed.
+    for line in configuration_lines:
+        if not line.startswith('#'):
+            cls += 1
         else:
-            data_files.append(None)
-    else:
-        data_files = [None, None, None]
+            break
 
-    return data_files
+    if cls == ncls:
+        mode = configuration_lines[4]
+        configuration = {}
+        if len(mode) == 2:
+            try:
+                configuration['problem_mode'] = problem_modes[mode[0]]
+                configuration['machine_mode'] = machine_modes[mode[1]]
+            except KeyError:
+                sys.stderr.write('\nERROR: Incorrect configuration file. Invalid machine mode. See help for mklObj.open_configuration_file().')
+    else:
+        sys.stderr.write('\nERROR: Incorrect configuration file. Invalid number of lines. See help for mklObj.open_configuration_file().')
+        exit()
+
+    Null = ncls                                     # Null index
+    if configuration['machine_mode'] == 'learning': # According to availability of training files, indexes are setted.
+        trf = 0; tsf = 1; trlf = 2          # training_file, test_file, training_labels_file, test_labels_file, mode
+        tslf = 3; mf = Null
+        configuration_lines[ncls] = None
+        del(configuration_lines[ncls+1:])   # All from the first '#' onwards is ignored.
+    elif configuration['machine_mode'] == 'pattern_recognition':
+        trf = 0; tsf = 1; trlf = Null       # training_file, test_file, test_labels_file, mode, model_file
+        tslf = 2; mf = 3
+        configuration_lines[ncls] = None
+        del(configuration_lines[ncls+1:])
+
+    configuration['training_file'] = configuration_lines[trf]
+    configuration['test_file'] = configuration_lines[tsf]
+    configuration['training_labels_file'] = configuration_lines[trlf]
+    configuration['test_labels_file'] = configuration_lines[tslf]
+    configuration['model_file'] = configuration_lines[mf]
+
+    return configuration
 
 # Loading toy multiclass data from files
 def load_multiclassToy(dataRoute, fileTrain, fileLabels):
@@ -276,7 +316,8 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
                 'cauchy',
                 'exponential']
     """
-
+    allowed_sparse = ['gaussian', 'polynomial'] # Change this assertion list and function if different kernels are needed.
+    assert not (featsL.get_feature_class() == featsR.get_feature_class() == 'C_SPARSE') or basisFam in allowed_sparse # Sparse type is not compatible with specified kernel or feature types are different.
     kernels = []
     if basisFam == 'gaussian':
         for w in widths:
@@ -284,8 +325,8 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
             kernels[-1].set_width(w)
 
     elif basisFam == 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
-        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
-        dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
+        #dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(InverseMultiQuadricKernel(0, w, dst))
 
@@ -294,32 +335,32 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
             kernels.append(PolyKernel(0, w, False))
 
     elif basisFam == 'power':  # At least for images, the used norm does not make differences in performace
-        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(PowerKernel(0, w, dst))
 
     elif basisFam == 'rationalQuadratic':  # At least for images, using 3-norm  make differences
-        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
-        dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
+        #dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(RationalQuadraticKernel(0, w, dst))
 
     elif basisFam == 'spherical':  # At least for images, the used norm does not make differences in performace
-        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(SphericalKernel(0, w, dst))
 
     elif basisFam == 'tstudent':  # At least for images, the used norm does not make differences in performace
-        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(TStudentKernel(0, w, dst))
 
     elif basisFam == 'wave':  # At least for images, the used norm does not make differences in performace
-        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(WaveKernel(0, w, dst))
 
@@ -328,14 +369,14 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
             kernels.append(WaveletKernel(0, w, 0))
 
     elif basisFam == 'cauchy':
-        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(CauchyKernel(0, w, dst))
 
     elif basisFam == 'exponential':  # For this kernel it is necessary specifying features at the constructor
-        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(ExponentialKernel(featsL, featsR, w, dst, 0))
 
@@ -392,35 +433,69 @@ class mklObj(object):
     Once the MKL object has been fitted, you can get what you need from it. See getters documentation listed below.
     """
 
-    def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=1e-5,
-                 threads=2, MKLepsilon=0.001, problem='regression', verbose=False):
+    def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=1e-5, model_file = None,
+                 threads=2, MKLepsilon=0.001, problem='regression', verbose=False, mode = 'learning'):
         """Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
         hyperparameters (kernel fitting).
         """
+        assert not model_file and mode != 'pattern_recognition' or (
+                   model_file and mode == 'pattern_recognition')# Model file or pattern_recognition mode must be specified.
         self.__problem = problem
-        if self.__problem == 'binary':
-            self.mkl = MKLClassification()  # MKL object (Binary)
-            self.mklC = [mklC, mklC]  # Setting MKL regularization parameters (different values for imbalanced classes).
-        elif self.__problem == 'multiclass':                         # You can modify them separately by using the corresponding setter.
-            self.mkl = MKLMulticlass()  # MKL object (Multiclass).
-            self.mklC = mklC  # Setting MKL regularization parameter
-        elif self.__problem == 'regression':
-            self.mkl = MKLRegression()
-            self.mklC = [mklC, mklC]
-
-        self.weightRegNorm = weightRegNorm  # Setting the basis' weight vector norm
-        self.SVMepsilon = SVMepsilon  # setting the transducer stop (convergence) criterion
-        self.MKLepsilon = MKLepsilon  # setting the MKL stop criterion. The value suggested by
-        # Shogun examples is 0.001. See setter docs for details
         self.threads = threads  # setting number of training threads. Verify functionality!!
         self.verbose = verbose  # inner training process verbose flag
         self.Matrx = False  # Kind of returned learned kernel object. See getter documentation of these
         self.expansion = False  # object configuration parameters for details. Only modifiable by setter.
         self.__testerr = 0
 
+        if mode == 'learning':
+            if self.__problem == 'binary':
+                self.mkl = MKLClassification()  # MKL object (Binary)
+                self.mklC = [mklC, mklC]  # Setting MKL regularization parameters (different values for imbalanced classes).
+            elif self.__problem == 'multiclass':     # You can modify them separately by using the corresponding setter.
+                self.mkl = MKLMulticlass()  # MKL object (Multiclass).
+                self.mklC = mklC  # Setting MKL regularization parameter
+            elif self.__problem == 'regression':
+                self.mkl = MKLRegression()
+                self.mklC = [mklC, mklC]
+            else:
+                sys.stderr.write('Error: Given problem type is not valid.')
+                exit()
+
+            self.weightRegNorm = weightRegNorm  # Setting the basis' weight vector norm
+            self.SVMepsilon = SVMepsilon  # setting the transducer stop (convergence) criterion
+            self.MKLepsilon = MKLepsilon  # setting the MKL stop criterion. The value suggested by
+            # Shogun examples is 0.001. See setter docs for details
+        elif mode == 'pattern_recognition':
+            [self.mkl, self.mkl_model] = self.load_mkl_model(file_name = model_file, model_type = problem)
+            self.sigmas = self.mkl_model['widths']
+
+    def fit_pretrained(self, featsTr, targetsTr, featsTs, targetsTs):
+        """
+        """
+        self.ker = genKer(self, featsTr, featsTs,
+                          basisFam=self.family_translation[self.mkl_model['family']], widths=self.sigmas)
+        self.ker.set_subkernel_weights(self.mkl_model['weights'])  # Setting up pretrained weights to the
+        self.ker.init(featsTr, featsTs)                            # new kernel
+        #self.mkl.set_kernel(self.ker)
+        #out = self.mkl.apply()
+
+        #self.estimated_out = list(out.get_labels())
+        # ----------------------------------------------------------------------------------
+        #if self.__problem == 'binary':      # If the problem is either binary, regression or multiclass, different
+        #    evalua = ErrorRateMeasure()     # performance measures are computed.
+        #    self.__testerr = 100 - evalua.evaluate(out, targetsTs) * 100
+        #elif self.__problem == 'multiclass':
+        #    evalua = MulticlassAccuracy()
+        #    self.__testerr = evalua.evaluate(out, targetsTs) * 100
+        #elif self.__problem == 'regression':
+        #    evalua = MeanSquaredError()
+        #    m = numpy.ones(targetsTs.get_num_labels())*numpy.mean(targetsTs.get_labels()) # Determination Coefficient
+        #    self.__testerr = evalua.evaluate(out, RegressionLabels(m))*100/evalua.evaluate(targetsTs, RegressionLabels(m))
+
+
     # Self Function for kernel generation
     def fit_kernel(self, featsTr, targetsTr, featsTs, targetsTs, randomRange=[1, 50], randomParams=[1, 1],
-                   hyper='linear', kernelFamily='guassian', pKers=3):
+                   hyper='linear', kernelFamily='gaussian', pKers=3):
         """ :return: CombinedKernel Shogun object.
         This method is used for training the desired compound kernel. See documentation of the 'mklObj'
         object for using example. 'featsTr' and 'featsTs' are the training and test data respectively. 'targetsTr'
@@ -479,9 +554,9 @@ class mklObj(object):
             elif self.__problem == 'regression':
                 print 'Regression problem'
 
-            # Generating the list of subkernels. Creating the compound kernel
-            # For monomial-nonhomogeneous (polynomial) kernels the hyperparameters are uniquely the degree of each monomial
-            # in the form of a sequence. MKL finds the coefficient for each monomial in order to find a compound polynomial.
+        # Generating the list of subkernels. Creating the compound kernel. For monomial-nonhomogeneous (polynomial)
+        # kernels the hyperparameters are uniquely the degree of each monomial, in the form of a sequence. MKL finds the
+        # coefficient (weight) for each monomial in order to find a compound polynomial.
         if kernelFamily == 'polynomial' or kernelFamily == 'power' or \
                         kernelFamily == 'tstudent' or kernelFamily == 'anova':
             self.sigmas = range(1, pKers+1)
@@ -530,14 +605,17 @@ class mklObj(object):
             print '\nLearning the machine coefficients...'
         # ------------------ The most time consuming code segment --------------------------
         self.mkl.train()
-
-        if self.verbose:
+        self.mkl_model = self.keep_mkl_model(self.mkl, self.ker, self.sigmas) # Let's keep the trained model
+        if self.verbose:                                                      # for future use.
             print 'Kernel trained... Weights: ', self.weights
         # Evaluate the learnt Kernel. Here it is assumed 'ker' is learnt, so we only need for initialize it again but
         # with the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
         self.ker.init(self._featsTr, featsTs)   # Now with test examples. The inner product between training
+
+    def pattern_recognition(self):
         self.mkl.set_kernel(self.ker)           # and test examples generates the corresponding Gram Matrix.
         out = self.mkl.apply()  # Applying the obtained Gram Matrix
+
         self.estimated_out = list(out.get_labels())
         # ----------------------------------------------------------------------------------
         if self.__problem == 'binary':                   # If the problem is either binary or multiclass, different
@@ -554,6 +632,7 @@ class mklObj(object):
         # Verbose for learning surveying
         if self.verbose:
             print 'Kernel evaluation ready. The precision was: ', self.__testerr, '%'
+
 
     def save_sigmas(self, file='sigmasFile.txt', mode='w', note='Some note'):
         """This method saves the set of kernel parameters (e.g. gaussian widths) into a text file, which are
@@ -603,7 +682,84 @@ class mklObj(object):
             f.write('\nTest error:' + str(self.__testerr * 100))
         f.close()
 
+    def keep_mkl_model(self, mkl, kernel, widths, file_name = None):
+        """ Python reimplementated function for saving a pretrained MKL machine.
+        This method saves a trained MKL machine to the file 'file_name'. If not 'file_name' is given, a dictionary
+        'mkl_machine' containing parameters of the given trained MKL object is returned.
+        Here we assumed all subkernels of the passed CombinedKernel are of the same family, so uniquely the first kernel
+        is used for verifying if the passed 'kernel' is a Gaussian mixture. If it is so, we insert the 'widths' to the
+        model dictionary 'mkl_machine'. An error is returned otherwise.
+        """
+        mkl_machine = {}
+        support=[]
+        mkl_machine['num_support_vectors'] = mkl.get_num_support_vectors()
+        mkl_machine['bias']=mkl.get_bias()
+        for i in xrange(mkl_machine['num_support_vectors']):
+            support.append((mkl.get_alpha(i), mkl.get_support_vector(i)))
+
+        mkl_machine['support'] = support
+        mkl_machine['weights'] = list(kernel.get_subkernel_weights())
+        mkl_machine['family'] = kernel.get_first_kernel().get_name()
+        mkl_machine['widths'] = widths
+
+        if file_name:
+            f = open(file_name,'w')
+            f.write(str(mkl_machine)+'\n')
+            f.close()
+        else:
+            return mkl_machine
+
+    def load_mkl_model(self, file_name, model_type = 'regression'):
+        """ This method receives a file name (if it is not in pwd, full path must be given) and a model type to be
+        loaded {'regression', 'binary', 'multiclass'}. The loaded file must contain a t least a dictionary at its top.
+        This dictionary must contain a key called 'model' whose value must be a dictionary, from which model parameters
+        will be read. For example:
+            {'key_0':value, 'key_1':value,..., 'model':{'family':'PolyKernel', 'bias':1.001,...}, key_n:value}
+        Four objects are returned. The MKL model which is tuned to those parameters stored at the given file. A numpy
+        array containing learned weights of a CombinedKernel. The widths corresponding to returned kernel weights and
+        the kernel family. Be careful with the kernel family you are loading because widths no necessarily are it, but probably 'degrees',
+        e.g. for the PolyKernel family.
+        The Combined kernel must be instantiated outside this method, thereby loading to it corresponding weights and
+        widths.
+        """
+        with open(file_name, 'r') as pointer:
+            mkl_machine = eval(pointer.read())['model']
+
+        if model_type == 'regression':
+            mkl = MKLRegression()           # A new two-class MKL object
+        elif model_type == 'binary':
+            mkl = MKLClassification()
+        elif model_type == 'multiclass':
+            mkl = MKLMulticlass()
+        else:
+            sys.stderr.write('ERROR: Unknown problem type in model loading.')
+            exit()
+
+        mkl.set_bias(mkl_machine['bias'])
+        mkl.create_new_model(mkl_machine['num_support_vectors']) # Initialize the inner SVM
+        for i in xrange(mkl_machine['num_support_vectors']):
+            mkl.set_alpha(i, mkl_machine['support'][i][0])
+            mkl.set_support_vector(i, mkl_machine['support'][i][1])
+        mkl_machine['weights'] = numpy.array(mkl_machine['weights'])
+        return mkl, mkl_machine
+
     # Getters (properties):
+    @property
+    def family_translation(self):
+        """
+        """
+        self.__family_translation = {'PolyKernel':'polynomial', 'GaussianKernel':'gaussian',
+                                     'ExponentialKernel':'exponential'}
+        return self.__family_translation
+
+    @property
+    def mkl_model(self):
+        """ This property stores the MKL model parameters learned by the self-object. These parameters can be stored
+        into a file for future configuration of a non-trained MKL new MKL object. Also probably passed onwards for
+        showing results.
+        """
+        return self.__mkl_model
+
     @property
     def estimated_out(self):
         """ This property is the mkl result after applying.
@@ -796,6 +952,12 @@ class mklObj(object):
 
     # mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
     # a new mklObj object.
+
+    @mkl_model.setter
+    def mkl_model(self, value):
+
+        assert isinstance(value, dict) # The model is not stored as a dictionary
+        self.__mkl_model = value
 
     @estimated_out.setter
     def estimated_out(self, value):
