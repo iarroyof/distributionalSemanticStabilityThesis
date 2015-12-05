@@ -8,7 +8,7 @@ import random
 from math import sqrt
 import numpy
 from os import getcwd
-from pdb import set_trace
+#from pdb import set_trace
 
 def open_configuration_file(fileName):
     """ Loads the input data configuration file. The first line is the name of the training dataset. The second line is
@@ -35,7 +35,7 @@ def open_configuration_file(fileName):
     else:
         data_files = [None, None, None]
 
-    return  data_files
+    return data_files
 
 # Loading toy multiclass data from files
 def load_multiclassToy(dataRoute, fileTrain, fileLabels):
@@ -103,7 +103,7 @@ def generate_binToy(file_data = None, file_labels = None):
                                       numpy.concatenate((xnte, xnte1, xpte, xpte1), axis=1)), axis = 1).T
         labels = numpy.concatenate((numpy.concatenate((-numpy.ones(2 * num), numpy.ones(2 * num))),
                                     numpy.concatenate((-numpy.ones(10000), numpy.ones(10000)))), axis = 1).astype(int)
-        #set_trace()
+
         indexes = range(len(data_set))
         numpy.random.shuffle(indexes)
         fd = open(file_data, 'w')
@@ -133,12 +133,37 @@ def load_binData(tr_ts_portion = None, fileTrain = None, fileLabels = None, data
             BinaryLabels(labels[0:tr_ts_portion * len(labels)]),  # Return corresponding train and test labels
             BinaryLabels(labels[tr_ts_portion * len(labels):]))
 
+
+def load_sparse_regressionData(fileTrain = None, fileTest = None, fileLabelsTr = None, fileLabelsTs = None):
+    """ This method loads data from sparse mtx file format. Loading uniquely test data is allowed (optional training
+    data). When training data file names are not specified, None is returned out for corresponding Shogun feature
+    objects. Feature list returned: [features_tr, features_ts, labels_tr, labels_ts]
+    Returned data is short float type (dtype='float32'), i.e. input data is not only sparse, but also each vector entry
+    is represented as a 32bit floating point (instead of the full 64bit float one). This is the minimum allowed data
+    length by Shogun (the Short<type>).
+    """
+    assert fileTest and fileLabelsTs # Necessary test data set specification.
+    assert not ((fileTrain or fileLabelsTr) and not (fileTrain and fileLabelsTr)) # xnor. Specify both train files.
+    from scipy.io import mmread
+
+    lm = LoadMatrix()
+    if fileTrain:
+        sci_data_tr = mmread(fileTrain).asformat('csr').astype('float32')   # sci_data_x: COO sparse as 'int' data type.
+        features_tr = SparseShortRealFeatures(sci_data_tr)                  # Reformated as CSR and 'float32' type for
+        labels_tr = RegressionLabels(lm.load_labels(fileLabelsTr))          # compatibility with SparseShortRealFeatures
+    else: labels_tr = features_tr = None
+
+    sci_data_ts = mmread(fileTest).asformat('csr').astype('float32')
+    features_ts = SparseShortRealFeatures(sci_data_ts)
+    labels_ts = RegressionLabels(lm.load_labels(fileLabelsTs))
+
+    return features_tr, features_ts, labels_tr, labels_ts
+
 # Exception handling:
 class customException(Exception):
     """ This exception prevents training inconsistencies. It could be edited for accepting a complete
     dictionary of exceptions if desired.
     """
-
     def __init__(self, message):
         self.parameter = message
 
@@ -229,7 +254,7 @@ def sigmaGen(self, hyperDistribution, size, rango, parameters):
         #pdb.set_trace()
 
 # Combining kernels
-def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
+def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
     """:return: Shogun CombinedKernel object.
     This module generates a list of basis kernels. These kernels are tuned according to the vector ''widths''. Input
     parameters ''featsL'' and ''featsR'' are Shogun feature objects. In the case of a learnt RKHS, these both objects
@@ -256,10 +281,11 @@ def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
     if basisFam == 'gaussian':
         for w in widths:
             kernels.append(GaussianKernel())
-            kernels[len(kernels) - 1].set_width(w)
+            kernels[-1].set_width(w)
 
     elif basisFam == 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(InverseMultiQuadricKernel(0, w, dst))
 
@@ -268,27 +294,32 @@ def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
             kernels.append(PolyKernel(0, w, False))
 
     elif basisFam == 'power':  # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(PowerKernel(0, w, dst))
 
     elif basisFam == 'rationalQuadratic':  # At least for images, using 3-norm  make differences
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(RationalQuadraticKernel(0, w, dst))
 
     elif basisFam == 'spherical':  # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(SphericalKernel(0, w, dst))
 
     elif basisFam == 'tstudent':  # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(TStudentKernel(0, w, dst))
 
     elif basisFam == 'wave':  # At least for images, the used norm does not make differences in performace
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(WaveKernel(0, w, dst))
 
@@ -297,12 +328,14 @@ def genKer(featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0]):
             kernels.append(WaveletKernel(0, w, 0))
 
     elif basisFam == 'cauchy':
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(CauchyKernel(0, w, dst))
 
     elif basisFam == 'exponential':  # For this kernel it is necessary specifying features at the constructor
-        dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(ExponentialKernel(featsL, featsR, w, dst, 0))
 
@@ -337,7 +370,7 @@ class mklObj(object):
                         SVMepsilon = 1e-5,
                         threads = 2,
                         MKLepsilon = 0.001,
-                        binary = False,
+                        probome = 'Multiclass',
                         verbose = False) # IMPORTANT: Don't use this feature (True) if you are working in pipe mode.
                                          # The object will print undesired outputs to the stdout.
     The above values are the defaults, so if they are suitable for you it is possible instantiating the object by simply
@@ -360,17 +393,20 @@ class mklObj(object):
     """
 
     def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=1e-5,
-                 threads=2, MKLepsilon=0.001, binary=False, verbose=False):
+                 threads=2, MKLepsilon=0.001, problem='regression', verbose=False):
         """Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
         hyperparameters (kernel fitting).
         """
-        self.__binary = binary
-        if self.__binary:
+        self.__problem = problem
+        if self.__problem == 'binary':
             self.mkl = MKLClassification()  # MKL object (Binary)
             self.mklC = [mklC, mklC]  # Setting MKL regularization parameters (different values for imbalanced classes).
-        else:                         # You can modify them separately by using the corresponding setter.
+        elif self.__problem == 'multiclass':                         # You can modify them separately by using the corresponding setter.
             self.mkl = MKLMulticlass()  # MKL object (Multiclass).
             self.mklC = mklC  # Setting MKL regularization parameter
+        elif self.__problem == 'regression':
+            self.mkl = MKLRegression()
+            self.mklC = [mklC, mklC]
 
         self.weightRegNorm = weightRegNorm  # Setting the basis' weight vector norm
         self.SVMepsilon = SVMepsilon  # setting the transducer stop (convergence) criterion
@@ -436,10 +472,12 @@ class mklObj(object):
             print "\nHyperarameter distribution: ", self._hyper, "\nLinear combination size: ", pKers, \
                 '\nWeight regularization norm: ', self.weightRegNorm, \
                 'Weight regularization parameter: ',self.mklC
-            if not self.__binary:
+            if self.__problem == 'multiclass':
                 print "Classes: ", targetsTr.get_num_classes()
-            else:
+            elif self.__problem == 'binary':
                 print "Classes: Binary"
+            elif self.__problem == 'regression':
+                print 'Regression problem'
 
             # Generating the list of subkernels. Creating the compound kernel
             # For monomial-nonhomogeneous (polynomial) kernels the hyperparameters are uniquely the degree of each monomial
@@ -450,9 +488,9 @@ class mklObj(object):
             self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
         else:
             # We have called 'sigmas' to any basis kernel parameter, regardless if the kernel is Gaussian or not. So
-            # generate the widths:
+            # let's generate the widths:
             self.sigmas = sorted(sigmaGen(self, hyperDistribution=hyper, size=pKers,
-                                          rango=randomRange, parameters=randomParams))#; pdb.set_trace()
+                                          rango=randomRange, parameters=randomParams))
             try:
                 z = self.sigmas.index(0)
                 self.sigmas[z] = 0.1
@@ -500,13 +538,18 @@ class mklObj(object):
         self.ker.init(self._featsTr, featsTs)   # Now with test examples. The inner product between training
         self.mkl.set_kernel(self.ker)           # and test examples generates the corresponding Gram Matrix.
         out = self.mkl.apply()  # Applying the obtained Gram Matrix
+        self.estimated_out = list(out.get_labels())
         # ----------------------------------------------------------------------------------
-        if self.__binary:                   # If the problem is either binary or multiclass, different
+        if self.__problem == 'binary':                   # If the problem is either binary or multiclass, different
             evalua = ErrorRateMeasure()     # performance measures are computed.
             self.__testerr = 100 - evalua.evaluate(out, targetsTs) * 100
-        else:
+        elif self.__problem == 'multiclass':
             evalua = MulticlassAccuracy()
             self.__testerr = evalua.evaluate(out, targetsTs) * 100
+        elif self.__problem == 'regression':
+            evalua = MeanSquaredError()
+            m = numpy.ones(targetsTs.get_num_labels())*numpy.mean(targetsTs.get_labels()) # Determination Coefficient
+            self.__testerr = evalua.evaluate(out, RegressionLabels(m))*100/evalua.evaluate(targetsTs, RegressionLabels(m))
 
         # Verbose for learning surveying
         if self.verbose:
@@ -553,7 +596,7 @@ class mklObj(object):
         f.write('\nWidths: ')
         for item in self.sigmas:
             f.write("%s, " % item)
-        if self.__binary:
+        if self.__problem == 'binary':
             f.write('\nTest error: ' + str(100 - self.__testerr * 100))
         else:
             f.write("\nClasses: " + str(self._targetsTr.get_num_classes()))
@@ -561,6 +604,12 @@ class mklObj(object):
         f.close()
 
     # Getters (properties):
+    @property
+    def estimated_out(self):
+        """ This property is the mkl result after applying.
+        """
+        return self.__estimated_out
+
     @property
     def compoundKernel(self):
         """This method is used for getting the kernel object, i.e. the learned MKL object, which can be unwrapped
@@ -726,7 +775,7 @@ class mklObj(object):
 
     # Readonly properties:
     @property
-    def binary(self):
+    def problem(self):
         """This method is used for getting the kind of problem the mklObj object will be trained for. If binary == True,
         the you want to train the object for a two-class classification problem. Otherwise if binary == False, you want
         to train the object for multiclass classification problems. This property can't be modified once the object has
@@ -734,7 +783,7 @@ class mklObj(object):
 
         :rtype : bool
         """
-        return self.__binary
+        return self.__problem
 
     @property
     def testerr(self):
@@ -747,6 +796,12 @@ class mklObj(object):
 
     # mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
     # a new mklObj object.
+
+    @estimated_out.setter
+    def estimated_out(self, value):
+
+        self.__estimated_out = value
+
     @Matrx.setter
     def Matrx(self, value):
         """
@@ -841,11 +896,11 @@ class mklObj(object):
         @type value: float (greater than zero. There exits the zero-norm, but it is not considered here.)
         .. seealso:: Page 4 of Bagchi,(2014) SVM Classifiers Based On Imperfect Training Data.
         """
-        if self.__binary:
+        if self.__problem == 'binary' or self.__problem == 'regression':
             assert len(value) == 2
             assert (isinstance(value, (list, float)) and value[0] > 0.0 and value[1] > 0.0)
             self.mkl.set_C(value[0], value[1])
-        else:
+        elif self.__problem == 'multiclass':
             assert (isinstance(value, float) and value > 0.0)
             self.mkl.set_C(value)
 
