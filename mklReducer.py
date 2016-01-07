@@ -39,17 +39,20 @@ else:
     ac = sys.stdin
 
 for line in ac:
+
     a = line.strip().split(';')
     for att, value in args.__dict__.iteritems():
         if att == 'paths':
             if value: d['path']=a[1]
         elif att == 'learned_model':
             if value: d['learned_model'] = literal_eval(a[2])
-        elif att == 'estimated_output':
-            if value: d['estimated_output'] = list(literal_eval(a[3])) # Add another key from the input a[i+1]. Don't
-        elif att == 'performances':                                 # forget using the same option name (e.g. weights)
-            if value or args.ranked: d['performance']=float(a[0])   # both in 'elif' and in the corresponding dictionary
-    if not args.only_minimum:                                       # new key, e.g. d['weights'].
+        elif att == 'estimated_output': # Add another key from the input a[i+1]. Don't forget using the same
+                                        # option name (e.g. weights) both in 'elif' and in the corresponding
+                                        # new key, e.g. d['weights'].
+            if value: d['estimated_output'] = list(literal_eval(a[3])) # If index error, see if you have correct configuration, i.e. learning_mode (l), in configuration file.
+        elif att == 'performances':                                 
+            if value or args.ranked: d['performance']=float(a[0])    
+    if not args.only_minimum:                                       
         if args.ranked:
             r.append(d)
             d = {}

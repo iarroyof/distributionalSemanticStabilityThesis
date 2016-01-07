@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-__author__ = 'Ignacio Arroyo Fernandez'
+__author__ = 'Ignacio Arroyo-Fernandez'
 
 from mklObj import *
-#import pdb
 from ast import literal_eval
-from sys import stdout, stderr
+from sys import stdout
 import argparse
+#from sys import stderr
+#import pdb
 
 # [feats_train, feats_test, labelsTr, labelsTs] = generate_binToy()
 # [feats_train, feats_test, labelsTr, labelsTs] = load_binData(tr_ts_portion=0.75, fileTrain=files[0],
@@ -31,7 +32,7 @@ import argparse
 # other ones for processing dense data and their behavior is to similar (at least for image classification). Thus the
 # final performance rather depends on the learning hyperparameters and basis kernel parameters (e.g. C, l_p norm, kernel
 # widths).
-def mkl_Pool(path):
+def mkl_learning_pool(path):
     global feats_train; global feats_test; global labelsTr; global labelsTs; global conf
 
     mkl_object = mklObj(problem=conf['problem_mode'])
@@ -53,7 +54,7 @@ def mkl_Pool(path):
                     randomParams=[(a + b)/2, 1.0],   # have not effect. For quadratic there isn't parameter distribution
                     hyper=path[3],                   # With not effect when kernel family is polynomial and some
                     pKers=path[2])
-    mkl_object.pattern_recognition()
+    mkl_object.pattern_recognition(labelsTs)
     #return mkl_object.testerr, mkl_object.weights, mkl_object.sigmas, mkl_object.estimated_out
     return mkl_object.testerr, mkl_object.mkl_model, mkl_object.estimated_out                                                                    # If possible, return the maximum performance
                                                                         # learned machine. It it were not possible,
@@ -61,7 +62,7 @@ def mkl_Pool(path):
                                                                         # of saving the best one, in order to retrieve
                                                                         # it when necessary.
 
-def mkl_Pr():
+def mkl_pattern_recognition():
     """ This function loads a MKL pretrained model from specified file. All model parameters are loaded from that file,
     e.g. the kernel family, widths, subkernel weights, support, alphas, bias.
     In order to use loaded model for predicting, the mkl_object is instantiated in 'pattern_recognition' mode.
@@ -69,8 +70,8 @@ def mkl_Pr():
     global feats_train; global feats_test; global labelsTs; global conf
 
     mkl_object = mklObj(problem = conf['problem_mode'], model_file = conf['model_file'], mode = conf['machine_mode'])
-    mkl_object.fit_pretrained(feats_train, feats_test, labelsTs)
-    mkl_object.pattern_recognition()
+    mkl_object.fit_pretrained(feats_train, feats_test)
+    mkl_object.pattern_recognition(targetsTs=labelsTs)
 
     return mkl_object.testerr, mkl_object.estimated_out
 
@@ -87,7 +88,7 @@ if __name__ == '__main__':
         parser.add_argument('-p', type=str, dest = 'current_path', help='Specifies the grid path to be tested by the mkl object.')
         args = parser.parse_args()
         path = list(literal_eval(args.current_path))
-        [performance, model, output] = mkl_Pool(path)
+        [performance, model, output] = mkl_learning_pool(path)
 
         stdout.write('%s;%s;%s;%s\n' % (performance, path, model, output))
 
@@ -98,7 +99,8 @@ if __name__ == '__main__':
         # no piped operation is used here, so the script is used once for a given test set. Even though the above, it is
         # possible testing several modes in pipe operation, but it is needed modifying this script for parsing these
         # models from stdin.
-        [performance, output] = mkl_Pr()
+        [performance, output] = mkl_pattern_recognition()
+
         stdout.write('# Performance (determination coefficient): %s\n' % performance)
         for predicted in output:
             stdout.write('%s\n' % predicted)
