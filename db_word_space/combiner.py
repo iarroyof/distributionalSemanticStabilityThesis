@@ -78,7 +78,7 @@ def read_sentence_pairs(filename, n=False):
     """
     with open(input_file) as fin:
         for row_i,line in enumerate(fin):
-            if row_i == n:
+            if not n is False and row_i == n:
                 break
             s1, s2 = line.strip().split("\t")
             s1 = s1.lower().split()
