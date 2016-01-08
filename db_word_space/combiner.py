@@ -2,6 +2,7 @@
 import numpy as np
 import sys
 import db_word_space as d_ws
+from scipy import signal
 
 def T(x1, x2, name="conv"):
     """ Convolutional (or any other from the ones defined) operation between two CiS vectors 
@@ -14,7 +15,7 @@ def T(x1, x2, name="conv"):
     if name.startswith("conc"):
         return np.concatenate((x1, x2))
     if name.startswith("conv"):
-        return np.convolve(x1, x2)
+        return signal.fftconvolve(x1, x2)
     if name.startswith("corr"):
         return np.correlate(x1, x2)
 
@@ -86,17 +87,24 @@ def read_sentence_pairs(filename, n=False):
             yield row_i, s1, s2    
 
 if __name__ == "__main__":
-    """Script to read sentence pairs and generate output vectors file
-    
-    Modify the variables input_file and output_file as needed, as well
-    as the variable "limit" to limit the number of sentence pairs to read
+    """Command line tool to read sentence pairs and generate combined output vectors file
     """
-    dws = d_ws.db_word_space("wden_sparse")
-    input_file = "train/STS.input.MSRpar.txt"
-    output_file = "output.mtx"
-    limit = 2 #False if the whole file is to be analyzed
-    operation = "sub" #Change to use another operation (Available: corr, conv, conc, and sub)
-    method = ccbsp #can be ccbsp or csosp
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", help="input file name (sentence pairs)", metavar="input_file", required=True)
+    parser.add_argument("-d", help="name of the database (word space)", metavar="database", required=True)
+    parser.add_argument("-o", help="output file name (optional, defaults to output.mtx)", default="output.mtx", metavar="output_file")
+    parser.add_argument("-l", help="limit to certain number of pairs (optional, defaults to whole file)", default=False, metavar="limit")
+    parser.add_argument("-m", help="method, ccbsp or csosp (optional, defaults to ccbsp)", default="ccbsp", metavar="method")
+    parser.add_argument("-t", help="combiner operation, can be corr, conv, conc, sub", metavar="operation", required=True) 
+    args = parser.parse_args()
+    dws = d_ws.db_word_space(args.d)
+    input_file = args.f
+    output_file = args.o
+    limit = int(args.l) or False
+    operation = args.t
+    method_dict = {'ccbsp': ccbsp, 'csosp': csosp}
+    method = method_dict[args.m]
     row = []
     col = []
     data = []
