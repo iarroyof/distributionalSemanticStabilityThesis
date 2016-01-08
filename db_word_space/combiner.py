@@ -97,6 +97,7 @@ if __name__ == "__main__":
     parser.add_argument("-l", help="limit to certain number of pairs (optional, defaults to whole file)", default=False, metavar="limit")
     parser.add_argument("-m", help="method, ccbsp or csosp (optional, defaults to ccbsp)", default="ccbsp", metavar="method")
     parser.add_argument("-t", help="combiner operation, can be corr, conv, conc, sub", metavar="operation", required=True) 
+    parser.add_argument("-s", help="save as sparse", action="store_true")
     args = parser.parse_args()
     dws = d_ws.db_word_space(args.d)
     input_file = args.f
@@ -108,15 +109,27 @@ if __name__ == "__main__":
     row = []
     col = []
     data = []
-    for row_i, s1, s2 in read_sentence_pairs(input_file, limit):
-        v = method(dws, s1, s2, operation)
-        for col_i in range(0,len(v)):
-            if v[col_i]:
-                row.append(row_i)
-                col.append(col_i)
-                data.append(v[col_i])
-    from scipy.sparse import csr_matrix
-    from scipy import io
-    m = csr_matrix((data, (row, col)))
-    print m.get_shape()
-    io.mmwrite(output_file, m)    
+    #For sparse data a csr matrix is constructed from the coordinates
+    if args.s:
+        for row_i, s1, s2 in read_sentence_pairs(input_file, limit):
+            v = method(dws, s1, s2, operation)
+            for col_i in range(0,len(v)):
+                if v[col_i]:
+                    row.append(row_i)
+                    col.append(col_i)
+                    data.append(v[col_i])
+        from scipy.sparse import csr_matrix
+        from scipy import io
+        m = csr_matrix((data, (row, col)))
+        io.mmwrite(output_file, m)    
+    #Otherwise the vectors are appended row-wise to a file
+    else:
+        import os
+        from numpy import savetxt
+        if os.path.isfile(output_file):
+            os.unlink(output_file)
+        with open(output_file, "a") as fout:
+            for row_i, s1, s2 in read_sentence_pairs(input_file, limit):
+                v = method(dws, s1, s2, operation).astype("float32")
+                savetxt(fout, v, fmt="%d", newline=' ')
+                fout.write("\n")
