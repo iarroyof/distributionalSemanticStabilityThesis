@@ -192,14 +192,14 @@ def load_sparse_regressionData(fileTrain = None, fileTest = None, fileLabelsTr =
     from scipy.io import mmread
 
     lm = LoadMatrix()
-    sci_data_tr = mmread(fileTrain).asformat('csr').astype('float64')
+    sci_data_tr = mmread(fileTrain).asformat('csr').astype('float64').T
     features_tr = SparseRealFeatures(sci_data_tr)                       # Reformated as CSR and 'float64' type for
-    sci_data_ts = mmread(fileTest).asformat('csr').astype('float64')    # compatibility with SparseRealFeatures
+    sci_data_ts = mmread(fileTest).asformat('csr').astype('float64').T    # compatibility with SparseRealFeatures
     features_ts = SparseRealFeatures(sci_data_ts)
-    labels_ts = RegressionLabels(lm.load_labels(fileLabelsTs))
+    labels_ts = RegressionLabels(lm.load_numbers(fileLabelsTs)[0])
 
     if fileTrain and fileLabelsTr: # sci_data_x: Any sparse data type in the file.
-        labels_tr = RegressionLabels(lm.load_labels(fileLabelsTr))
+        labels_tr = RegressionLabels(lm.load_numbers(fileLabelsTr)[0])
     else:
         labels_tr = None
 
