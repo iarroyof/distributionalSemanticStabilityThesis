@@ -616,12 +616,11 @@ class mklObj(object):
             self.__testerr = evalua.evaluate(out, targetsTs) * 100
         elif self.__problem == 'regression': # Determination Coefficient was selected for measuring performance
             evalua = MeanSquaredError()
-            n = out.get_num_labels()
-            l = targetsTs.get_labels()
-            m = numpy.ones(n)*numpy.mean(l)
-            self.__testerr = evalua.evaluate(out,
-            RegressionLabels(m))*100/evalua.evaluate(targetsTs, 
-            RegressionLabels(m))
+            #n = out.get_num_labels()
+            #l = targetsTs.get_labels()
+            #m = numpy.ones(n)*numpy.mean(l)
+            #self.__testerr = evalua.evaluate(out, RegressionLabels(m))*100/evalua.evaluate(targetsTs, RegressionLabels(m))
+            self.__testerr = evalua.evaluate(out, targetsTs)
 
         # Verbose for learning surveying
         if self.verbose:

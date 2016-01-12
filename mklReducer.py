@@ -62,15 +62,15 @@ for line in ac:
             d = {}
 
 if args.ranked and not args.only_estimated:
-    for i in sorted(r, key=lambda k : k['performance'], reverse=True):
+    for i in sorted(r, key=lambda k : k['performance']):#, reverse=True):
         print i,'\n'
 elif args.only_estimated:
-    srtd = sorted(r, key=lambda k : k['performance'], reverse=True)
+    srtd = sorted(r, key=lambda k : k['performance'])#, reverse=True)
     print ("# Performance: %s\n" % (srtd[0]['performance']))
     for i in srtd[0]['estimated_output']:
         print i
     #print sorted(r, key=lambda k : k['performance'], reverse=True)
     #pass
 else:
-    a, b = max(acc)
+    a, b = min(acc) #max(acc)
     print '\n#The maximum performance path:\n ', 'Performance:', a,'\n','Parameters:', b
