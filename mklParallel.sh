@@ -6,5 +6,5 @@ if [ "$1" ] ; then exec < "$1" ; fi # verifying if there is a specified file in 
 
 while IFS='' read -r path || [[ -n "$path" ]]; do # load in $path a line from the input paths file
     #(python /home/iarroyof/printLine.py -l "$path") #test file
-    (python mklCall.py -p "$path") & # Execute in parallel as many (subshell) mklCalls as paths in the input file
+    (python mklCall.py -p "$path" >> output_dense_col_sum_sub_ccbsp_hl_divided.txt) & # Execute in parallel as many (subshell) mklCalls as paths in the input file
 done
