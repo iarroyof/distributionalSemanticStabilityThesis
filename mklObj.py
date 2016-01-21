@@ -469,6 +469,7 @@ class mklObj(object):
                               'binary': (MKLClassification, [mklC, mklC]),
                               'multiclass': (MKLMulticlass, mklC)}
         self.mode = mode
+        self.sparse = sparse
         assert not model_file and mode != 'pattern_recognition' or (
                    model_file and mode == 'pattern_recognition')# Model file or pattern_recognition mode must be specified.
         self.__problem = problem
@@ -499,7 +500,7 @@ class mklObj(object):
         """ This method sets up a MKL machine by using parameters from self.mkl_model preloaded dictionary which
         contains preptrained model paremeters, e.g. weights and widths. 
         """
-        self.ker = genKer(self, featsTr, featsTs, sparse = sparse,
+        self.ker = genKer(self, featsTr, featsTs, sparse = self.sparse,
                           basisFam = self.family_translation[self.mkl_model['family']], widths = self.sigmas)
         self.ker.set_subkernel_weights(self.mkl_model['weights'])  # Setting up pretrained weights to the
         self.ker.init(featsTr, featsTs)                            # new kernel
@@ -571,7 +572,7 @@ class mklObj(object):
         if kernelFamily == 'polynomial' or kernelFamily == 'power' or \
                         kernelFamily == 'tstudent' or kernelFamily == 'anova':
             self.sigmas = range(1, pKers+1)
-            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas, sparse = sparse)
+            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas, sparse = self.sparse)
         else:
         # We have called 'sigmas' to any basis kernel parameter, regardless if the kernel is Gaussian or not. So
         # let's generate the widths:
@@ -961,6 +962,14 @@ class mklObj(object):
         :rtype : float
         """
         return self.__testerr
+    
+    @property
+    def sparse(self):
+        """This method is used for getting the sparse/dense mode of the MKL object. 
+
+        :rtype : float
+        """
+        return self.__sparse
 
     # mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
     # a new mklObj object.
@@ -975,6 +984,11 @@ class mklObj(object):
     def estimated_out(self, value):
 
         self.__estimated_out = value
+    
+    @sparse.setter
+    def sparse(self, value):
+
+        self.__sparse = value
 
     @Matrx.setter
     def Matrx(self, value):

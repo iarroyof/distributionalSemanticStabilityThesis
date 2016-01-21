@@ -33,9 +33,9 @@ import argparse
 # final performance rather depends on the learning hyperparameters and basis kernel parameters (e.g. C, l_p norm, kernel
 # widths).
 def mkl_learning_pool(path):
-    global feats_train; global feats_test; global labelsTr; global labelsTs; global conf
+    global feats_train; global feats_test; global labelsTr; global labelsTs; global conf; global sparse_mode
 
-    mkl_object = mklObj(problem=conf['problem_mode'])
+    mkl_object = mklObj(problem=conf['problem_mode'], sparse = sparse_mode)
     if path[0][0] is 'gaussian': a = 2*path[0][1][0]**2; b = 2*path[0][1][1]**2
     else: a = path[0][1][0]; b = path[0][1][1]
 
@@ -67,15 +67,17 @@ def mkl_pattern_recognition():
     e.g. the kernel family, widths, subkernel weights, support, alphas, bias.
     In order to use loaded model for predicting, the mkl_object is instantiated in 'pattern_recognition' mode.
     """
-    global feats_train; global feats_test; global labelsTs; global conf
+    global feats_train; global feats_test; global labelsTs; global conf; global sparse_mode
 
-    mkl_object = mklObj(problem = conf['problem_mode'], model_file = conf['model_file'], mode = conf['machine_mode'])
+    mkl_object = mklObj(problem = conf['problem_mode'], model_file = conf['model_file'], mode = conf['machine_mode'], sparse = sparse_mode)
     mkl_object.fit_pretrained(feats_train, feats_test)
     mkl_object.pattern_recognition(targetsTs=labelsTs)
 
     return mkl_object.testerr, mkl_object.estimated_out
 
 if __name__ == '__main__':
+    global sparse_mode
+    sparse_mode = False
     conf = open_configuration_file('mkl_object.conf')
     [feats_train, feats_test, labelsTr, labelsTs] = load_regression_data(fileTrain = conf['training_file'],
                                                                            fileTest = conf['test_file'],
@@ -88,6 +90,7 @@ if __name__ == '__main__':
         parser.add_argument('-p', type=str, dest = 'current_path', help='Specifies the grid path to be tested by the mkl object.')
         args = parser.parse_args()
         path = list(literal_eval(args.current_path))
+        
         [performance, model, output] = mkl_learning_pool(path)
 
         stdout.write('%s;%s;%s;%s\n' % (performance, path, model, output))
