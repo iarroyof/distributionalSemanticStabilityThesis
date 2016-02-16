@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "combiner.py", line 123, in <module>
+    m = csr_matrix((data, (row, col)))
+  File "/usr/lib/python2.7/dist-packages/scipy/sparse/compressed.py", line 45, in __init__
+    other = self.__class__(coo_matrix(arg1, shape=shape))
+  File "/usr/lib/python2.7/dist-packages/scipy/sparse/compressed.py", line 29, in __init__
+    arg1 = arg1.asformat(self.format)
+  File "/usr/lib/python2.7/dist-packages/scipy/sparse/base.py", line 213, in asformat
+    return getattr(self,'to' + format)()
+  File "/usr/lib/python2.7/dist-packages/scipy/sparse/coo.py", line 312, in tocsr
+    indices = np.empty(self.nnz, dtype=np.intc)
+MemoryError

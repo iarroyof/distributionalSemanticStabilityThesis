@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
-    
+
 __author__ = 'Ignacio Arroyo-Fernandez'
 
 from modshogun import *
@@ -172,7 +172,8 @@ def load_binData(tr_ts_portion = None, fileTrain = None, fileLabels = None, data
             BinaryLabels(labels[0:tr_ts_portion * len(labels)]),  # Return corresponding train and test labels
             BinaryLabels(labels[tr_ts_portion * len(labels):]))
 
-def load_regression_data(fileTrain = None, fileTest = None, fileLabelsTr = None, fileLabelsTs = None, sparse=False):
+def load_regression_data(fileTrain = None, fileTest = None, fileLabelsTr = None, 
+                         fileLabelsTs = None, sparse=False):
     """ This method loads data from sparse mtx file format ('CSR' preferably. See Python sci.sparse matrix
     format, also referred to as matrix market read and write methods). Label files should contain a column of
     these labels, e.g. see the contents of a three labels file:
@@ -339,7 +340,7 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0], spa
         if not sparse:
             dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
         else:
-            dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(InverseMultiQuadricKernel(0, w, dst))
 
@@ -348,66 +349,52 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0], spa
             kernels.append(PolyKernel(0, w, False))
 
     elif basisFam == 'power':  # At least for images, the used norm does not make differences in performace
-        if not sparse:
-            dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        else:
-            dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(PowerKernel(0, w, dst))
 
     elif basisFam == 'rationalQuadratic':  # At least for images, using 3-norm  make differences
-        if not sparse:
-            dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
-        else:
-            dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # in performance
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(RationalQuadraticKernel(0, w, dst))
 
     elif basisFam == 'spherical':  # At least for images, the used norm does not make differences in performace
-        if not sparse:
-            dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        else:
-            dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(SphericalKernel(0, w, dst))
 
     elif basisFam == 'tstudent':  # At least for images, the used norm does not make differences in performace
-        if not sparse:
-            dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        else:
-            dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(TStudentKernel(0, w, dst))
 
     elif basisFam == 'wave':  # At least for images, the used norm does not make differences in performace
-        if not sparse:
-            dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        else:
-            dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(WaveKernel(0, w, dst))
 
-    elif basisFam == 'wavelet' and not sparse:  # At least for images it is very low the performance with this kernel.
+    elif basisFam == 'wavelet':  # At least for images it is very low the performance with this kernel.
         for w in widths:  # It remains pending, for now, analysing its parameters.
             kernels.append(WaveletKernel(0, w, 0))
 
     elif basisFam == 'cauchy':
-        if not sparse:
-            dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        else:
-            dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(CauchyKernel(0, w, dst))
 
     elif basisFam == 'exponential':  # For this kernel it is necessary specifying features at the constructor
-        if not sparse:
-            dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
-        else:
-            dst = SparseEuclideanDistance(l=featsL, r=featsR)
+        #dst = MinkowskiMetric(l=featsL, r=featsR, k=2)
+        dst = SparseEuclideanDistance(l=featsL, r=featsR)
         for w in widths:
             kernels.append(ExponentialKernel(featsL, featsR, w, dst, 0))
 
-    elif basisFam == 'anova' and not sparse:  # This kernel presents a warning in training:
+    elif basisFam == 'anova':  # This kernel presents a warning in training:
         """RuntimeWarning: [WARN] In file /home/iarroyof/shogun/src/shogun/classifier/mkl/MKLMulticlass.cpp line
            198: CMKLMulticlass::evaluatefinishcriterion(...): deltanew<=0.Switching back to weight norsm
            difference as criterion.
@@ -461,7 +448,7 @@ class mklObj(object):
     """
 
     def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=1e-5, model_file = None,
-                 threads=5, MKLepsilon=0.001, problem='regression', verbose=False, mode = 'learning', sparse = False):
+                 threads=5, MKLepsilon=0.001, problem='regression', verbose=False, mode = 'learning'):
         """Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
         hyperparameters (kernel fitting).
         """
@@ -469,7 +456,6 @@ class mklObj(object):
                               'binary': (MKLClassification, [mklC, mklC]),
                               'multiclass': (MKLMulticlass, mklC)}
         self.mode = mode
-        self.sparse = sparse
         assert not model_file and mode != 'pattern_recognition' or (
                    model_file and mode == 'pattern_recognition')# Model file or pattern_recognition mode must be specified.
         self.__problem = problem
@@ -500,7 +486,7 @@ class mklObj(object):
         """ This method sets up a MKL machine by using parameters from self.mkl_model preloaded dictionary which
         contains preptrained model paremeters, e.g. weights and widths. 
         """
-        self.ker = genKer(self, featsTr, featsTs, sparse = self.sparse,
+        self.ker = genKer(self, featsTr, featsTs,
                           basisFam = self.family_translation[self.mkl_model['family']], widths = self.sigmas)
         self.ker.set_subkernel_weights(self.mkl_model['weights'])  # Setting up pretrained weights to the
         self.ker.init(featsTr, featsTs)                            # new kernel
@@ -572,7 +558,7 @@ class mklObj(object):
         if kernelFamily == 'polynomial' or kernelFamily == 'power' or \
                         kernelFamily == 'tstudent' or kernelFamily == 'anova':
             self.sigmas = range(1, pKers+1)
-            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas, sparse = self.sparse)
+            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
         else:
         # We have called 'sigmas' to any basis kernel parameter, regardless if the kernel is Gaussian or not. So
         # let's generate the widths:
@@ -962,14 +948,6 @@ class mklObj(object):
         :rtype : float
         """
         return self.__testerr
-    
-    @property
-    def sparse(self):
-        """This method is used for getting the sparse/dense mode of the MKL object. 
-
-        :rtype : float
-        """
-        return self.__sparse
 
     # mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
     # a new mklObj object.
@@ -984,11 +962,6 @@ class mklObj(object):
     def estimated_out(self, value):
 
         self.__estimated_out = value
-    
-    @sparse.setter
-    def sparse(self, value):
-
-        self.__sparse = value
 
     @Matrx.setter
     def Matrx(self, value):

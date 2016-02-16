@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys
+
+__author__ = 'Ignacio Arroyo-Fernandez'
+
+from modshogun import *
+from tools.load import LoadMatrix
+import random
+from math import sqrt
+import numpy
+from os import getcwd
+from sys import stderr
+
+def open_configuration_file(fileName):
+    """ Loads the input data configuration file. Lines which start with '#' are ignored. No lines different from
+    configuration ones (even blank ones) at top are allowed. The amount of lines at top are exclusively either three or
+    five (see below for allowed contents).
+
+    The first line may be specifying the train data file in sparse market matrix format.
+    The second line may be specifying the test data file in sparse market matrix format.
+    The third line may be specifying the train labels file. An scalar by line must be associated as label of a vector
+    in training data.
+    The fourth line may be specifying the test labels file. An scalar by line must be associated as label of a vector
+    in test data.
+    The fifth line indicates options for the MKL object:
+        First character : Problem type : valid_options = {r: regression, b: binary, m: multiclass}
+        Second character: Machine mode : valid_options = {l: learning_mode, p: pattern_recognition_mode}
+    Any other characters and amount of they will be ignored or caught as errors.
+    For all configuration lines no other kind of content is allowed (e.g. comments in line ahead).
+    Training data (and its labels) is optional. Whenever no five configuration lines are detected in this file,
+    the first line will be considered as the test data file name, the second line as de test labels and third line as
+    the MKL options. An error exception will be raised otherwise (e.g. no three or no five configuration lines).
+    """
+    with open(fileName) as f:
+        configuration_lines = f.read().splitlines()
+    problem_modes = {'r':'regression', 'b':'binary', 'm':'multiclass'}
+    machine_modes = {'l':'learning', 'p':'pattern_recognition'}
+    cls = 0     # Counted number of configuration lines from top.
+    ncls = 5    # Number of configuration lines allowed.
+    for line in configuration_lines:
+        if not line.startswith('#'):
+            cls += 1
+        else:
+            break
+
+    if cls == ncls:
+        mode = configuration_lines[4]
+        configuration = {}
+        if len(mode) == 2:
+            try:
+                configuration['problem_mode'] = problem_modes[mode[0]]
+                configuration['machine_mode'] = machine_modes[mode[1]]
+            except KeyError:
+                sys.stderr.write('\nERROR: Incorrect configuration file. Invalid machine mode. See help for mklObj.open_configuration_file().')
+    else:
+        sys.stderr.write('\nERROR: Incorrect configuration file. Invalid number of lines. See help for mklObj.open_configuration_file().')
+        exit()
+
+    Null = ncls                                     # Null index
+    if configuration['machine_mode'] == 'learning': # According to availability of training files, indexes are setted.
+        trf = 0; tsf = 1; trlf = 2          # training_file, test_file, training_labels_file, test_labels_file, mode
+        tslf = 3; mf = Null
+        configuration_lines[ncls] = None
+        del(configuration_lines[ncls+1:])   # All from the first '#' onwards is ignored.
+    elif configuration['machine_mode'] == 'pattern_recognition':
+        trf = 0; tsf = 1; trlf = Null       # training_file, test_file, test_labels_file, mode, model_file
+        tslf = 2; mf = 3
+        configuration_lines[ncls] = None
