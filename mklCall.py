@@ -36,9 +36,9 @@ def mkl_learning_pool(path):
     global feats_train; global feats_test; global labelsTr; global labelsTs; global conf; global sparse_mode
 
     mkl_object = mklObj(problem=conf['problem_mode'], sparse = sparse_mode)
-    if path[0][0] is 'gaussian': a = 2*path[0][1][0]**2; b = 2*path[0][1][1]**2
-    else: a = path[0][1][0]; b = path[0][1][1]
-
+    #if path[0][0] is 'gaussian': a = path[0][1][0]; b = 2*path[0][1][1]**2
+    #else: a = path[0][1][0]; b = path[0][1][1]
+    a = path[0][1][0]; b = path[0][1][1]
     if conf['problem_mode'] == 'binary' or conf['problem_mode'] == 'regression':
         mkl_object.mklC = [path[5], path[5]]
     elif conf['problem_mode'] == 'multiclass': mkl_object.mklC = path[5]
