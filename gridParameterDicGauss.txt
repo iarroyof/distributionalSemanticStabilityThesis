@@ -1,0 +1,8 @@
+{
+'inputSLM': {0:'1-gr_tfidf', 1:'2-gr_tfidf', 2:'3-gr_tfidf', 3:'1-gr', 4:'2-gr', 5:'3-gr'},
+'basisKernelFamily': {0:('gaussian', [500.0, 50000.0]), 1:('spherical', [500.0, 50000.0]), 2:('tstudent', [500.0, 50000.0]), 3:('wave', [500.0, 50000.0]), 4:('cauchy',  [500.0, 50000.0]), 5:('exponential',  [500.0, 50000.0])},
+'basisKernelParameterDistribution': {0:'linear', 1:'quadratic', 2:'gaussian', 3:'triangular', 4:'pareto', 5:'beta', 6:'gamma', 7:'weibull'},
+'linearCombinationSize': [2, 4, 8, 16],
+'weightRegularizer': [1.0, 2.0],
+'regularizationParameter': [50.0,  100.0, 500.0, 1000.0, 1500.0, 2000.0, 2500.0]
+}
