@@ -39,7 +39,8 @@ else:
     ac = sys.stdin
 
 for line in ac:
-
+#    if line.startswith('') or line.startswith('#'): # Check empty line and hash-started comments
+#        continue
     a = line.strip().split(';')
     for att, value in args.__dict__.iteritems():
         if att == 'paths':

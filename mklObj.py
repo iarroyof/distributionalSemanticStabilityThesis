@@ -11,6 +11,7 @@ from math import sqrt
 import numpy
 from os import getcwd
 from sys import stderr
+from pdb import set_trace as st
 
 def open_configuration_file(fileName):
     """ Loads the input data configuration file. Lines which start with '#' are ignored. No lines different from
@@ -198,8 +199,8 @@ def load_regression_data(fileTrain = None, fileTest = None, fileLabelsTr = None,
         sci_data_ts = mmread(fileTest).asformat('csr').astype('float64').T    # compatibility with SparseRealFeatures
         features_ts = SparseRealFeatures(sci_data_ts)
     else:
-        features_tr = RealFeatures(lm.load_numbers(fileTrain))
-        features_ts = RealFeatures(lm.load_numbers(fileTest))
+        features_tr = RealFeatures(lm.load_numbers(fileTrain).astype('float64'))
+        features_ts = RealFeatures(lm.load_numbers(fileTest).astype('float64'))
 
     labels_ts = RegressionLabels(lm.load_labels(fileLabelsTs))
 
@@ -332,9 +333,13 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0], spa
     kernels = []
     if basisFam == 'gaussian':
         for w in widths:
-            kernels.append(GaussianKernel())
-            kernels[-1].set_width(w)
-
+            k=GaussianKernel(featsL, featsR, w)
+            k.init(featsL, featsR)
+            st()
+            kernels.append(k)
+            #kernels[-1].set_width(w)
+            #kernels[-1].init(featsL, featsR)
+            #st()
     elif basisFam == 'inverseQuadratic':  # For this (and others below) kernel it is necessary fitting the
         if not sparse:
             dst = MinkowskiMetric(l=featsL, r=featsR, k=2)  # distance matrix at this moment k = 2 is for l_2 norm
@@ -417,12 +422,17 @@ def genKer(self, featsL, featsR, basisFam, widths=[5.0, 4.0, 3.0, 2.0, 1.0], spa
 
     else:
         raise NameError('Unknown Kernel family name!!!')
-
+    
     combKer = CombinedKernel()
+    #features_tr = CombinedFeatures()
     for k in kernels:
         combKer.append_kernel(k)
-
-    return combKer
+        #features_tr.append_feature_obj(featsL)    
+    
+    #combKer.init(features_tr, features_tr)
+    combKer.init(featsL,featsL)
+    st()
+    return combKer#, features_tr
 
 # Defining the compounding kernel object
 class mklObj(object):
@@ -594,11 +604,14 @@ class mklObj(object):
                      kernels, i.e. pKers <= 1, so 'mklObj' couldn't be instantiated."""
                 print "-----------------------------------------------------"
 
-            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas)
+            self.ker = genKer(self, self._featsTr, self._featsTr, basisFam=kernelFamily, widths=self.sigmas, sparse = self.sparse)
             if self.verbose:
                 print 'Widths: ', self.sigmas
         # Initializing the compound kernel
-        self.ker.init(self._featsTr, self._featsTr)
+        
+#        combf_tr = CombinedFeatures()
+#        combf_tr.append_feature_obj(self._featsTr)
+#        self.ker.init(combf_tr, combf_tr)
         try:  # Verifying if number of  kernels was greater or equal to 2 after training
             if self.ker.get_num_subkernels() < 2:
                 raise customException(
@@ -610,20 +623,30 @@ class mklObj(object):
         if self.verbose:
             print '\nKernel fitted...'
         # Initializing the transducer for multiclassification
+        features_tr = CombinedFeatures()
+        features_ts = CombinedFeatures()
+        for k in self.sigmas:
+            features_tr.append_feature_obj(self._featsTr)
+            features_ts.append_feature_obj(featsTs)
+        
+        self.ker.init(features_tr, features_tr)
+        
         self.mkl.set_kernel(self.ker)
         self.mkl.set_labels(self._targetsTr)
         # Train to return the learnt kernel
         if self.verbose:
             print '\nLearning the machine coefficients...'
         # ------------------ The most time consuming code segment --------------------------
+        
         self.mkl.train()
         self.mkl_model = self.keep_mkl_model(self.mkl, self.ker, self.sigmas) # Let's keep the trained model
         if self.verbose:                                                      # for future use.
             print 'Kernel trained... Weights: ', self.weights
         # Evaluate the learnt Kernel. Here it is assumed 'ker' is learnt, so we only need for initialize it again but
         # with the test set object. Then, set the initialized kernel to the mkl object in order to 'apply'.
-        self.ker.init(self._featsTr, featsTs)   # Now with test examples. The inner product between training
 
+        self.ker.init(features_tr, features_ts)   # Now with test examples. The inner product between training
+        st()
     def pattern_recognition(self, targetsTs):
         self.mkl.set_kernel(self.ker)           # and test examples generates the corresponding Gram Matrix.
         out = self.mkl.apply()  # Applying the obtained Gram Matrix
