@@ -92,8 +92,8 @@ if __name__ == '__main__':
         path = list(literal_eval(args.current_path))
         
         [performance, model, output] = mkl_learning_pool(path)
-        sys.stdout.flush()
         stdout.write('%s;%s;%s;%s\n' % (performance, path, model, output))
+        stdout.flush()
 
         # This script (mklCall.py) is called multiple times in learning mode, so multiple outputs are written to the
         # stdout. These outputs are managed by the reducer script (mklReducer.py).
