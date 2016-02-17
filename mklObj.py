@@ -637,8 +637,12 @@ class mklObj(object):
         if self.verbose:
             print '\nLearning the machine coefficients...'
         # ------------------ The most time consuming code segment --------------------------
-        
-        self.mkl.train()
+        self.crashed = False
+        try:
+            self.mkl.train()
+        except SystemError:
+            self.crashed = True
+
         self.mkl_model = self.keep_mkl_model(self.mkl, self.ker, self.sigmas) # Let's keep the trained model
         if self.verbose:                                                      # for future use.
             print 'Kernel trained... Weights: ', self.weights
@@ -649,7 +653,10 @@ class mklObj(object):
         #st()
     def pattern_recognition(self, targetsTs):
         self.mkl.set_kernel(self.ker)           # and test examples generates the corresponding Gram Matrix.
-        out = self.mkl.apply()  # Applying the obtained Gram Matrix
+        if not self.crashed:
+            out = self.mkl.apply()  # Applying the obtained Gram Matrix
+        else:
+            out = RegressionLabels(-1.0*numpy.ones(targetsTs.get_num_labels()))
 
         self.estimated_out = list(out.get_labels())
         # ----------------------------------------------------------------------------------
@@ -669,54 +676,6 @@ class mklObj(object):
         # Verbose for learning surveying
         if self.verbose:
             print 'Kernel evaluation ready. The precision was: ', self.__testerr, '%'
-
-    def save_sigmas(self, file='sigmasFile.txt', mode='w', note='Some note'):
-        """This method saves the set of kernel parameters (e.g. gaussian widths) into a text file, which are
-        associated to a basis kernel family. It could be used for loading a desired set of widths used in previous
-        training epochs (i.e. when the F1-measure showed a maximum).
-        By default, '../sigmasFile.txt' will be the corresponding directory and file name. You can set the mode of
-        the file object, e.g. to 'a' for uniquely adding content. If you want adding some note to each saved sigma
-        array, it could be used the 'note' input string.
-        """
-        f = open(file, mode)
-        f.write('# ----------------- ' + note + ' ------------------')
-        f.write("\n# Basis kernel family: " + self.basisFamily + '\n')
-        for s in self.sigmas:
-            f.write("%s, " % s)
-        f.close()
-
-    # Multi-kernel object training procedure file reporting.
-    def filePrintingResults(self, fileName, mode = 'w'):
-        """This method is used for printing training results as well as used settings for each learned compounding
-        kernel into a file for comparison. 'fileName' is the desired location of the file at your HD and 'mode' could
-        be setted to 'a' for adding different training results to the same file. The default mode is 'w', which is
-        used for creating or rewriting a file.
-        """
-        f = open(fileName, mode)
-        if mode == 'w':
-            f.write('                   Results\
-            \n--------------------------------------------------------------------\n')
-        else:
-            f.write('\n--------------------------------------------------------------------\n')
-
-        f.write("Basis kernel family: " + self.basisFamily)
-        f.write("\nLinear combination size: " + str(self._pkers))
-        f.write('\nHyperparameter distribution: ' + str(self._hyper))
-        f.write('\nWeight regularization norm: ' + str(self.weightRegNorm))
-        f.write('\nWeight regularization parameter: ' + str(self.mklC))
-        f.write("\nWeights: ")
-        ws = self.weights
-        for item in ws:
-            f.write("%s, " % item)
-        f.write('\nWidths: ')
-        for item in self.sigmas:
-            f.write("%s, " % item)
-        if self.__problem == 'binary':
-            f.write('\nTest error: ' + str(100 - self.__testerr * 100))
-        else:
-            f.write("\nClasses: " + str(self._targetsTr.get_num_classes()))
-            f.write('\nTest error:' + str(self.__testerr * 100))
-        f.close()
 
     def keep_mkl_model(self, mkl, kernel, widths, file_name = None):
         """ Python reimplementated function for saving a pretrained MKL machine.
@@ -994,8 +953,22 @@ class mklObj(object):
         """
         return self.__sparse
 
+    @property
+    def crashed(self):
+        """This method is used for getting the sparse/dense mode of the MKL object. 
+
+        :rtype : float
+        """
+        return self.__crashed
+
     # mklObj (decorated) Setters: Binary configuration of the classifier cant be changed. It is needed to instantiate
     # a new mklObj object.
+
+    @crashed.setter
+    def crashed(self, value):
+
+        assert isinstance(value, bool) # The model is not stored as a dictionary
+        self.__crashed = value
 
     @mkl_model.setter
     def mkl_model(self, value):
