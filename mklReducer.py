@@ -37,10 +37,10 @@ if args.reducer_file: # If a file containing outputs writen by the multiple mkl 
     ac = f.readlines()
 else:
     ac = sys.stdin
-
+i=1
 for line in ac:
-#    if line.startswith('') or line.startswith('#'): # Check empty line and hash-started comments
-#        continue
+  if unicode(line[0], 'utf-8').isnumeric(): # Check empty line and hash-started comments
+    sys.stderr.write("-- Line %s in the input file is wrong\n" % i)
     a = line.strip().split(';')
     for att, value in args.__dict__.iteritems():
         if att == 'paths':
