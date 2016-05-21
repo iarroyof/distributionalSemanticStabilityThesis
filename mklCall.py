@@ -35,7 +35,7 @@ import argparse
 def mkl_learning_pool(path):
     global feats_train; global feats_test; global labelsTr; global labelsTs; global conf; global sparse_mode
 
-    mkl_object = mklObj(problem=conf['problem_mode'], sparse = sparse_mode)
+    mkl_object = mklObj(problem=conf['problem_mode'], sparse = sparse_mode, threads = 24)
     #if path[0][0] is 'gaussian': a = path[0][1][0]; b = 2*path[0][1][1]**2
     #else: a = path[0][1][0]; b = path[0][1][1]
     a = path[0][1][0]; b = path[0][1][1]

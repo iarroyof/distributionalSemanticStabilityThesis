@@ -471,7 +471,7 @@ class mklObj(object):
     """
 
     def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=1e-5, model_file = None,
-                 threads=5, MKLepsilon=0.001, problem='regression', verbose=False, mode = 'learning', sparse = False):
+                 threads=4, MKLepsilon=0.001, problem='regression', verbose=False, mode = 'learning', sparse = False):
         """Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
         hyperparameters (kernel fitting).
         """
