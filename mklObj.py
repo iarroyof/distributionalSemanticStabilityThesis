@@ -6,6 +6,7 @@ __author__ = 'Ignacio Arroyo-Fernandez'
 
 from modshogun import *
 from tools.load import LoadMatrix
+from sklearn import r2_score
 import random
 from math import sqrt
 import numpy
@@ -667,11 +668,9 @@ class mklObj(object):
             evalua = MulticlassAccuracy()
             self.__testerr = evalua.evaluate(out, targetsTs) * 100
         elif self.__problem == 'regression': # Determination Coefficient was selected for measuring performance
-            evalua = MeanSquaredError()
-            #n = out.get_num_labels()
-            #l = targetsTs.get_labels()
-            #m = numpy.ones(n)*numpy.mean(l)
-            self.__testerr = evalua.evaluate(out, targetsTs)
+            #evalua = MeanSquaredError()
+            #self.__testerr = evalua.evaluate(out, targetsTs)
+            self.__testerr = r2_score(self.estimated_out,  list(targetsTs.get_labels()))
 
         # Verbose for learning surveying
         if self.verbose:
