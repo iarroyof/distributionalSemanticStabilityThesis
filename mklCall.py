@@ -78,7 +78,7 @@ def mkl_pattern_recognition():
 if __name__ == '__main__':
     global sparse_mode
     sparse_mode = False
-    conf = open_configuration_file('mkl_object.conf')
+    conf = open_configuration_file("mkl_objectPucesEn.conf")#"mkl_objectD2VH20sts.conf")#"mkl_objectPucesEn.conf")#'mkl_object.conf')
     [feats_train, feats_test, labelsTr, labelsTs] = load_regression_data(fileTrain = conf['training_file'],
                                                                            fileTest = conf['test_file'],
                                                                            fileLabelsTr = conf['training_labels_file'],

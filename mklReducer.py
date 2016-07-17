@@ -39,7 +39,7 @@ else:
     ac = sys.stdin
 i=1
 for line in ac:
-  if unicode(line[0], 'utf-8').isnumeric(): # Check empty line and hash-started comments
+  if unicode(line[0], 'utf-8').isnumeric() or line[0] == '-': # Check empty line and hash-started comments
     a = line.strip().split(';')
     for att, value in args.__dict__.iteritems():
         if att == 'paths':

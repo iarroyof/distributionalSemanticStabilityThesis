@@ -6,7 +6,7 @@ __author__ = 'Ignacio Arroyo-Fernandez'
 
 from modshogun import *
 from tools.load import LoadMatrix
-from sklearn import r2_score
+from sklearn.metrics import r2_score
 import random
 from math import sqrt
 import numpy
