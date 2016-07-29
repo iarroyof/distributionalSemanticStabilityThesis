@@ -5,34 +5,36 @@ from sklearn.metrics import r2_score
 from mkl_regressor import *
 from scipy.stats import randint as sp_randint
 from sklearn.grid_search import  RandomizedSearchCV as RS
-from scipy.stats import expon
+from scipy.stats import expon, uniform
 import sys
 
 from sklearn.cross_validation import cross_val_score
 
-#def scorer(estimator, X, y):
+def scorer(estimator, X, y):
 
-#    predicted = estimator.predict(X)
-#    return r2_score(predicted, y)
+    predicted = estimator.predict(X)
+    return r2_score(predicted, y)
 
 
 if __name__ == "__main__":
 
-    labels = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.OnWN.txt")
-    data = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_OnWN_d2v_H10_sub_m5w8.mtx").T
+    #labels = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.OnWN.txt")
+    #data = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_OnWN_d2v_H10_sub_m5w8.mtx").astype("float64")
+    labels = array([2.,3.,2.])
+    data = array([[1.,2.,3.,4.],[1.,2.,3.,4.],[1.,2.,3.,4.]])
+    print data.shape
+    #labels_t = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.FNWN.txt")
+    #data_t = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_FNWN_d2v_H10_sub_m5w8.mtx").astype("float64")
+    labels_t = array([1.,3.,4])
+    data_t = array([[1.,2.,3.,4.],[1.,2.,3.,4.],[1.,2.,3.,4.]])
+    print data_t.shape
+    k = 2
+    median_wd = 0.01
 
-    labels_t = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.FNWN.txt")
-    data_t = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_FNWN_d2v_H10_sub_m5w8.mtx").T
-
-    k = 7
-    p = 5
-    distributions = {}
-    for _ in xrange(p):
-        distributions[str(_)] = expon
 
     """     self.degree = kwargs['degree']
-            self.svm_C = kwargs['svm_c']
-            self.mkl_C = kwargs['mkl_c']
+            self.svm_c = kwargs['svm_c']
+            self.mkl_c = kwargs['mkl_c']
             self.mkl_norm = kwargs['mkl_norm']
             self.svm_norm = kwargs['svm_norm']
             self.widths = kwargs['widths']
@@ -44,17 +46,20 @@ if __name__ == "__main__":
     param_grid = [ {'svm_c': expon(scale=100, loc=5), 
                     'mkl_c': expon(scale=100, loc=5),                    
                     'degree': sp_randint(0, 32), 
-                    'widths': distributions,
-                    'num_widths': sp_randint(0, 5) } ]
+                    'num_widths': [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}] #,
+                    #'num_widths': sp_randint(0, 5) } ]
 
 
     for params in param_grid:
 
         mkl = mkl_regressor()
-        rs = RS(mkl, param_distributions = params, n_iter = 10, n_jobs = 24, cv = k, scoring = 'mean_squared_error')
+        for i in xrange(16):
+            params['wd' + str(i)] = uniform(scale=50, loc = median_wd)
+            
+        rs = RS(mkl, param_distributions = params, n_iter = 10, n_jobs = 24, cv = k, scoring = scorer)
 
         #try:
-        rs.fit(data, labels)
+        rs.fit(X=data, y=labels)
         #except:
         #    sys.stderr.write("\n:>> Fitting Error:\n" )
 
