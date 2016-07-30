@@ -1,0 +1,27 @@
+  File "mkl.py", line 41
+    for i in xrange(N)
+                     ^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "mkl.py", line 41, in <module>
+    for i in xrange(N):
+NameError: name 'N' is not defined
+Traceback (most recent call last):
+  File "mkl.py", line 46, in <module>
+    rs.fit(data, labels)
+  File "/usr/local/lib/python2.7/dist-packages/sklearn/grid_search.py", line 996, in fit
+    return self._fit(X, y, sampled_params)
+  File "/usr/local/lib/python2.7/dist-packages/sklearn/grid_search.py", line 553, in _fit
+    for parameters in parameter_iterable
+  File "/usr/local/lib/python2.7/dist-packages/sklearn/externals/joblib/parallel.py", line 804, in __call__
+    while self.dispatch_one_batch(iterator):
+  File "/usr/local/lib/python2.7/dist-packages/sklearn/externals/joblib/parallel.py", line 657, in dispatch_one_batch
+    tasks = BatchedCalls(itertools.islice(iterator, batch_size))
+  File "/usr/local/lib/python2.7/dist-packages/sklearn/externals/joblib/parallel.py", line 68, in __init__
+    self.items = list(iterator_slice)
+  File "/usr/local/lib/python2.7/dist-packages/sklearn/grid_search.py", line 549, in <genexpr>
+    delayed(_fit_and_score)(clone(base_estimator), X, y, self.scorer_,
+  File "/usr/local/lib/python2.7/dist-packages/sklearn/grid_search.py", line 249, in __iter__
+    params[k] = v[rnd.randint(len(v))]
+  File "mtrand.pyx", line 945, in mtrand.RandomState.randint (numpy/random/mtrand/mtrand.c:10732)
+ValueError: low >= high
