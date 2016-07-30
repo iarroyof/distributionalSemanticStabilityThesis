@@ -1,5 +1,4 @@
 from modshogun import *
-import Gnuplot, Gnuplot.funcutils
 from numpy import *
 from sklearn.metrics import r2_score
 
