@@ -5,6 +5,7 @@ from scipy.stats import randint
 from scipy.stats import randint as sp_randint
 from scipy.stats import expon
 from mkl_regressor import *
+from time import localtime, strftime
 
 if __name__ == "__main__":
 
@@ -45,13 +46,13 @@ if __name__ == "__main__":
     max_p = int(args.P)
     median_w = float(args.m)
     # median_width = None, width_scale = 20.0, min_size=2, max_size = 10, kernel_size = None
-    print ">> Shapes: labels %s; Data %s\n\tlabelsT %s; DataT %s" % (labels.shape, data.shape, labels_t.shape, data_t.shape)
+    sys.stderr.write("\n>> [%s] Training session begins...\n" % (strftime("%Y-%m-%d %H:%M:%S", localtime())))
     params = {'svm_c': expon(scale=100, loc=5),
                     'mkl_c': expon(scale=100, loc=5),
                     'degree': sp_randint(0, 24),
                     #'widths': expon_vector(loc = median_w, min_size = min_p, max_size = max_p) 
-                    'width_scale': [5, 10, 20, 30, 40, 50, 100],
-                    'median_width': expon(scale=20, loc=median_w),
+                    'width_scale': [0.05, 0.1, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0],
+                    'median_width': expon(scale=1, loc=median_w),
                     'kernel_size': [2, 3, 4, 5, 6, 7, 8, 9, 10]
                 }
     param_grid = []
@@ -70,5 +71,8 @@ if __name__ == "__main__":
         pred, real = zip(*sorted(zip(preds, labels_t), key=lambda tup: tup[1]))
         g = Gnuplot.Gnuplot()   
         g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
+    
+        sys.stderr.write("\n-------------------------------------------------\n>> [%s] Grid...\n" % (strftime("%Y-%m-%d %H:%M:%S", localtime())))    
+
 
     

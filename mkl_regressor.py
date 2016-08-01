@@ -99,7 +99,7 @@ class mkl_regressor():
         if not self.kernel_size:
             self.kernel_size = randint.rvs(low = self.min_size, high = self.max_size, size = 1)
 
-        self.widths = linspace(start = self.median_width * 0.09, stop = self.median_width * self.width_scale, num = self.kernel_size)
+        self.widths = linspace(start = self.median_width * 0.001, stop = self.median_width * self.width_scale, num = self.kernel_size)
 
 class expon_vector(stats.rv_continuous):
     

@@ -9,7 +9,8 @@ import sys, os
 
 class mkl_regressor():
 
-    def __init__(self, widths = array([0.01, 0.1, 1.0, 10.0, 50.0, 100.0]), kernel_weights = [0.01, 0.1, 1.0,], svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2):
+    def __init__(self, widths = array([0.01, 0.1, 1.0, 10.0, 50.0, 100.0]), kernel_weights = [0.01, 0.1, 1.0,], 
+                        svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2):
         self.svm_c = svm_c
         self.mkl_c = mkl_c
         self.svm_norm = svm_norm
@@ -17,11 +18,11 @@ class mkl_regressor():
         self.degree = degree
         self.widths = widths
         self.kernel_weights = kernel_weights                
-        self.loaded = False
     
     def combine_kernel(self):
 
         self._kernels_  = CombinedKernel()
+        f = CombinedFeatures()
         for width in self.widths:
             kernel = GaussianKernel()
             kernel.set_width(width)
@@ -32,17 +33,18 @@ class mkl_regressor():
         kernel = PolyKernel(10, self.degree)            
         self._kernels_.append_kernel(kernel)
         del kernel
-
+        f.append_feature_obj(self.feats_train)
+        self.feats_train = f; del f
         self._kernels_.init(self.feats_train, self.feats_train)
 
     def fit(self, X, y, **params):
         for parameter, value in params.items():
             setattr(self, parameter, value)        
-       
-        self.feats_train = RealFeatures(X.T)
+        
         labels_train = RegressionLabels(y.reshape((len(y), )))
         
-        combine_kernel()
+        self.feats_train = RealFeatures(X.T)
+        self.combine_kernel()
 
         binary_svm_solver = SVRLight() # seems to be optional, with LibSVR it does not work.
         self.mkl = MKLRegression(binary_svm_solver)
@@ -56,17 +58,16 @@ class mkl_regressor():
         self.mkl.set_labels(labels_train)
         self.mkl.train()
         self.kernel_weights = self._kernels_.get_subkernel_weights()
+        self.__loaded = False
 
     def predict(self, X):
         """ For prediction from here, once the model was loaded from outside, test if saving the kernel separetely and loading it again."""
-        if not self.loaded:
-            self.feats_test = RealFeatures(X.T)
+        self.feats_test = CombinedFeatures()
+        self.feats_test.append_feature_obj(RealFeatures(X.T))
+
+        if not self.__loaded:
             self._kernels_.init(self.feats_train, self.feats_test) # test for test
             self.mkl.set_kernel(self._kernels_)
-        else:
-            self.feats_test = CombinedFeatures()
-            self.feats_test.append_feature_obj(RealFeatures(X.T))
-        #self.loaded = False
 
         return self.mkl.apply_regression(self.feats_test).get_labels()
 
@@ -106,7 +107,7 @@ class mkl_regressor():
             #self.feats_train = RealFeatures()
             #self.feats_train.load_serializable(fstream)
             self.mkl = pickle.load(f)
-            self.loaded = True
+            self.__loaded = True
 
     def save(self, file_name = None):
         """ Python reimplementated function for saving a pretrained MKL machine.

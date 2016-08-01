@@ -290,3 +290,170 @@ Fitting 5 folds for each of 20 candidates, totalling 100 fits
 
 R^2:  -0.807917450704
 Parameters:  {'widths': array([ 3.87431955,  1.05149597,  0.42158976,  0.36605987,  1.17801393]), 'mkl_c': 115.05825377704055, 'degree': 11, 'svm_c': 9.515674051345544}
+>> Shapes: labels (561,); Data (561, 10)
+	labelsT (189,); DataT (189, 10)
+Fitting 5 folds for each of 20 candidates, totalling 100 fits
+[Parallel(n_jobs=16)]: Done  18 tasks      | elapsed:  2.6min
+[Parallel(n_jobs=16)]: Done 100 out of 100 | elapsed: 43.0min finished
+
+
+  5 ++-----+------+------+------+-------+------+------+------+------+-----++
+    +      +      +      +      +       +      +      +      +      +      +
+    |                          *                                           |
+  4 ++                         *                              *       BB  ++
+    |                 *        *    *****  * *                *  *  *BB    |
+  3 ++      ***      ***** * * * * ******  * **  ***  ** *  * ****BBBB *  ++
+    | *** *******  * ***** * ***** ****** ** *******  ** * ****BBBB *  *   |
+    | *** ******* ***** ** * *************** **********BBBBBBBBB** ****    |
+  2 ******************* ***********************BBBBBBBBB****** *** ****   ++
+    ********** ******** ***** ** *****BBBBBBBBBB** *********** *** ****    |
+    |**  *** * ******** ***** BBBBBBBB** ** * ***  ***  ****** ** ***      |
+  1 +**  *** * ******BBBBBBBBBB* ****  * **    *   **   **** *  * ***     ++
+    |**  *** * BBBBBB**    **  *  **     **    *   **    ***    * ***      |
+    | *  ** BBB* ***       **  *   *     *     *    *    **     *  *       |
+  0 BBBBBBBBB* * **         *  *   *     *          *    *      *  *      ++
+    |    **  * *  *         *  *   *     *          *    *      *          |
+ -1 ++            *         *                       *           *         ++
+    |             *                                                        |
+    +      +      +      +      +       +      +      +      +      +      +
+ -2 ++-----+------+------+------+-------+------+------+------+------+-----++
+    0      20     40     60     80     100    120    140    160    180    200
+
+R^2:  -0.743738981708
+Parameters:  {'degree': 1, 'median_width': 5.291990720466572, 'mkl_c': 237.35192226217168, 'width_scale': 10, 'svm_c': 26.240355469412926, 'kernel_size': 5}
+Traceback (most recent call last):
+  File "mkl.py", line 1, in <module>
+    from modshogun import *
+ImportError: No module named modshogun
+
+>> [2016-08-01 07:38:32] Training session begins...
+Fitting 5 folds for each of 20 candidates, totalling 100 fits
+[Parallel(n_jobs=16)]: Done  18 tasks      | elapsed:  1.9min
+[Parallel(n_jobs=16)]: Done 100 out of 100 | elapsed: 18.4min finished
+
+-------------------------------------------------
+>> [2016-08-01 07:57:02] Grid...
+R^2:  -125.994805381
+Parameters:  {'degree': 15, 'median_width': 0.1382072587870192, 'mkl_c': 153.56699053078663, 'width_scale': 1.0, 'svm_c': 29.48720592618463, 'kernel_size': 10}
+Fitting 5 folds for each of 20 candidates, totalling 100 fits
+
+
+    4 ++-----+------+------+------+------+-----+------+------+------+--B--++
+      +      +      +      +      +      +     +      +      +      +  B   +
+  3.5 ++                                                               #  ++
+      |                                                              BB    |
+      |                                                            BBB     |
+    3 ++                                                          BB      ++
+      |                                  *                      BBB        |
+  2.5 ++**    ***       *  *       *     ** *      *    *  BBBBB    *     ++
+      ***** ********************************************BBBB************   |
+    2 ********** * ** ** ** *** * ******* **   *BBBBBBBB**** **********   ++
+      |                                      BBB             *             |
+      |                                BBBBBB                              |
+  1.5 ++                            BBBB                                  ++
+      |                         BBBBB                                      |
+    1 ++                    BBBB                                          ++
+      |               BBBBBBB                                              |
+      |            BBBB                                                    |
+  0.5 ++        BBBB                                                      ++
+      +      +BBB   +      +      +      +     +      +      +      +      +
+    0 BBBBBBBBB-----+------+------+------+-----+------+------+------+-----++
+      0      20     40     60     80    100   120    140    160    180    200
+
+[Parallel(n_jobs=16)]: Done  18 tasks      | elapsed:   51.0s
+[Parallel(n_jobs=16)]: Done 100 out of 100 | elapsed: 26.1min finished
+
+-------------------------------------------------
+>> [2016-08-01 08:23:31] Grid...
+R^2:  -125.72594557
+Parameters:  {'degree': 17, 'median_width': 0.6359624436786987, 'mkl_c': 127.71945404728721, 'width_scale': 0.05, 'svm_c': 32.343585048201135, 'kernel_size': 7}
+Fitting 5 folds for each of 20 candidates, totalling 100 fits
+
+
+    4 ++-----+------+------+------+------+-----+------+------+------+--B--++
+      +      +      +      +      +      +     +      +      +      +  B   +
+  3.5 ++                                                               #  ++
+      |                                                              BB    |
+      |                                                            BBB     |
+    3 ++                                                          BB      ++
+      |                                  *                      BBB        |
+  2.5 ++**    ***       *  *       *     ** *      *    *  BBBBB    *     ++
+      ***** ********************************************BBBB************   |
+    2 ********** * ** ** ** *** * ******* **   *BBBBBBBB**** **********   ++
+      |                                      BBB             *             |
+      |                                BBBBBB                              |
+  1.5 ++                            BBBB                                  ++
+      |                         BBBBB                                      |
+    1 ++                    BBBB                                          ++
+      |               BBBBBBB                                              |
+      |            BBBB                                                    |
+  0.5 ++        BBBB                                                      ++
+      +      +BBB   +      +      +      +     +      +      +      +      +
+    0 BBBBBBBBB-----+------+------+------+-----+------+------+------+-----++
+      0      20     40     60     80    100   120    140    160    180    200
+
+[Parallel(n_jobs=16)]: Done  18 tasks      | elapsed:   49.9s
+[Parallel(n_jobs=16)]: Done 100 out of 100 | elapsed: 32.8min finished
+
+-------------------------------------------------
+>> [2016-08-01 08:56:20] Grid...
+R^2:  -111.655316744
+Parameters:  {'degree': 23, 'median_width': 0.12076861807131521, 'mkl_c': 182.76181226518278, 'width_scale': 1.5, 'svm_c': 77.56531312604183, 'kernel_size': 9}
+Fitting 5 folds for each of 20 candidates, totalling 100 fits
+
+
+    4 ++-----+------+------+------+------+-----+------+------+------+--B--++
+      +      +      +      +      +      +     +      +      +      +  B   +
+  3.5 ++                                                               #  ++
+      |                                                              BB    |
+      |                                                            BBB     |
+    3 ++                                                          BB      ++
+      |                                  *                      BBB        |
+  2.5 ++**    ***       *      **  *     ** *   *  *    *  BBBBB    *     ++
+      ***** ********** *********************************BBBB************   |
+    2 *********  **** ** ** *** * ******* ** * *BBBBBBBB**** **** *** *   ++
+      | *                                    BBB             *             |
+      |                                BBBBBB                              |
+  1.5 ++                            BBBB                                  ++
+      |                         BBBBB                                      |
+    1 ++                    BBBB                                          ++
+      |               BBBBBBB                                              |
+      |            BBBB                                                    |
+  0.5 ++        BBBB                                                      ++
+      +      +BBB   +      +      +      +     +      +      +      +      +
+    0 BBBBBBBBB-----+------+------+------+-----+------+------+------+-----++
+      0      20     40     60     80    100   120    140    160    180    200
+
+[Parallel(n_jobs=16)]: Done  18 tasks      | elapsed:   37.0s
+[Parallel(n_jobs=16)]: Done 100 out of 100 | elapsed: 28.8min finished
+
+-------------------------------------------------
+>> [2016-08-01 09:25:13] Grid...
+R^2:  -118.262058311
+Parameters:  {'degree': 15, 'median_width': 0.05252946691153866, 'mkl_c': 51.62924735485463, 'width_scale': 3.0, 'svm_c': 129.038474571654, 'kernel_size': 10}
+Fitting 5 folds for each of 20 candidates, totalling 100 fits
+
+
+    4 ++-----+------+------+------+------+-----+------+------+------+--B--++
+      +      +      +      +      +      +     +      +      +      +  B   +
+  3.5 ++                                                               #  ++
+      |                                                              BB    |
+      |                                                            BBB     |
+    3 ++                                                          BB      ++
+      |                                  *                      BBB        |
+  2.5 ++**    ***       *  *       *     ** *      *    *  BBBBB    *     ++
+      ***** ********** *********************************BBBB************   |
+    2 ********** * ** ** ** *** * ******* **   *BBBBBBBB**** **********   ++
+      |                                      BBB             *             |
+      |                                BBBBBB                              |
+  1.5 ++                            BBBB                                  ++
+      |                         BBBBB                                      |
+    1 ++                    BBBB                                          ++
+      |               BBBBBBB                                              |
+      |            BBBB                                                    |
+  0.5 ++        BBBB                                                      ++
+      +      +BBB   +      +      +      +     +      +      +      +      +
+    0 BBBBBBBBB-----+------+------+------+-----+------+------+------+-----++
+      0      20     40     60     80    100   120    140    160    180    200
+
+[Parallel(n_jobs=16)]: Done  18 tasks      | elapsed:   45.4s
