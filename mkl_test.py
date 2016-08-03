@@ -12,16 +12,21 @@ import Gnuplot, Gnuplot.funcutils
 
 class mkl_regressor():
 
-    def __init__(self, widths = array([0.01, 0.1, 1.0, 10.0, 50.0, 100.0]), kernel_weights = [0.01, 0.1, 1.0,], 
-                        svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2):
+    def __init__(self, widths = None, kernel_weights = None, svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2, 
+                    median_width = None, width_scale = 20.0, min_size=2, max_size = 10, kernel_size = None):
         self.svm_c = svm_c
         self.mkl_c = mkl_c
         self.svm_norm = svm_norm
         self.mkl_norm = mkl_norm
         self.degree = degree
         self.widths = widths
-        self.kernel_weights = kernel_weights                
-    
+        self.kernel_weights = kernel_weights       
+        self.median_width = median_width
+        self.width_scale = width_scale
+        self.min_size = min_size
+        self.max_size = max_size
+        self.kernel_size = kernel_size
+                 
     def combine_kernel(self):
 
         self.__kernels  = CombinedKernel()
@@ -41,7 +46,7 @@ class mkl_regressor():
     def fit(self, X, y, **params):
 
         for parameter, value in params.items():
-            setattr(self, parameter, value)        
+            setattr(self, parameter, value)
         labels_train = RegressionLabels(y.reshape((len(y), )))
         
         self.__feats_train = RealFeatures(X.T)
@@ -261,8 +266,7 @@ if __name__ == "__main__":
             rs.fit(data, labels)
             rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.model' % i)
 
-            if e: # If user wants to save estimates
-                #ests = rs.best_estimator_.predict(data)
+            if e: # If user wants to save estimates    
                 test_predict(data = data, machine = rs.best_estimator_, labels = labels, out_file = out_file)
                 if p: # If user wants to predict and save just after training.
                     assert not X is None # Provide test data

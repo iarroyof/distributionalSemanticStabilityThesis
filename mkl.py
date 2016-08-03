@@ -7,24 +7,25 @@ from scipy.stats import expon
 from mkl_regressor import *
 from time import localtime, strftime
 
-def test_predict(data, machine = None, file=None, labels = None):
+def test_predict(data, machine = None, file=None, labels = None, out_file=None):
     g = Gnuplot.Gnuplot()
     if type(machine) is str:
         if "mkl_regerssion" == machine:
-            machine = mkl_regressor()
-            machine.load(model_file)
+            machine_ = mkl_regressor()
+            machine_.load(model_file)
 		# elif other machine types ...
         else:
             print "Error machine type"
-	#elif "Regression" in str(type(machine)):
+            exit()
      # elif other machine types ...  
     else:
-        print "Error machine type"  
+        machine_ = machine
 
-    preds = machine.predict(data_t)
+    preds = machine_.predict(data)
 
     if labels is not None:
-        print "R^2: ", r2_score(preds, labels)
+        r2 = r2_score(preds, labels)
+        print "R^2: ", r2
         pred, real = zip(*sorted(zip(preds, labels), key=lambda tup: tup[1]))
 
     else:
@@ -48,18 +49,23 @@ if __name__ == "__main__":
     parser.add_argument("-Y", help="Test labels file.", metavar="testLabs_file", default = None)
     parser.add_argument("-n", help="Number of tests to be performed.", metavar="tests_amount", default=1)
     parser.add_argument("-o", help="""The operation the input data was derived from. Options: {'conc', 'convss', 'sub'}. In the case you want to give a precalculated center for
-                                    width randomization, specify the number. e.g. '-o 123.654'. A filename can be specified, which is the file where a SVR model is sotred,
-                                    e.g. '-o filename.model'""", metavar="operat{or,ion}")
-    parser.add_argument("-u", help="Especify C regulazation parameter. For a list '-u C:a_b', for a value '-u C:a'.", metavar="fixed_params", default = None)
-    parser.add_argument("-K", help="Kernel type custom specification. Uniquely valid if -u is not none.  Options: gaussian, linear, sigmoid.", metavar="kernel", default = None)
-    parser.add_argument("-s", help="Toggle if you will process sparse input format.", action="store_true", default = False)
-    parser.add_argument("-e", help="Toggle if you will prjust after estimating.", action="store_true", default = False)
+                                    width randomization (the median width), specify the number. e.g. '-o 123.654'. A filename can be specified, which is the file where a pretrained MKL model,
+                                    e.g. '-o filename.model'""", metavar="median", default=0.01)
+    #parser.add_argument("-u", help="Especify C regulazation parameter. For a list '-u C:a_b', for a value '-u C:a'.", metavar="fixed_params", default = None)
+    #parser.add_argument("-K", help="Kernel type custom specification. Uniquely valid if -u is not none.  Options: gaussian, linear, sigmoid.", metavar="kernel", default = None)
+    #parser.add_argument("-s", help="Toggle if you will process sparse input format.", action="store_true", default = False)
+    parser.add_argument("--estimate", help="Toggle if you will predict the training.", action="store_true", default = False)
+    parser.add_argument("--predict", help="Toggle if you will predict just after estimating (This is assumed if you provide a model file instead of a medianwidth: option '-m'.).", action="store_true", default = False)
     parser.add_argument("-k", help="k-fold cross validation for the randomized search.", metavar="k-fold_cv", default=None)
     parser.add_argument("-p", help="Minimum number of basis kernels.", metavar="min_amount", default=2)
     parser.add_argument("-P", help="Maximum number of basis kernels.", metavar="max_amount", default=10)
-    parser.add_argument("-m", help="Median width for generating width vectors.", metavar="median", default=0.01)
+
     args = parser.parse_args()
     
+    #name_components = shatter_file_name()
+    model_file = None# "/almac/ignacio/data/mkl_models/mkl_0.model"
+    out_file = "mkl_outs/mkl_idx_corpus_source_repr_dims_op_other.out"
+
     if args.X: # Test set.
         labels_t = loadtxt(args.Y) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.FNWN.txt")
         if args.Y:
@@ -73,13 +79,13 @@ if __name__ == "__main__":
     	N = int(args.n)
     	min_p = int(args.p)
     	max_p = int(args.P)
-    	median_w = float(args.m)
+    	median_w = float(args.o)
     # median_width = None, width_scale = 20.0, min_size=2, max_size = 10, kernel_size = None
     	sys.stderr.write("\n>> [%s] Training session begins...\n" % (strftime("%Y-%m-%d %H:%M:%S", localtime())))
-    	params = {'svm_c': expon(scale=100, loc=5),
-                    'mkl_c': expon(scale=100, loc=5),
+    	params = {'svm_c': expon(scale=100, loc=0.001),
+                    'mkl_c': expon(scale=100, loc=0.001),
                     'degree': sp_randint(0, 24),
-                    'width_scale': [0.05, 0.1, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0],
+                    'width_scale': [0.0001, 0.001, 0.01, 0.05, 0.1, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0],
                     'median_width': expon(scale=1, loc=median_w),
                     'kernel_size': [2, 3, 4, 5, 6, 7, 8, 9, 10] }
         param_grid = []
@@ -90,10 +96,22 @@ if __name__ == "__main__":
             mkl = mkl_regressor()
             rs = RS(mkl, param_distributions = params, n_iter = 20, n_jobs = 24, cv = k, scoring="mean_squared_error")#"r2")
             rs.fit(data, labels)
-            rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.asc' % i)
-            if args.e: # If user wants to estimate just after training.
-                preds = rs.best_estimator_.predict(data_t)
-                test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t)
+            rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.model' % i)
+
+            if args.estimate: # If user wants to save estimates    
+                test_predict(data = data, machine = rs.best_estimator_, labels = labels, out_file = out_file)
+                if args.predict: # If user wants to predict and save just after training.
+                    assert not args.X is None # If test data is provided
+                   #preds = rs.best_estimator_.predict(data_t)
+                    if args.Y: # Get performance if test labels are provided
+                        test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t, out_file = out_file + ".pred")
+                    else: # Only predictions
+                        test_predict(data = data_t, machine = rs.best_estimator_, out_file = out_file + ".pred")
+
+        sys.stderr.write("\n:>> Finished!!\n" )
     else:
         idx = 0
-        test_predict(data = data_t, machine = 'mkl_regression', file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, labels = labels_t)
+        test_predict(data = data_t, machine = "mkl_regerssion", file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, 
+                        labels = labels_t, out_file = out_file)
+
+        sys.stderr.write("\n:>> Finished!!\n" )

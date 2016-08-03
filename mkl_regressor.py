@@ -5,7 +5,8 @@ from scipy.stats import randint
 from scipy import stats
 from scipy.stats import randint as sp_randint
 from scipy.stats import expon
-import sys
+import sys, os
+import Gnuplot, Gnuplot.funcutils
 
 class mkl_regressor():
 
@@ -60,7 +61,7 @@ class mkl_regressor():
         self.__mkl.set_kernel(self.__kernels)
         self.__mkl.set_labels(labels_train)
         try:
-            self.mkl.train()
+            self.__mkl.train()
         except SystemError as inst:
             if "Assertion" in str(inst):
                 sys.stderr.write("""WARNING: Bad parameter combination: [svm_c %f mkl_c %f mkl_norm %f svm_norm %f, degree %d] \n widths %s \n
@@ -97,9 +98,8 @@ class mkl_regressor():
 
         predicted = self.predict(X_t)
         return r2_score(predicted, y_t)    
-
-    
-    def serialization_matrix (self, file_name, sl="save"):
+   
+    def serialize_model (self, file_name, sl="save"):
         from os.path import basename, dirname
         from bz2 import BZ2File
         import pickle
@@ -108,8 +108,7 @@ class mkl_regressor():
         elif sl == "load": mode = "rb"
         else: sys.stderr.write("Bad option. Only 'save' and 'load' are available.")
 
-            #fstream = SerializableAsciiFile(dirname(file_name) + "/mtx_" + basename(file_name), mode)
-        f = BZ2File(dirname(file_name) + "/mtx_" + basename(file_name), mode)
+        f = BZ2File(file_name + ".bin", mode)
         if not f: 
             sys.stderr.write("Error serializing kernel matrix.")
             exit()
@@ -144,21 +143,18 @@ class mkl_regressor():
         if file_name:
             with open(file_name,'w') as f:
                 f.write(str(self.get_params())+'\n')
-            self.serialization_matrix(file_name, "save")    
+            self.serialize_model(file_name, "save")    
         else:
             return self.get_params()
 
     def load(self, file_name):
-        """ This method receives a file name (if it is not in pwd, full path must be given). The loaded file 
-        must contain at least a dictionary at its top. This dictionary must contain a key called 'model' whose 
-        value must be a dictionary, from which model parameters will be read. For example:
-            {'key_0':value, 'key_1':value,..., 'model':{'family':'PolyKernel', 'bias':1.001,...}, key_n:value}
-        Four objects are returned. The MKL model which is tuned to those parameters stored at the given file. A
-        numpy array containing learned weights of a CombinedKernel. The widths corresponding to returned kernel
-        weights and the kernel family. Be careful with the kernel family you are loading because widths no
-        necessarily are it, but probably 'degrees' for the 'family':'PolyKernel' key-value.
-        The Combined kernel must be instantiated outside this method, thereby loading to it corresponding
-        weights and widths.
+        """ This method receives a 'file.model' file name (if it is not in pwd, full path must be given). The loaded file 
+        must contain at least a dictionary at its top. This dictionary must contain keys from which model 
+        parameters will be read (including weights, C, etc.). For example:
+            {'bias': value, 'param_1': value,...,'support_vectors': [(idx, value),(idx, value)], param_n: value}
+        The MKL model is tuned to those parameters stored at the given file.  Other file with double extension must
+        be jointly with the model file: '*file.model.bin' where the kernel matrix is encoded together with the kernel
+        machine.
         """
         # Load machine parameters
         with open(file_name, 'r') as pointer:
@@ -167,7 +163,7 @@ class mkl_regressor():
         for parameter, value in mkl_machine.items():
             setattr(self, parameter, value)
         # Load the machine itself
-        self.serialization_matrix(file_name, "load") # Instantiates the loaded MKL.
+        self.serialize_model(file_name, "load") # Instantiates the loaded MKL.
         return self   
 
 class expon_vector(stats.rv_continuous):
@@ -192,6 +188,40 @@ def param_vector(self):
             for scaling parameter. If not size of the output vector is given, a random size between 'min_size' and 'max_size' is
             returned."""
         if not self.kernel_size:
-            self.kernel_size = randint.rvs(low = self.min_size, high = self.max_size, size = 1)
-   
+            self.kernel_size = randint.rvs(low = self.min_size, high = self.max_size, size = 1) 
 
+def test_predict(data, machine = None, file=None, labels = None, out_file=None):
+    g = Gnuplot.Gnuplot()
+    if type(machine) is str:
+        if "mkl_regerssion" == machine:
+            machine_ = mkl_regressor()
+            machine_.load(model_file)
+		# elif other machine types ...
+        else:
+            print "Error machine type"
+            exit()
+     # elif other machine types ...  
+    else:
+        machine_ = machine
+
+    preds = machine_.predict(data)
+
+    if labels is not None:
+        r2 = r2_score(preds, labels)
+        print "R^2: ", r2
+        pred, real = zip(*sorted(zip(preds, labels), key=lambda tup: tup[1]))
+
+    else:
+        pred = preds; real = range(len(pred))
+    
+    if out_file:
+        output = {}
+        output['learned_model'] = out_file
+        output['estimated_output'] = preds
+        output['best_params'] = machine_.get_params()
+        output['performance'] = r2
+        with open(out_file, "a") as f:
+            f.write(str(output)+'\n')
+    
+    print "Machine Parameters: ",  machine_.get_params()
+    g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
