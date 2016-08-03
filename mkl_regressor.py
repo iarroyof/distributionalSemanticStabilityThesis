@@ -24,32 +24,29 @@ class mkl_regressor():
         self.max_size = max_size
         self.kernel_size = kernel_size
                  
+    def combine_kernel(self):
 
-    def fit(self, X, y, **params):
-        for parameter, value in params.items():
-            setattr(self, parameter, value)        
-       
-        self.feats_train = RealFeatures(X.T)
-        labels_train = RegressionLabels(y.reshape((len(y), )))
         self._kernels_  = CombinedKernel()
-
-        if not self.widths:
-            assert self.median_width # Especify a median width
-            self.param_vector()
-
         for width in self.widths:
             kernel = GaussianKernel()
             kernel.set_width(width)
-            kernel.init(self.feats_train,self.feats_train)
+            kernel.init(self.feats_train, self.feats_train)
             self._kernels_.append_kernel(kernel)
             del kernel
 
-        if self.degree > 0:
-            kernel = PolyKernel(10, self.degree)            
-            self._kernels_.append_kernel(kernel)
-            del kernel
-
+        kernel = PolyKernel(10, self.degree)
+        kernel.init(self.feats_train, self.feats_train)
+        self._kernels_.append_kernel(kernel)
+        del kernel
         self._kernels_.init(self.feats_train, self.feats_train)
+
+    def fit(self, X, y, **params):
+        for parameter, value in params.items():
+            setattr(self, parameter, value)
+        labels_train = RegressionLabels(y.reshape((len(y), )))
+
+        self.feats_train = RealFeatures(X.T)
+        self.combine_kernel()
 
         binary_svm_solver = SVRLight() # seems to be optional, with LibSVR it does not work.
         self.mkl = MKLRegression(binary_svm_solver)
@@ -70,12 +67,19 @@ class mkl_regressor():
                 pass
             
         self.kernel_weights = self._kernels_.get_subkernel_weights()
+        self.__loaded = False
 
     def predict(self, X):
         self.feats_test = RealFeatures(X.T)
-        self._kernels_.init(self.feats_train, self.feats_test) # test for test
-        self.mkl.set_kernel(self._kernels_)
-        return self.mkl.apply_regression().get_labels()
+        ft = None
+        if not self.__loaded:
+            self._kernels_.init(self.feats_train, self.feats_test) # test for test
+            self.mkl.set_kernel(self._kernels_)
+        else:
+            ft = CombinedFeatures()
+            ft.append_feature_obj(self.feats_test)
+
+        return self.mkl.apply_regression(ft).get_labels()
 
     def set_params(self, **params):
         for parameter, value in params.items():
