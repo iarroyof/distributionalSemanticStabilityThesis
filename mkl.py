@@ -7,33 +7,6 @@ from scipy.stats import expon
 from mkl_regressor import *
 from time import localtime, strftime
 
-def test_predict(data, machine = None, file=None, labels = None, out_file=None):
-    g = Gnuplot.Gnuplot()
-    if type(machine) is str:
-        if "mkl_regerssion" == machine:
-            machine_ = mkl_regressor()
-            machine_.load(model_file)
-		# elif other machine types ...
-        else:
-            print "Error machine type"
-            exit()
-     # elif other machine types ...  
-    else:
-        machine_ = machine
-
-    preds = machine_.predict(data)
-
-    if labels is not None:
-        r2 = r2_score(preds, labels)
-        print "R^2: ", r2
-        pred, real = zip(*sorted(zip(preds, labels), key=lambda tup: tup[1]))
-
-    else:
-        pred = preds; real = range(len(pred))
-
-    print "Machine Parameters: ",  machine.get_params()
-    g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp"))
-
 
 if __name__ == "__main__":
 
@@ -63,7 +36,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     #name_components = shatter_file_name()
-    model_file = None# "/almac/ignacio/data/mkl_models/mkl_0.model"
+    
+    model_file = None # "/almac/ignacio/data/mkl_models/mkl_0.model"
     out_file = "mkl_outs/mkl_idx_corpus_source_repr_dims_op_other.out"
 
     if args.X: # Test set.
@@ -71,7 +45,7 @@ if __name__ == "__main__":
         if args.Y:
             data_t = loadtxt(args.X) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_FNWN_d2v_H10_sub_m5w8.mtx")
 
-	if args.x != None: 
+    if args.x != None: 
         assert args.y # If training data given, supply corresponding labels.
         labels = loadtxt(args.y) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.OnWN.txt")
         data = loadtxt(args.x) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_OnWN_d2v_H10_sub_m5w8.mtx")
@@ -108,10 +82,10 @@ if __name__ == "__main__":
                     else: # Only predictions
                         test_predict(data = data_t, machine = rs.best_estimator_, out_file = out_file + ".pred")
 
-        sys.stderr.write("\n:>> Finished!!\n" )
+        sys.stderr.write("\n:>> [%s] Finished!!\n"  % (strftime("%Y-%m-%d %H:%M:%S", localtime())))
     else:
         idx = 0
         test_predict(data = data_t, machine = "mkl_regerssion", file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, 
                         labels = labels_t, out_file = out_file)
 
-        sys.stderr.write("\n:>> Finished!!\n" )
+        sys.stderr.write("\n:>> [%s] Finished!!\n"  % (strftime("%Y-%m-%d %H:%M:%S", localtime())))

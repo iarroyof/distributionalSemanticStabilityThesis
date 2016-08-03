@@ -10,7 +10,7 @@ import Gnuplot, Gnuplot.funcutils
 
 class mkl_regressor():
 
-    def __init__(self, widths = None, kernel_weights = None, svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2, 
+    def __init__(self, widths = array([0.001, 0.01, 0.1]), kernel_weights = None, svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2, 
                     median_width = None, width_scale = 20.0, min_size=2, max_size = 10, kernel_size = None):
         self.svm_c = svm_c
         self.mkl_c = mkl_c
