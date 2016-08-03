@@ -6,6 +6,7 @@ from scipy import stats
 from scipy.stats import randint as sp_randint
 from scipy.stats import expon
 import sys, os
+import Gnuplot, Gnuplot.funcutils
 
 from pdb import set_trace as st
 
@@ -56,12 +57,18 @@ class mkl_regressor():
 
         self.__mkl.set_kernel(self.__kernels)
         self.__mkl.set_labels(labels_train)
-        self.__mkl.train()
+        try:
+            self.mkl.train()
+        except SystemError as inst:
+            if "Assertion" in str(inst):
+                sys.stderr.write("""WARNING: Bad parameter combination: [svm_c %f mkl_c %f mkl_norm %f svm_norm %f, degree %d] \n widths %s \n
+                                    MKL error [%s]""" % (self.svm_c, self.mkl_c, self.mkl_norm, self.svm_norm, self.degree, self.widths, str(inst)))
+                pass
         self.kernel_weights = self.__kernels.get_subkernel_weights()
         self.__loaded = False
 
     def predict(self, X):
-        """ For prediction from here, once the model was loaded from outside, test if saving the kernel separetely and loading it again."""
+
         self.__feats_test = RealFeatures(X.T)
         ft = None
         if not self.__loaded:
@@ -88,6 +95,7 @@ class mkl_regressor():
 
         predicted = self.predict(X_t)
         return r2_score(predicted, y_t)    
+
     
     def serialization_matrix (self, file_name, sl="save"):
         from os.path import basename, dirname
@@ -167,7 +175,7 @@ class expon_vector(stats.rv_continuous):
         self.scale = scale
         self.min_size = min_size
         self.max_size = max_size
-        self.size = size # Only for initialization
+        self.size = size
 
     def rvs(self):
         if not self.size:
@@ -176,14 +184,37 @@ class expon_vector(stats.rv_continuous):
             return expon.rvs(loc = self.loc * 0.09, scale = self.scale, size = self.size)
         else:
             return expon.rvs(loc = self.loc * 0.09, scale = self.loc * 8.0, size = self.size)
-    
+ 
+def param_vector(self):
+        """Gives a vector of weights which distribution is linear. The 'median' value is used both as location parameter and
+            for scaling parameter. If not size of the output vector is given, a random size between 'min_size' and 'max_size' is
+            returned."""
+        if not self.kernel_size:
+            self.kernel_size = randint.rvs(low = self.min_size, high = self.max_size, size = 1) 
+
+def test_predict(data, machine = None, file=None, labels = None):
+	g = Gnuplot.Gnuplot()
+	if type(machine) is str:
+		if "mkl_regerssion" == machine):
+        	machine = mkl_regressor()
+		    machine.load(model_file)
+		# if other machine types ...
+	elif "Regerssion" in str(type(machine)):
+       	preds = machine.predict(data_t)
+        
+	if labels:
+        print "R^2: ", r2_score(preds, labels_t)
+
+    	print "Parameters: ",  mkl.get_params()
+    	pred, real = zip(*sorted(zip(preds, labels_t), key=lambda tup: tup[1]))
+    else:
+        pred = preds; real = range(len(pred))
+
+    g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
 
 if __name__ == "__main__":
-
-    import Gnuplot, Gnuplot.funcutils
     from sklearn.grid_search import RandomizedSearchCV as RS
-    from sklearn.externals import joblib
-    import pickle
+    
 #    labels = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.OnWN.txt")
 #    data = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_OnWN_d2v_H10_sub_m5w8.mtx")
 
@@ -219,26 +250,10 @@ if __name__ == "__main__":
             rs = RS(mkl, param_distributions = params, n_iter = 20, n_jobs = 24, cv = k, scoring="mean_squared_error")#"r2")
             rs.fit(data, labels)
             rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.asc' % i)
+			if args.e: # If user wants to estimate just after training.
+        		preds = rs.best_estimator_.predict(data_t)
 
-            preds = rs.best_estimator_.predict(data_t)
-            print "R^2: ", r2_score(preds, labels_t)
-            print "Parameters: ",  rs.best_params_
-            i += 1
-            pred, real = zip(*sorted(zip(preds, labels_t), key=lambda tup: tup[1]))
-            g = Gnuplot.Gnuplot()   
-            g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
-
+			test_predic(data = data_t, machine = rs.best_estimator_, labels = labels_t)
     else:
-        g = Gnuplot.Gnuplot()        
-        mkl = mkl_regressor()
-        mkl.load(model_file)
-        preds = mkl.predict(data_t)
-        if labels_t:
-            print "R^2: ", r2_score(preds, labels_t)
-
-        print "Parameters: ",  mkl.get_params()
-            pred, real = zip(*sorted(zip(preds, labels_t), key=lambda tup: tup[1]))
-        else: 
-            pred = preds; real = range(len(pred))
-
-        g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
+		idx = 0
+		test_predic(data = data_t, machine = 'mkl_regression', file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, labels = labels_t)

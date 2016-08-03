@@ -7,6 +7,27 @@ from scipy.stats import expon
 from mkl_regressor import *
 from time import localtime, strftime
 
+def test_predict(data, machine = None, file=None, labels = None):
+	g = Gnuplot.Gnuplot()
+	if type(machine) is str:
+		if "mkl_regerssion" == machine):
+        	machine = mkl_regressor()
+		    machine.load(model_file)
+		# if other machine types ...
+	elif "Regerssion" in str(type(machine)):
+       	preds = machine.predict(data_t)
+        
+	if labels:
+        print "R^2: ", r2_score(preds, labels_t)
+
+    	print "Parameters: ",  mkl.get_params()
+    	pred, real = zip(*sorted(zip(preds, labels_t), key=lambda tup: tup[1]))
+    else:
+        pred = preds; real = range(len(pred))
+
+    g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
+
+
 if __name__ == "__main__":
 
     import Gnuplot, Gnuplot.funcutils
@@ -26,6 +47,7 @@ if __name__ == "__main__":
     parser.add_argument("-u", help="Especify C regulazation parameter. For a list '-u C:a_b', for a value '-u C:a'.", metavar="fixed_params", default = None)
     parser.add_argument("-K", help="Kernel type custom specification. Uniquely valid if -u is not none.  Options: gaussian, linear, sigmoid.", metavar="kernel", default = None)
     parser.add_argument("-s", help="Toggle if you will process sparse input format.", action="store_true", default = False)
+    parser.add_argument("-e", help="Toggle if you will prjust after estimating.", action="store_true", default = False)
     parser.add_argument("-k", help="k-fold cross validation for the randomized search.", metavar="k-fold_cv", default=None)
     parser.add_argument("-p", help="Minimum number of basis kernels.", metavar="min_amount", default=2)
     parser.add_argument("-P", help="Maximum number of basis kernels.", metavar="max_amount", default=10)
@@ -40,39 +62,31 @@ if __name__ == "__main__":
     if args.Y:
         data_t = loadtxt(args.X) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_FNWN_d2v_H10_sub_m5w8.mtx")
 
-    k = int(args.k)
-    N = int(args.n)
-    min_p = int(args.p)
-    max_p = int(args.P)
-    median_w = float(args.m)
+	if not args.x:
+    	k = int(args.k)
+    	N = int(args.n)
+    	min_p = int(args.p)
+    	max_p = int(args.P)
+    	median_w = float(args.m)
     # median_width = None, width_scale = 20.0, min_size=2, max_size = 10, kernel_size = None
-    sys.stderr.write("\n>> [%s] Training session begins...\n" % (strftime("%Y-%m-%d %H:%M:%S", localtime())))
-    params = {'svm_c': expon(scale=100, loc=5),
+    	sys.stderr.write("\n>> [%s] Training session begins...\n" % (strftime("%Y-%m-%d %H:%M:%S", localtime())))
+    	params = {'svm_c': expon(scale=100, loc=5),
                     'mkl_c': expon(scale=100, loc=5),
                     'degree': sp_randint(0, 24),
-                    #'widths': expon_vector(loc = median_w, min_size = min_p, max_size = max_p) 
                     'width_scale': [0.05, 0.1, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0],
                     'median_width': expon(scale=1, loc=median_w),
-                    'kernel_size': [2, 3, 4, 5, 6, 7, 8, 9, 10]
-                }
-    param_grid = []
-    for i in xrange(N):
-        param_grid.append(params)
+                    'kernel_size': [2, 3, 4, 5, 6, 7, 8, 9, 10] }
+        param_grid = []
+        for i in xrange(N):
+            param_grid.append(params)
+        i = 0
+        for params in param_grid:
+            mkl = mkl_regressor()
+            rs = RS(mkl, param_distributions = params, n_iter = 20, n_jobs = 24, cv = k, scoring="mean_squared_error")#"r2")
+            rs.fit(data, labels)
+            rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.asc' % i)
+			if args.e: # If user wants to estimate just after training.
+        		preds = rs.best_estimator_.predict(data_t)
 
-    for params in param_grid:
-        mkl = mkl_regressor()
-        rs = RS(mkl, param_distributions = params, n_iter = 20, n_jobs = 16, cv = k, scoring="mean_squared_error", verbose = 1)#"r2")
-        rs.fit(data, labels)
-        preds = rs.best_estimator_.predict(data_t)
-
-        print "R^2: ", r2_score(preds, labels_t)
-        print "Parameters: ",  rs.best_params_
-        
-        pred, real = zip(*sorted(zip(preds, labels_t), key=lambda tup: tup[1]))
-        g = Gnuplot.Gnuplot()   
-        g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
-    
-        sys.stderr.write("\n-------------------------------------------------\n>> [%s] Grid...\n" % (strftime("%Y-%m-%d %H:%M:%S", localtime())))    
-
-
-    
+    else:
+		test_predic()
