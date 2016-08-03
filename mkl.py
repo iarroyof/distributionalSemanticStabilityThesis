@@ -41,7 +41,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser as ap
 
     parser = ap(description='This script trains/applies a SVR over any input dataset of numerical representations. The main aim is to determine a set of learning parameters')
-    parser.add_argument("-x", help="Input file name (train vectors)", metavar="input_file", required=True)
+    parser.add_argument("-x", help="Input file name (train vectors)", metavar="input_file", default=None)
     parser.add_argument("-y", help="""Regression labels file. Do not specify this argument if you want to uniauely predict over any test set. In this case, you must to specify
                                     the SVR model to be loaded as the parameter of the option -o.""", metavar="regrLabs_file", default = None)
     parser.add_argument("-X", help="Input file name (TEST vectors)", metavar="test_file", default = None)
@@ -59,16 +59,16 @@ if __name__ == "__main__":
     parser.add_argument("-P", help="Maximum number of basis kernels.", metavar="max_amount", default=10)
     parser.add_argument("-m", help="Median width for generating width vectors.", metavar="median", default=0.01)
     args = parser.parse_args()
-
-    labels = loadtxt(args.y) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.OnWN.txt")
-    data = loadtxt(args.x) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_OnWN_d2v_H10_sub_m5w8.mtx")
     
-    if args.X:
+    if args.X: # Test set.
         labels_t = loadtxt(args.Y) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.FNWN.txt")
-    if args.Y:
-        data_t = loadtxt(args.X) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_FNWN_d2v_H10_sub_m5w8.mtx")
+        if args.Y:
+            data_t = loadtxt(args.X) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_FNWN_d2v_H10_sub_m5w8.mtx")
 
-	if not args.x:
+	if args.x != None: 
+        assert args.y # If training data given, supply corresponding labels.
+        labels = loadtxt(args.y) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.OnWN.txt")
+        data = loadtxt(args.x) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_OnWN_d2v_H10_sub_m5w8.mtx")
     	k = int(args.k)
     	N = int(args.n)
     	min_p = int(args.p)

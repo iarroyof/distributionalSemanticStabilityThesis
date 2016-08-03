@@ -105,7 +105,7 @@ class mkl_regressor():
         elif sl == "load": mode = "rb"
         else: sys.stderr.write("Bad option. Only 'save' and 'load' are available.")
 
-        f = BZ2File(dirname(file_name) + "/mtx_" + basename(file_name), mode)
+        f = BZ2File(file_name + ".bin", mode)
         if not f: 
             sys.stderr.write("Error serializing kernel matrix.")
             exit()
@@ -141,16 +141,13 @@ class mkl_regressor():
             return self.get_params()
 
     def load(self, file_name):
-        """ This method receives a file name (if it is not in pwd, full path must be given). The loaded file 
-        must contain at least a dictionary at its top. This dictionary must contain a key called 'model' whose 
-        value must be a dictionary, from which model parameters will be read. For example:
-            {'key_0':value, 'key_1':value,..., 'model':{'family':'PolyKernel', 'bias':1.001,...}, key_n:value}
-        Four objects are returned. The MKL model which is tuned to those parameters stored at the given file. A
-        numpy array containing learned weights of a CombinedKernel. The widths corresponding to returned kernel
-        weights and the kernel family. Be careful with the kernel family you are loading because widths no
-        necessarily are it, but probably 'degrees' for the 'family':'PolyKernel' key-value.
-        The Combined kernel must be instantiated outside this method, thereby loading to it corresponding
-        weights and widths.
+        """ This method receives a 'file.model' file name (if it is not in pwd, full path must be given). The loaded file 
+        must contain at least a dictionary at its top. This dictionary must contain keys from which model 
+        parameters will be read (including weights, C, etc.). For example:
+            {'bias': value, 'param_1': value,...,'support_vectors': [(idx, value),(idx, value)], param_n: value}
+        The MKL model is tuned to those parameters stored at the given file.  Other file with double extension must
+        be jointly with the model file: '*file.model.bin' where the kernel matrix is encoded together with the kernel
+        machine.
         """
         # Load machine parameters
         with open(file_name, 'r') as pointer:
@@ -186,30 +183,40 @@ def param_vector(self):
         if not self.kernel_size:
             self.kernel_size = randint.rvs(low = self.min_size, high = self.max_size, size = 1) 
 
-def test_predict(data, machine = None, file=None, labels = None):
+def test_predict(data, machine = None, file=None, labels = None, out_file=None):
     g = Gnuplot.Gnuplot()
     if type(machine) is str:
         if "mkl_regerssion" == machine:
-            machine = mkl_regressor()
-            machine.load(model_file)
+            machine_ = mkl_regressor()
+            machine_.load(model_file)
 		# elif other machine types ...
         else:
             print "Error machine type"
-	#elif "Regression" in str(type(machine)):
+            exit()
      # elif other machine types ...  
     else:
-        print "Error machine type"  
+        machine_ = machine
 
-    preds = machine.predict(data_t)
+    preds = machine_.predict(data)
 
     if labels is not None:
-        print "R^2: ", r2_score(preds, labels)
+        r2 = r2_score(preds, labels)
+        print "R^2: ", r2
         pred, real = zip(*sorted(zip(preds, labels), key=lambda tup: tup[1]))
 
     else:
         pred = preds; real = range(len(pred))
-
-    print "Machine Parameters: ",  machine.get_params()
+    
+    if out_file:
+        output = {}
+        output['learned_model'] = out_file
+        output['estimated_output'] = preds
+        output['best_params'] = machine_.get_params()
+        output['performance'] = r2
+        with open(out_file, "a") as f:
+            f.write(str(output)+'\n')
+    
+    print "Machine Parameters: ",  machine_.get_params()
     g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
 
 if __name__ == "__main__":
@@ -227,8 +234,14 @@ if __name__ == "__main__":
     labels_t = labels_t.reshape((len(labels_t), 1))
     data_t = array([[20.0,30.0,40.0],[10.0,20.0,30.0],[10.0,20.0,40.0]])
     
-    model_file = None# "/almac/ignacio/data/mkl_models/mkl_0.asc"
-    e = True
+    #name_components = shatter_file_name()
+    model_file = None# "/almac/ignacio/data/mkl_models/mkl_0.model"
+    out_file = "mkl_outs/mkl_idx_corpus_source_repr_dims_op_other.out"
+    
+    e = False #True
+    p = True
+    X = True
+    Y = True
     if not model_file:
         k = 3
         N = 2
@@ -246,10 +259,23 @@ if __name__ == "__main__":
             mkl = mkl_regressor()
             rs = RS(mkl, param_distributions = params, n_iter = 20, n_jobs = 24, cv = k, scoring="mean_squared_error")#"r2")
             rs.fit(data, labels)
-            rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.asc' % i)
-            if e: # If user wants to estimate just after training.
-                preds = rs.best_estimator_.predict(data_t)
-                test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t)
+            rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.model' % i)
+
+            if e: # If user wants to save estimates
+                #ests = rs.best_estimator_.predict(data)
+                test_predict(data = data, machine = rs.best_estimator_, labels = labels, out_file = out_file)
+                if p: # If user wants to predict and save just after training.
+                    assert not X is None # Provide test data
+                   #preds = rs.best_estimator_.predict(data_t)
+                    if Y: # Get performance
+                        test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t, out_file = out_file + ".pred")
+                    else: # Only predictions
+                        test_predict(data = data_t, machine = rs.best_estimator_, out_file = out_file + ".pred")
+
+        sys.stderr.write("\n:>> Finished!!\n" )
     else:
         idx = 0
-        test_predict(data = data_t, machine = 'mkl_regression', file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, labels = labels_t)
+        test_predict(data = data_t, machine = "mkl_regerssion", file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, 
+                        labels = labels_t, out_file = out_file)
+
+        sys.stderr.write("\n:>> Finished!!\n" )
