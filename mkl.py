@@ -8,24 +8,30 @@ from mkl_regressor import *
 from time import localtime, strftime
 
 def test_predict(data, machine = None, file=None, labels = None):
-	g = Gnuplot.Gnuplot()
-	if type(machine) is str:
-		if "mkl_regerssion" == machine):
-        	machine = mkl_regressor()
-		    machine.load(model_file)
-		# if other machine types ...
-	elif "Regerssion" in str(type(machine)):
-       	preds = machine.predict(data_t)
-        
-	if labels:
-        print "R^2: ", r2_score(preds, labels_t)
+    g = Gnuplot.Gnuplot()
+    if type(machine) is str:
+        if "mkl_regerssion" == machine:
+            machine = mkl_regressor()
+            machine.load(model_file)
+		# elif other machine types ...
+        else:
+            print "Error machine type"
+	#elif "Regression" in str(type(machine)):
+     # elif other machine types ...  
+    else:
+        print "Error machine type"  
 
-    	print "Parameters: ",  mkl.get_params()
-    	pred, real = zip(*sorted(zip(preds, labels_t), key=lambda tup: tup[1]))
+    preds = machine.predict(data_t)
+
+    if labels is not None:
+        print "R^2: ", r2_score(preds, labels)
+        pred, real = zip(*sorted(zip(preds, labels), key=lambda tup: tup[1]))
+
     else:
         pred = preds; real = range(len(pred))
 
-    g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
+    print "Machine Parameters: ",  machine.get_params()
+    g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp"))
 
 
 if __name__ == "__main__":
@@ -85,8 +91,9 @@ if __name__ == "__main__":
             rs = RS(mkl, param_distributions = params, n_iter = 20, n_jobs = 24, cv = k, scoring="mean_squared_error")#"r2")
             rs.fit(data, labels)
             rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.asc' % i)
-			if args.e: # If user wants to estimate just after training.
-        		preds = rs.best_estimator_.predict(data_t)
-
+            if args.e: # If user wants to estimate just after training.
+                preds = rs.best_estimator_.predict(data_t)
+                test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t)
     else:
-		test_predic()
+        idx = 0
+        test_predict(data = data_t, machine = 'mkl_regression', file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, labels = labels_t)
