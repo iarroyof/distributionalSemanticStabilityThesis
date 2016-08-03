@@ -8,7 +8,7 @@ from scipy.stats import expon
 import sys, os
 import Gnuplot, Gnuplot.funcutils
 
-from pdb import set_trace as st
+#from pdb import set_trace as st
 
 class mkl_regressor():
 
@@ -58,7 +58,7 @@ class mkl_regressor():
         self.__mkl.set_kernel(self.__kernels)
         self.__mkl.set_labels(labels_train)
         try:
-            self.mkl.train()
+            self.__mkl.train()
         except SystemError as inst:
             if "Assertion" in str(inst):
                 sys.stderr.write("""WARNING: Bad parameter combination: [svm_c %f mkl_c %f mkl_norm %f svm_norm %f, degree %d] \n widths %s \n
@@ -95,9 +95,8 @@ class mkl_regressor():
 
         predicted = self.predict(X_t)
         return r2_score(predicted, y_t)    
-
-    
-    def serialization_matrix (self, file_name, sl="save"):
+   
+    def serialize_model (self, file_name, sl="save"):
         from os.path import basename, dirname
         from bz2 import BZ2File
         import pickle
@@ -106,19 +105,14 @@ class mkl_regressor():
         elif sl == "load": mode = "rb"
         else: sys.stderr.write("Bad option. Only 'save' and 'load' are available.")
 
-            #fstream = SerializableAsciiFile(dirname(file_name) + "/mtx_" + basename(file_name), mode)
         f = BZ2File(dirname(file_name) + "/mtx_" + basename(file_name), mode)
         if not f: 
             sys.stderr.write("Error serializing kernel matrix.")
             exit()
         
         if sl == "save":
-            #self.feats_train.save_serializable(fstream)
-            #os.unlink(file_name)
             pickle.dump(self.__mkl, f, protocol=2)
         elif sl == "load":
-            #self.feats_train = RealFeatures()
-            #self.feats_train.load_serializable(fstream)
             mkl = self.__mkl = pickle.load(f)
             self.__loaded = True  
         else: sys.stderr.write("Bad option. Only 'save' and 'load' are available.")
@@ -142,7 +136,7 @@ class mkl_regressor():
         if file_name:
             with open(file_name,'w') as f:
                 f.write(str(self.get_params())+'\n')
-            self.serialization_matrix(file_name, "save")    
+            self.serialize_model(file_name, "save")    
         else:
             return self.get_params()
 
@@ -165,7 +159,7 @@ class mkl_regressor():
         for parameter, value in mkl_machine.items():
             setattr(self, parameter, value)
         # Load the machine itself
-        self.serialization_matrix(file_name, "load") # Instantiates the loaded MKL.
+        self.serialize_model(file_name, "load") # Instantiates the loaded MKL.
         return self   
 
 class expon_vector(stats.rv_continuous):
@@ -193,35 +187,38 @@ def param_vector(self):
             self.kernel_size = randint.rvs(low = self.min_size, high = self.max_size, size = 1) 
 
 def test_predict(data, machine = None, file=None, labels = None):
-	g = Gnuplot.Gnuplot()
-	if type(machine) is str:
-		if "mkl_regerssion" == machine):
-        	machine = mkl_regressor()
-		    machine.load(model_file)
-		# if other machine types ...
-	elif "Regerssion" in str(type(machine)):
-       	preds = machine.predict(data_t)
-        
-	if labels:
-        print "R^2: ", r2_score(preds, labels_t)
+    g = Gnuplot.Gnuplot()
+    if type(machine) is str:
+        if "mkl_regerssion" == machine:
+            machine = mkl_regressor()
+            machine.load(model_file)
+		# elif other machine types ...
+        else:
+            print "Error machine type"
+	#elif "Regression" in str(type(machine)):
+     # elif other machine types ...  
+    else:
+        print "Error machine type"  
 
-    	print "Parameters: ",  mkl.get_params()
-    	pred, real = zip(*sorted(zip(preds, labels_t), key=lambda tup: tup[1]))
+    preds = machine.predict(data_t)
+
+    if labels is not None:
+        print "R^2: ", r2_score(preds, labels)
+        pred, real = zip(*sorted(zip(preds, labels), key=lambda tup: tup[1]))
+
     else:
         pred = preds; real = range(len(pred))
 
+    print "Machine Parameters: ",  machine.get_params()
     g.plot(Gnuplot.Data(pred, with_="lines"), Gnuplot.Data(real, with_="linesp") )
 
 if __name__ == "__main__":
     from sklearn.grid_search import RandomizedSearchCV as RS
-    
 #    labels = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.OnWN.txt")
 #    data = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_OnWN_d2v_H10_sub_m5w8.mtx")
-
 #    labels_t = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.FNWN.txt")
 #    data_t = loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_FNWN_d2v_H10_sub_m5w8.mtx")
 #    from sklearn.grid_search import RandomizedSearchCV as RS
-
 
     labels = array([2.0,0.0,2.0,1.0,3.0,2.0])
     labels = labels.reshape((len(labels), 1))
@@ -231,7 +228,7 @@ if __name__ == "__main__":
     data_t = array([[20.0,30.0,40.0],[10.0,20.0,30.0],[10.0,20.0,40.0]])
     
     model_file = None# "/almac/ignacio/data/mkl_models/mkl_0.asc"
-
+    e = True
     if not model_file:
         k = 3
         N = 2
@@ -250,10 +247,9 @@ if __name__ == "__main__":
             rs = RS(mkl, param_distributions = params, n_iter = 20, n_jobs = 24, cv = k, scoring="mean_squared_error")#"r2")
             rs.fit(data, labels)
             rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.asc' % i)
-			if args.e: # If user wants to estimate just after training.
-        		preds = rs.best_estimator_.predict(data_t)
-
-			test_predic(data = data_t, machine = rs.best_estimator_, labels = labels_t)
+            if e: # If user wants to estimate just after training.
+                preds = rs.best_estimator_.predict(data_t)
+                test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t)
     else:
-		idx = 0
-		test_predic(data = data_t, machine = 'mkl_regression', file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, labels = labels_t)
+        idx = 0
+        test_predict(data = data_t, machine = 'mkl_regression', file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, labels = labels_t)
