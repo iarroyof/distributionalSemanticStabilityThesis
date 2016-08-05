@@ -10,7 +10,7 @@ import Gnuplot, Gnuplot.funcutils
 
 class mkl_regressor():
 
-    def __init__(self, widths = array([0.001, 0.01, 0.1]), kernel_weights = None, svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2, 
+    def __init__(self, widths = array([0.001, 0.01, 0.1]), kernel_weights = None, svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 3, 
                     median_width = None, width_scale = 20.0, min_size=2, max_size = 10, kernel_size = None):
         self.svm_c = svm_c
         self.mkl_c = mkl_c
@@ -64,10 +64,11 @@ class mkl_regressor():
             self.__mkl.train()
         except SystemError as inst:
             if "Assertion" in str(inst):
-                sys.stderr.write("""WARNING: Bad parameter combination: [svm_c %f mkl_c %f mkl_norm %f svm_norm %f, degree %d] \n widths %s \n
-                                    MKL error [%s]""" % (self.svm_c, self.mkl_c, self.mkl_norm, self.svm_norm, self.degree, self.widths, str(inst)))
+                sys.stderr.write("""WARNING: Bad parameter combination: [svm_c %f mkl_c %f mkl_norm %f svm_norm %f, degree %d] \n widths %s\nMKL error [%s]""" % (self.svm_c, self.mkl_c, self.mkl_norm, self.svm_norm, self.degree, self.widths, str(inst)))
                 pass
         self.kernel_weights = self.__kernels.get_subkernel_weights()
+        self.widths = array([k.get_width() for k in self.__kernels.list_kernels() if not "Poly" in str(k.get_name())])
+        
         self.__loaded = False
 
     def predict(self, X):

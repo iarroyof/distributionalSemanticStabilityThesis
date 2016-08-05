@@ -13,7 +13,7 @@ import Gnuplot, Gnuplot.funcutils
 class mkl_regressor():
 
     def __init__(self, widths = None, kernel_weights = None, svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2, 
-                    median_width = None, width_scale = 20.0, min_size=2, max_size = 10, kernel_size = None):
+                    median_width = None, width_scale = None, min_size=2, max_size = 10, kernel_size = None):
         self.svm_c = svm_c
         self.mkl_c = mkl_c
         self.svm_norm = svm_norm
@@ -36,11 +36,11 @@ class mkl_regressor():
             kernel.init(self.__feats_train, self.__feats_train)
             self.__kernels.append_kernel(kernel)
             del kernel
-
-        kernel = PolyKernel(10, self.degree)            
-        kernel.init(self.__feats_train, self.__feats_train)
-        self.__kernels.append_kernel(kernel)
-        del kernel
+        if self.degree > 0:
+            kernel = PolyKernel(10, self.degree)            
+            kernel.init(self.__feats_train, self.__feats_train)
+            self.__kernels.append_kernel(kernel)
+            del kernel
         self.__kernels.init(self.__feats_train, self.__feats_train)
 
     def fit(self, X, y, **params):
@@ -70,6 +70,7 @@ class mkl_regressor():
                                     MKL error [%s]""" % (self.svm_c, self.mkl_c, self.mkl_norm, self.svm_norm, self.degree, self.widths, str(inst)))
                 pass
         self.kernel_weights = self.__kernels.get_subkernel_weights()
+        self.kernel_size = len(self.kernel_weights)
         self.__loaded = False
 
     def predict(self, X):
@@ -89,6 +90,9 @@ class mkl_regressor():
     def set_params(self, **params):
         for parameter, value in params.items():
             setattr(self, parameter, value)
+
+        if self.median_width: # If widths are specified, the specified median has priority, so widths will be automatically overwritten.
+            self.set_param_weights()
 
         return self
 
@@ -164,6 +168,21 @@ class mkl_regressor():
         self.serialize_model(file_name, "load") # Instantiates the loaded MKL.
         return self   
 
+    def set_param_weights(self):
+        """Gives a vector of weights which distribution is linear. The 'median' value is used both as location parameter and
+            for scaling parameter. If not size of the output vector is given, a random size between 'min_size' and 'max_size' is
+            returned.
+            'width_scale': [0.0001, 0.001, 0.01, 0.05, 0.1, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0],
+            'median_width': expon(scale=1, loc=median_w),
+            'kernel_size': [2, 3, 4, 5, 6, 7, 8, 9, 10]"""
+        assert self.median_width and self.width_scale and self.kernel_size # Width generation needed parameters
+        self.minimun_width_scale = 0.01
+        self.widths = linspace(start = self.median_width*self.minimun_width_scale, 
+                                stop = self.median_width*self.width_scale, 
+                                num = self.kernel_size) 
+        
+        
+        
 class expon_vector(stats.rv_continuous):
     
     def __init__(self, loc = 1.0, scale = None, min_size=2, max_size = 10, size = None):
@@ -181,12 +200,7 @@ class expon_vector(stats.rv_continuous):
         else:
             return expon.rvs(loc = self.loc * 0.09, scale = self.loc * 8.0, size = self.size)
  
-def param_vector(self):
-        """Gives a vector of weights which distribution is linear. The 'median' value is used both as location parameter and
-            for scaling parameter. If not size of the output vector is given, a random size between 'min_size' and 'max_size' is
-            returned."""
-        if not self.kernel_size:
-            self.kernel_size = randint.rvs(low = self.min_size, high = self.max_size, size = 1) 
+    
 
 def test_predict(data, machine = None, file=None, labels = None, out_file=None):
     g = Gnuplot.Gnuplot()
@@ -243,19 +257,22 @@ if __name__ == "__main__":
     model_file = None# "/almac/ignacio/data/mkl_models/mkl_0.model"
     out_file = "mkl_outs/mkl_idx_corpus_source_repr_dims_op_other.out"
     
-    e = False #True
+    e = True #True
     p = True
     X = True
     Y = True
     if not model_file:
         k = 3
         N = 2
-        m = 10.0
+        median_w = 30
         print ">> Shapes: labels %s; Data %s\n\tlabelsT %s; DataT %s" % (labels.shape, data.shape, labels_t.shape, data_t.shape)
         params = {'svm_c': expon(scale=100, loc=5),
                     'mkl_c': expon(scale=100, loc=5),
                     'degree': sp_randint(0, 24),
-                    'widths': expon_vector(loc = m, min_size = 2, max_size = 10) }
+                    #'widths': expon_vector(loc = m, min_size = 2, max_size = 10)
+                    'width_scale': [2.0, 2.5, 3.0, 3.5, 4.0],
+                    'median_width': expon(scale=1, loc=median_w),
+                    'kernel_size': [2, 3, 4, 5, 6, 7, 8, 9, 10] }
         param_grid = []
         for i in xrange(N):
             param_grid.append(params)
