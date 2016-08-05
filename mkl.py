@@ -75,13 +75,13 @@ if __name__ == "__main__":
 
             if args.estimate: # If user wants to save estimates    
                 test_predict(data = data, machine = rs.best_estimator_, labels = labels, out_file = out_file)
-                if args.predict: # If user wants to predict and save just after training.
-                    assert not args.X is None # If test data is provided
+            if args.predict: # If user wants to predict and save just after training.
+                assert not args.X is None # If test data is provided
                    #preds = rs.best_estimator_.predict(data_t)
-                    if args.Y: # Get performance if test labels are provided
-                        test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t, out_file = out_file + ".pred")
-                    else: # Only predictions
-                        test_predict(data = data_t, machine = rs.best_estimator_, out_file = out_file + ".pred")
+                if args.Y: # Get performance if test labels are provided
+                    test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t, out_file = out_file + ".pred")
+                else: # Only predictions
+                    test_predict(data = data_t, machine = rs.best_estimator_, out_file = out_file + ".pred")
 
         sys.stderr.write("\n:>> [%s] Finished!!\n"  % (strftime("%Y-%m-%d %H:%M:%S", localtime())))
     else:
