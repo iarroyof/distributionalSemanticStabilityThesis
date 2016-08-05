@@ -10,8 +10,8 @@ import Gnuplot, Gnuplot.funcutils
 
 class mkl_regressor():
 
-    def __init__(self, widths = array([0.001, 0.01, 0.1]), kernel_weights = None, svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 3, 
-                    median_width = None, width_scale = 20.0, min_size=2, max_size = 10, kernel_size = None):
+    def __init__(self, widths = None, kernel_weights = None, svm_c = 0.01, mkl_c = 1.0, svm_norm = 1, mkl_norm = 1, degree = 2, 
+                    median_width = None, width_scale = None, min_size=2, max_size = 10, kernel_size = None):
         self.svm_c = svm_c
         self.mkl_c = mkl_c
         self.svm_norm = svm_norm
@@ -34,11 +34,11 @@ class mkl_regressor():
             kernel.init(self.__feats_train, self.__feats_train)
             self.__kernels.append_kernel(kernel)
             del kernel
-
-        kernel = PolyKernel(10, self.degree)            
-        kernel.init(self.__feats_train, self.__feats_train)
-        self.__kernels.append_kernel(kernel)
-        del kernel
+        if self.degree > 0:
+            kernel = PolyKernel(10, self.degree)            
+            kernel.init(self.__feats_train, self.__feats_train)
+            self.__kernels.append_kernel(kernel)
+            del kernel
         self.__kernels.init(self.__feats_train, self.__feats_train)
 
     def fit(self, X, y, **params):
@@ -64,11 +64,11 @@ class mkl_regressor():
             self.__mkl.train()
         except SystemError as inst:
             if "Assertion" in str(inst):
-                sys.stderr.write("""WARNING: Bad parameter combination: [svm_c %f mkl_c %f mkl_norm %f svm_norm %f, degree %d] \n widths %s\nMKL error [%s]""" % (self.svm_c, self.mkl_c, self.mkl_norm, self.svm_norm, self.degree, self.widths, str(inst)))
+                sys.stderr.write("""WARNING: Bad parameter combination: [svm_c %f mkl_c %f mkl_norm %f svm_norm %f, degree %d] \n widths %s \n
+                                    MKL error [%s]""" % (self.svm_c, self.mkl_c, self.mkl_norm, self.svm_norm, self.degree, self.widths, str(inst)))
                 pass
         self.kernel_weights = self.__kernels.get_subkernel_weights()
-        self.widths = array([k.get_width() for k in self.__kernels.list_kernels() if not "Poly" in str(k.get_name())])
-        
+        self.kernel_size = len(self.kernel_weights)
         self.__loaded = False
 
     def predict(self, X):
@@ -88,6 +88,9 @@ class mkl_regressor():
     def set_params(self, **params):
         for parameter, value in params.items():
             setattr(self, parameter, value)
+
+        if self.median_width: # If widths are specified, the specified median has priority, so widths will be automatically overwritten.
+            self.set_param_weights()
 
         return self
 
@@ -167,6 +170,18 @@ class mkl_regressor():
         self.serialize_model(file_name, "load") # Instantiates the loaded MKL.
         return self   
 
+    def set_param_weights(self):
+        """Gives a vector of weights which distribution is linear. The 'median' value is used both as location parameter and
+            for scaling parameter. If not size of the output vector is given, a random size between 'min_size' and 'max_size' is
+            returned."""
+        assert self.median_width and self.width_scale and self.kernel_size # Width generation needed parameters
+        self.minimun_width_scale = 0.01
+        self.widths = linspace(start = self.median_width*self.minimun_width_scale, 
+                                stop = self.median_width*self.width_scale, 
+                                num = self.kernel_size) 
+        
+        
+        
 class expon_vector(stats.rv_continuous):
     
     def __init__(self, loc = 1.0, scale = None, min_size=2, max_size = 10, size = None):
@@ -184,12 +199,7 @@ class expon_vector(stats.rv_continuous):
         else:
             return expon.rvs(loc = self.loc * 0.09, scale = self.loc * 8.0, size = self.size)
  
-def param_vector(self):
-        """Gives a vector of weights which distribution is linear. The 'median' value is used both as location parameter and
-            for scaling parameter. If not size of the output vector is given, a random size between 'min_size' and 'max_size' is
-            returned."""
-        if not self.kernel_size:
-            self.kernel_size = randint.rvs(low = self.min_size, high = self.max_size, size = 1) 
+    
 
 def test_predict(data, machine = None, file=None, labels = None, out_file=None):
     g = Gnuplot.Gnuplot()

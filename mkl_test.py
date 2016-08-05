@@ -171,10 +171,7 @@ class mkl_regressor():
     def set_param_weights(self):
         """Gives a vector of weights which distribution is linear. The 'median' value is used both as location parameter and
             for scaling parameter. If not size of the output vector is given, a random size between 'min_size' and 'max_size' is
-            returned.
-            'width_scale': [0.0001, 0.001, 0.01, 0.05, 0.1, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0],
-            'median_width': expon(scale=1, loc=median_w),
-            'kernel_size': [2, 3, 4, 5, 6, 7, 8, 9, 10]"""
+            returned."""
         assert self.median_width and self.width_scale and self.kernel_size # Width generation needed parameters
         self.minimun_width_scale = 0.01
         self.widths = linspace(start = self.median_width*self.minimun_width_scale, 
