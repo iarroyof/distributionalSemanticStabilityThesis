@@ -60,9 +60,9 @@ if __name__ == "__main__":
                     'mkl_c': expon(scale=100, loc=0.001),
                     'degree': sp_randint(0, 24),
                     #'widths': expon_vector(loc = m, min_size = 2, max_size = 10)
-                    'width_scale': [2.0, 2.5, 3.0, 3.5, 4.0],
+                    'width_scale': [0.5, 1.0, 2.0, 2.5, 3.0, 3.5, 4.0],
                     'median_width': expon(scale=1, loc=median_w),
-                    'kernel_size': [2, 3, 4, 5, 6, 7, 8, 9, 10] }
+                    'kernel_size': [2, 3, 4, 5, 6, 7, 8] }
         param_grid = []
         for i in xrange(N):
             param_grid.append(params)

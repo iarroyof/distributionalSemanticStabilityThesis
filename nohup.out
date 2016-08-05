@@ -487,3 +487,5 @@ Fitting 5 folds for each of 20 candidates, totalling 100 fits
 
 R^2:  -115.808590903
 Parameters:  {'degree': 13, 'median_width': 0.07385133036463715, 'mkl_c': 129.4587127537984, 'width_scale': 0.75, 'svm_c': 120.91070388336374, 'kernel_size': 3}
+
+>> [2016-08-05 01:47:23] Training session begins...
