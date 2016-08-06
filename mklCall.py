@@ -35,7 +35,7 @@ import argparse
 def mkl_learning_pool(path):
     global feats_train; global feats_test; global labelsTr; global labelsTs; global conf; global sparse_mode
 
-    mkl_object = mklObj(problem=conf['problem_mode'], sparse = sparse_mode)
+    mkl_object = mklObj(problem=conf['problem_mode'], sparse = sparse_mode, threads = 24)
     #if path[0][0] is 'gaussian': a = path[0][1][0]; b = 2*path[0][1][1]**2
     #else: a = path[0][1][0]; b = path[0][1][1]
     a = path[0][1][0]; b = path[0][1][1]
@@ -78,7 +78,7 @@ def mkl_pattern_recognition():
 if __name__ == '__main__':
     global sparse_mode
     sparse_mode = False
-    conf = open_configuration_file('mkl_object.conf')
+    conf = open_configuration_file("mkl_objectD2VH10sts.conf")#"mkl_objectPucesEn.conf")#'mkl_object.conf')
     [feats_train, feats_test, labelsTr, labelsTs] = load_regression_data(fileTrain = conf['training_file'],
                                                                            fileTest = conf['test_file'],
                                                                            fileLabelsTr = conf['training_labels_file'],

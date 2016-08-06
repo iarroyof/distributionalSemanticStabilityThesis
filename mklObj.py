@@ -6,6 +6,7 @@ __author__ = 'Ignacio Arroyo-Fernandez'
 
 from modshogun import *
 from tools.load import LoadMatrix
+from sklearn.metrics import r2_score
 import random
 from math import sqrt
 import numpy
@@ -441,10 +442,10 @@ class mklObj(object):
     fit_kernel() function documentation for details. This function trains the kernel weights. The object has other
     member functions offering utilities. See the next instantiation and using example:
 
-        import mkl01 as mk
+        import mklObj as mk
 
         kernel = mk.mklObj(weightRegNorm = 2,
-                        mklC = 2,
+                        mklC = 2,       # This is the Cparameter of the underlaying SVM.
                         SVMepsilon = 1e-5,
                         threads = 2,
                         MKLepsilon = 0.001,
@@ -470,8 +471,8 @@ class mklObj(object):
     Once the MKL object has been fitted, you can get what you need from it. See getters documentation listed below.
     """
 
-    def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=1e-5, model_file = None,
-                 threads=5, MKLepsilon=0.001, problem='regression', verbose=False, mode = 'learning', sparse = False):
+    def __init__(self, weightRegNorm=2.0, mklC=2.0, SVMepsilon=0.01, model_file = None,
+                 threads=4, MKLepsilon=0.01, problem='regression', verbose=False, mode = 'learning', sparse = False):
         """Object initialization. This procedure is regardless of the input data, basis kernels and corresponding
         hyperparameters (kernel fitting).
         """
@@ -495,7 +496,8 @@ class mklObj(object):
             except KeyError:
                 sys.stderr.write('Error: Given problem type is not valid.')
                 exit()
-
+            #################<<<<<<<<<<<>>>>>>>>>>
+            self.mkl.set_C_mkl(5.0)       # This is the regularization parameter for the MKL weights regularizer (NOT the SVM C)
             self.weightRegNorm = weightRegNorm  # Setting the basis' weight vector norm
             self.SVMepsilon = SVMepsilon  # setting the transducer stop (convergence) criterion
             self.MKLepsilon = MKLepsilon  # setting the MKL stop criterion. The value suggested by
@@ -667,11 +669,9 @@ class mklObj(object):
             evalua = MulticlassAccuracy()
             self.__testerr = evalua.evaluate(out, targetsTs) * 100
         elif self.__problem == 'regression': # Determination Coefficient was selected for measuring performance
-            evalua = MeanSquaredError()
-            #n = out.get_num_labels()
-            #l = targetsTs.get_labels()
-            #m = numpy.ones(n)*numpy.mean(l)
-            self.__testerr = evalua.evaluate(out, targetsTs)
+            #evalua = MeanSquaredError()
+            #self.__testerr = evalua.evaluate(out, targetsTs)
+            self.__testerr = r2_score(self.estimated_out,  list(targetsTs.get_labels()))
 
         # Verbose for learning surveying
         if self.verbose:
@@ -839,7 +839,7 @@ class mklObj(object):
 
     @property
     def weightRegNorm(self):
-        """ The value of this property is the basis' weight vector norm, e.g. :math:`||\\beta||_p`, to be used as
+        """ The value of this property is the basis' weight vector norm, e.g. :math:`||\beta||_p`, to be used as
         regularizer. It controls the smoothing among basis kernel weights of the learned multiple kernel combination. On
         one hand, If p=1 (the l_1 norm) the weight values B_i will be disproportionally between them, i.e. a few of them
         will be >> 0,some other simply > 0 and many of them will be zero or very near to zero (the vector B will be
@@ -1081,7 +1081,7 @@ class mklObj(object):
         problems imbalanced densities are not considered, so uniquely the first argument is caught by the method.
         If one or both arguments are misplaced the default values are one both them.
 
-        @type value: float (greater than zero. There exits the zero-norm, but it is not considered here.)
+        @type value: float (for multiclass problems), [float, float] for binary and regression problems.
         .. seealso:: Page 4 of Bagchi,(2014) SVM Classifiers Based On Imperfect Training Data.
         """
         if self.__problem == 'binary' or self.__problem == 'regression':

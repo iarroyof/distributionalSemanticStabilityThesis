@@ -39,8 +39,7 @@ else:
     ac = sys.stdin
 i=1
 for line in ac:
-  if unicode(line[0], 'utf-8').isnumeric(): # Check empty line and hash-started comments
-    sys.stderr.write("-- Line %s in the input file is wrong\n" % i)
+  if unicode(line[0], 'utf-8').isnumeric() or line[0] == '-': # Check empty line and hash-started comments
     a = line.strip().split(';')
     for att, value in args.__dict__.iteritems():
         if att == 'paths':
@@ -61,6 +60,11 @@ for line in ac:
             acc.append((float(a[0]), a[1:]))
             print d
             d = {}
+    i += 1
+  else:
+    sys.stderr.write("-- Line %s in the input file is wrong\n" % i)
+    i += 1
+
 
 if args.ranked and not args.only_estimated:
     for i in sorted(r, key=lambda k : k['performance']):#, reverse=True):
