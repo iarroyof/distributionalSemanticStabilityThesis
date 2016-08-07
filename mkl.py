@@ -10,7 +10,6 @@ from time import localtime, strftime
 
 if __name__ == "__main__":
 
-    import Gnuplot, Gnuplot.funcutils
     from sklearn.grid_search import RandomizedSearchCV as RS
     from argparse import ArgumentParser as ap
 
@@ -46,7 +45,7 @@ if __name__ == "__main__":
             data_t = loadtxt(args.X) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_FNWN_d2v_H10_sub_m5w8.mtx")
 
     if args.x != None: 
-        assert args.y # If training data given, supply corresponding labels.
+        assert args.y # If training data is given, then supplying corresponding labels is necessary.
         labels = loadtxt(args.y) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/STS.gs.OnWN.txt")
         data = loadtxt(args.x) #loadtxt("/almac/ignacio/data/sts_all/pairs-NO_2013/vectors_H10/pairs_eng-NO-test-2e6-nonempty_OnWN_d2v_H10_sub_m5w8.mtx")
     	k = int(args.k)
@@ -60,13 +59,16 @@ if __name__ == "__main__":
                     'mkl_c': expon(scale=100, loc=0.001),
                     'degree': sp_randint(0, 24),
                     #'widths': expon_vector(loc = m, min_size = 2, max_size = 10)
-                    'width_scale': [0.5, 1.0, 2.0, 2.5, 3.0, 3.5, 4.0],
+                    'width_scale': [0.1, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
                     'median_width': expon(scale=1, loc=median_w),
-                    'kernel_size': [2, 3, 4, 5, 6, 7, 8] }
+                    'kernel_size': [2, 3, 4, 5] }
         param_grid = []
         for i in xrange(N):
             param_grid.append(params)
+
         i = 0
+        output = {}
+
         for params in param_grid:
             mkl = mkl_regressor()
             rs = RS(mkl, param_distributions = params, n_iter = 20, n_jobs = 24, cv = k, scoring="mean_squared_error")#"r2")
@@ -74,19 +76,25 @@ if __name__ == "__main__":
             rs.best_estimator_.save('/almac/ignacio/data/mkl_models/mkl_%d.model' % i)
 
             if args.estimate: # If user wants to save estimates    
-                test_predict(data = data, machine = rs.best_estimator_, labels = labels, out_file = out_file)
+                estimation = test_predict(data = data, machine = rs.best_estimator_, labels = labels)
+                output['estimation'] = estimation
             if args.predict: # If user wants to predict and save just after training.
                 assert not args.X is None # If test data is provided
                    #preds = rs.best_estimator_.predict(data_t)
                 if args.Y: # Get performance if test labels are provided
-                    test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t, out_file = out_file + ".pred")
+                    prediction = test_predict(data = data_t, machine = rs.best_estimator_, labels = labels_t, graph = True)
                 else: # Only predictions
-                    test_predict(data = data_t, machine = rs.best_estimator_, out_file = out_file + ".pred")
+                    prediction = test_predict(data = data_t, machine = rs.best_estimator_)
+                
+                output['prediction'] = prediction
+
+            with open(out_file, "a") as f:
+                f.write(str(output)+'\n')
 
         sys.stderr.write("\n:>> [%s] Finished!!\n"  % (strftime("%Y-%m-%d %H:%M:%S", localtime())))
     else:
         idx = 0
-        test_predict(data = data_t, machine = "mkl_regerssion", file="/almac/ignacio/data/mkl_models/mkl_%d.asc" % idx, 
+        test_predict(data = data_t, machine = "mkl_regerssion", model_file="/almac/ignacio/data/mkl_models/mkl_%d.model" % idx, 
                         labels = labels_t, out_file = out_file)
 
         sys.stderr.write("\n:>> [%s] Finished!!\n"  % (strftime("%Y-%m-%d %H:%M:%S", localtime())))

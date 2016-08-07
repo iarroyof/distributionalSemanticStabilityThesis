@@ -223,7 +223,6 @@ def test_predict(data, machine = None, model_file=None, labels = None, out_file 
     else:
         pred = preds; real = range(len(pred))
     
-    
     output = {}
     output['learned_model'] = out_file
     output['estimated_output'] = preds
